@@ -7,8 +7,10 @@ import {
   BookmarkCheck,
   BookmarkPlus,
   BookOpen,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
+  ChevronUp,
   Compass,
   Copy,
   ExternalLink,
@@ -37,7 +39,7 @@ import {
   fetchChapterVerses,
   resolveScriptureVerse,
 } from '@/services/bibleService';
-import { VerseContextData, VerseData } from '@/types/bible';
+import { ResolvedCrossReference, VerseContextData, VerseData } from '@/types/bible';
 import { usePlatform } from '@/context/PlatformContext';
 import {
   getRankedHumanVoices,
@@ -89,6 +91,7 @@ export default function BibleReaderPage() {
   const [inlineContextData, setInlineContextData] = useState<VerseContextData | null>(null);
   const [isLoadingInlineContext, setIsLoadingInlineContext] = useState(false);
   const [resolvedRefTexts, setResolvedRefTexts] = useState<Record<string, string>>({});
+  const [expandedReferenceIds, setExpandedReferenceIds] = useState<Record<string, boolean>>({});
 
   // Inline Save & Personal Notes state
   const [saveTargetType, setSaveTargetType] = useState<'verse' | 'context' | 'connection'>('verse');
@@ -239,6 +242,25 @@ export default function BibleReaderPage() {
       active = false;
     };
   }, [selectedVerse, currentBook, currentChapter, translation]);
+
+  const toggleInlineReference = (refItem: ResolvedCrossReference) => {
+    setExpandedReferenceIds((prev) => {
+      const nextVal = !prev[refItem.id];
+      if (nextVal && !resolvedRefTexts[refItem.connectedRef]) {
+        const local = getVerseText(refItem.connectedRef, translation);
+        if (local && !local.startsWith('[')) {
+          setResolvedRefTexts((r) => ({ ...r, [refItem.connectedRef]: local }));
+        } else {
+          resolveScriptureVerse(refItem.connectedRef, translation).then((res) => {
+            if (res?.text) {
+              setResolvedRefTexts((r) => ({ ...r, [refItem.connectedRef]: res.text }));
+            }
+          });
+        }
+      }
+      return { ...prev, [refItem.id]: nextVal };
+    });
+  };
 
   const handlePrevChapter = () => {
     if (currentChapter > 1) {
@@ -996,39 +1018,51 @@ export default function BibleReaderPage() {
                         </sup>
                         <span>{v.translations[translation] || v.translations.NIV}</span>
 
-                        {/* Reference Badge — Navigates Directly to Scripture Reference, Does NOT Open Verse Selection */}
+                        {/* Reference Badge — Inline Reference Expansion (Preserves Reading Position & Does NOT Navigate Away) */}
                         {refs.length > 0 && preferences.showReferenceBadges && (
                           <span className="inline-flex items-center gap-1.5 ml-2.5 align-middle flex-wrap">
-                            {refs.slice(0, 2).map((r) => (
-                              <button
-                                key={r.id}
-                                type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  navigateToReferenceString(r.connectedRef, false);
-                                }}
-                                className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 font-sans text-[11px] font-semibold transition border ${
-                                  isLight
-                                    ? 'bg-amber-50 hover:bg-amber-100 text-amber-900 border-amber-200/90'
-                                    : 'bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border-amber-500/30'
-                                }`}
-                                title={`Navigate directly to ${r.connectedRef}`}
-                              >
-                                <Link2 className="h-3 w-3" />
-                                <span>{r.connectedRef}</span>
-                              </button>
-                            ))}
+                            {refs.slice(0, 2).map((r) => {
+                              const isRefExpanded = !!expandedReferenceIds[r.id];
+                              return (
+                                <button
+                                  key={r.id}
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    toggleInlineReference(r);
+                                  }}
+                                  className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 font-sans text-[11px] font-semibold transition border ${
+                                    isRefExpanded
+                                      ? isLight
+                                        ? 'bg-amber-600 text-white border-amber-600 shadow-sm'
+                                        : 'bg-amber-500 text-zinc-950 border-amber-500 shadow-sm font-bold'
+                                      : isLight
+                                      ? 'bg-amber-50 hover:bg-amber-100 text-amber-900 border-amber-200/90'
+                                      : 'bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border-amber-500/30'
+                                  }`}
+                                  title={isRefExpanded ? `Collapse ${r.connectedRef}` : `Expand ${r.connectedRef} inline`}
+                                >
+                                  <Link2 className="h-3 w-3" />
+                                  <span>{r.connectedRef}</span>
+                                  {isRefExpanded ? (
+                                    <ChevronUp className="h-3 w-3 ml-0.5" />
+                                  ) : (
+                                    <ChevronDown className="h-3 w-3 ml-0.5" />
+                                  )}
+                                </button>
+                              );
+                            })}
                             {refs.length > 2 && (
                               <button
                                 type="button"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  navigateToReferenceString(refs[2].connectedRef, false);
+                                  toggleInlineReference(refs[2]);
                                 }}
                                 className={`text-[11px] font-semibold underline px-1 ${
                                   isLight ? 'text-amber-800' : 'text-amber-400'
                                 }`}
-                                title={`Navigate directly to ${refs[2].connectedRef}`}
+                                title={`Expand ${refs[2].connectedRef} inline`}
                               >
                                 +{refs.length - 2} more
                               </button>
@@ -1049,6 +1083,74 @@ export default function BibleReaderPage() {
                     </div>
 
                     {/* =========================================================
+                        INLINE EXPANDED REFERENCES (Compare & Contrast without navigating away)
+                        ========================================================= */}
+                    {refs.some((r) => expandedReferenceIds[r.id]) && (
+                      <div className="space-y-2 mt-2 mb-2 animate-in fade-in duration-150">
+                        {refs
+                          .filter((r) => expandedReferenceIds[r.id])
+                          .map((r) => {
+                            const refText =
+                              resolvedRefTexts[r.connectedRef] ||
+                              getVerseText(r.connectedRef, translation) ||
+                              'Loading cross-reference...';
+                            return (
+                              <div
+                                key={`inline-ref-${r.id}`}
+                                className={`rounded-xl border p-3.5 space-y-2 ${
+                                  isLight
+                                    ? 'bg-amber-50/70 border-amber-200 text-stone-900 shadow-sm'
+                                    : 'bg-[#1a1815] border-amber-500/30 text-zinc-100 shadow-md'
+                                }`}
+                              >
+                                <div className="flex items-center justify-between gap-2">
+                                  <div className="flex items-center gap-2">
+                                    <span className="font-bold text-xs sm:text-sm text-amber-900 dark:text-amber-300">
+                                      {r.connectedRef} ({translation})
+                                    </span>
+                                    <span
+                                      className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                                        isLight
+                                          ? 'bg-amber-100 text-amber-900'
+                                          : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                                      }`}
+                                    >
+                                      {r.category}
+                                    </span>
+                                  </div>
+                                  <button
+                                    type="button"
+                                    onClick={() => toggleInlineReference(r)}
+                                    className={`inline-flex items-center gap-1 text-[11px] font-semibold rounded-lg px-2 py-1 border transition ${
+                                      isLight
+                                        ? 'bg-white hover:bg-stone-100 border-stone-200 text-stone-700'
+                                        : 'bg-zinc-800 hover:bg-zinc-700 border-zinc-700 text-zinc-300'
+                                    }`}
+                                    title="Collapse this reference"
+                                  >
+                                    <ChevronUp className="h-3.5 w-3.5" />
+                                    <span>Collapse</span>
+                                  </button>
+                                </div>
+                                <p className="text-[11px] text-stone-600 dark:text-zinc-400 font-medium">
+                                  {r.title}
+                                </p>
+                                <div
+                                  className={`rounded-lg border p-2.5 font-serif text-xs sm:text-sm leading-relaxed ${
+                                    isLight
+                                      ? 'bg-white border-stone-200 text-stone-800'
+                                      : 'bg-[#121212] border-zinc-800 text-zinc-200'
+                                  }`}
+                                >
+                                  “{refText}”
+                                </div>
+                              </div>
+                            );
+                          })}
+                      </div>
+                    )}
+
+                    {/* =========================================================
                         INLINE EXPANDED CONTENT & ACTIONS UNDERNEATH CLICKED VERSE
                         (Organised into 2 Distinct Sections per Specification)
                         ========================================================= */}
@@ -1062,24 +1164,18 @@ export default function BibleReaderPage() {
                       >
                         {activeActionView === 'none' ? (
                           <>
-                            {/* FIRST SECTION: Verse text on left, Controls on top-right */}
-                            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
-                              {/* 1. Selected verse text, maximum width ~270px on mobile */}
-                              <div className="max-w-[270px] sm:max-w-md">
-                                <span
-                                  className={`text-[11px] font-bold tracking-tight block mb-0.5 ${
-                                    isLight ? 'text-amber-900' : 'text-amber-400'
-                                  }`}
-                                >
-                                  {v.canonicalRef} ({translation})
-                                </span>
-                                <p className="font-serif text-xs sm:text-sm leading-relaxed text-stone-800 dark:text-zinc-200">
-                                  “{v.translations[translation] || v.translations.NIV}”
-                                </p>
-                              </div>
+                            {/* FIRST SECTION: Verse reference on left, Controls on top-right (no repeated verse text) */}
+                            <div className="flex items-center justify-between gap-3">
+                              <span
+                                className={`text-xs sm:text-sm font-bold tracking-tight ${
+                                  isLight ? 'text-amber-900' : 'text-amber-400'
+                                }`}
+                              >
+                                {v.canonicalRef} ({translation})
+                              </span>
 
                               {/* 2 & 3. Top-Right Controls: Colour selector, Voice, Save, Close */}
-                              <div className="flex items-center gap-2 shrink-0 self-end sm:self-start flex-wrap justify-end">
+                              <div className="flex items-center gap-2 shrink-0 flex-wrap justify-end">
                                 {/* Colour selection control */}
                                 <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg border border-stone-200/80 dark:border-zinc-800 bg-stone-50/70 dark:bg-zinc-900/80">
                                   {(['amber', 'emerald', 'blue'] as const).map((col) => (
@@ -1228,8 +1324,8 @@ export default function BibleReaderPage() {
                         ) : activeActionView === 'reference' ? (
                           /* FOCUSED VIEW: Reference */
                           <div className="space-y-3">
-                            <div className="flex items-start justify-between gap-3">
-                              <div className="flex flex-col gap-1 max-w-[270px] sm:max-w-none">
+                            <div className="flex items-center justify-between gap-3">
+                              <div className="flex items-center gap-2 flex-wrap">
                                 <span
                                   className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded w-fit ${
                                     isLight
@@ -1239,9 +1335,9 @@ export default function BibleReaderPage() {
                                 >
                                   Reference
                                 </span>
-                                <p className="font-serif text-xs sm:text-sm leading-relaxed text-stone-800 dark:text-zinc-200">
-                                  “{v.translations[translation] || v.translations.NIV}”
-                                </p>
+                                <span className={`text-xs sm:text-sm font-bold ${isLight ? 'text-stone-900' : 'text-zinc-100'}`}>
+                                  {v.canonicalRef} ({translation})
+                                </span>
                               </div>
                               <button
                                 onClick={() => {
@@ -1292,15 +1388,9 @@ export default function BibleReaderPage() {
                                       }`}
                                     >
                                       <div className="flex items-center justify-between gap-2">
-                                        <button
-                                          type="button"
-                                          onClick={() => navigateToReferenceString(refItem.connectedRef, false)}
-                                          className="text-xs font-bold hover:underline flex items-center gap-1.5 text-amber-900 dark:text-amber-400"
-                                          title={`Navigate directly to ${refItem.connectedRef}`}
-                                        >
+                                        <span className="text-xs font-bold flex items-center gap-1.5 text-amber-900 dark:text-amber-400">
                                           <span>{refItem.connectedRef}</span>
-                                          <ExternalLink className="h-3 w-3" />
-                                        </button>
+                                        </span>
                                         <span
                                           className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
                                             isLight
@@ -1421,8 +1511,8 @@ export default function BibleReaderPage() {
                         ) : activeActionView === 'compare' ? (
                           /* FOCUSED VIEW: Compare Translation */
                           <div className="space-y-3">
-                            <div className="flex items-start justify-between gap-3">
-                              <div className="flex flex-col gap-1 max-w-[270px] sm:max-w-none">
+                            <div className="flex items-center justify-between gap-3">
+                              <div className="flex items-center gap-2 flex-wrap">
                                 <span
                                   className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded w-fit ${
                                     isLight
@@ -1432,9 +1522,9 @@ export default function BibleReaderPage() {
                                 >
                                   Compare Translation
                                 </span>
-                                <p className="font-serif text-xs sm:text-sm leading-relaxed text-stone-800 dark:text-zinc-200">
-                                  “{v.translations[translation] || v.translations.NIV}”
-                                </p>
+                                <span className={`text-xs sm:text-sm font-bold ${isLight ? 'text-stone-900' : 'text-zinc-100'}`}>
+                                  {v.canonicalRef}
+                                </span>
                               </div>
                               <button
                                 onClick={() => {
@@ -1499,8 +1589,8 @@ export default function BibleReaderPage() {
                         ) : activeActionView === 'save' ? (
                           /* FOCUSED VIEW: Save */
                           <div className="space-y-3">
-                            <div className="flex items-start justify-between gap-3">
-                              <div className="flex flex-col gap-1 max-w-[270px] sm:max-w-none">
+                            <div className="flex items-center justify-between gap-3">
+                              <div className="flex items-center gap-2 flex-wrap">
                                 <span
                                   className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded w-fit ${
                                     isLight
@@ -1510,9 +1600,9 @@ export default function BibleReaderPage() {
                                 >
                                   Save Discovery
                                 </span>
-                                <p className="font-serif text-xs sm:text-sm leading-relaxed text-stone-800 dark:text-zinc-200">
-                                  “{v.translations[translation] || v.translations.NIV}”
-                                </p>
+                                <span className={`text-xs sm:text-sm font-bold ${isLight ? 'text-stone-900' : 'text-zinc-100'}`}>
+                                  {v.canonicalRef} ({translation})
+                                </span>
                               </div>
                               <button
                                 onClick={() => {
@@ -1592,7 +1682,7 @@ export default function BibleReaderPage() {
 
                             {saveTargetType === 'connection' && refs.length > 1 && (
                               <div>
-                                <label className="text-[11px] font-semibold text-stone-500 block mb-1">
+                                <label className="text-[11px] font-semibold text-stone-500 dark:text-zinc-400 block mb-1">
                                   Select Connected Reference
                                 </label>
                                 <select
@@ -1607,7 +1697,11 @@ export default function BibleReaderPage() {
                                   }`}
                                 >
                                   {refs.map((r, i) => (
-                                    <option key={r.id} value={i}>
+                                    <option
+                                      key={r.id}
+                                      value={i}
+                                      className="bg-white dark:bg-zinc-900 text-stone-900 dark:text-zinc-100"
+                                    >
                                       {v.canonicalRef} ↔ {r.connectedRef} ({r.title})
                                     </option>
                                   ))}
@@ -1617,7 +1711,7 @@ export default function BibleReaderPage() {
 
                             {/* Collection Selector */}
                             <div>
-                              <label className="text-[11px] font-semibold text-stone-500 block mb-1">
+                              <label className="text-[11px] font-semibold text-stone-500 dark:text-zinc-400 block mb-1">
                                 Collection
                               </label>
                               <select
@@ -1630,7 +1724,11 @@ export default function BibleReaderPage() {
                                 }`}
                               >
                                 {collections.map((col) => (
-                                  <option key={col.id} value={col.id}>
+                                  <option
+                                    key={col.id}
+                                    value={col.id}
+                                    className="bg-white dark:bg-zinc-900 text-stone-900 dark:text-zinc-100"
+                                  >
                                     {col.name}
                                   </option>
                                 ))}
@@ -1639,7 +1737,7 @@ export default function BibleReaderPage() {
 
                             {/* Personal Notes & Reflections */}
                             <div>
-                              <label className="text-[11px] font-semibold text-stone-500 block mb-1">
+                              <label className="text-[11px] font-semibold text-stone-500 dark:text-zinc-400 block mb-1">
                                 Personal Reflections & Insights
                               </label>
                               <textarea
