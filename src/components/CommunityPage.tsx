@@ -122,7 +122,7 @@ export default function CommunityPage() {
             >
               Community
             </h1>
-            <p className="text-xs sm:text-sm text-stone-500 mt-1">
+            <p className="text-xs sm:text-sm text-stone-500 dark:text-zinc-400 mt-1">
               Explore scripture connections, verse contexts, and personal reflections shared by readers across the community.
             </p>
           </div>
@@ -140,18 +140,18 @@ export default function CommunityPage() {
                 : 'bg-[#161616] border-zinc-800 text-zinc-100'
             }`}
           >
-            <Search className="h-4 w-4 text-stone-400 shrink-0" />
+            <Search className="h-4 w-4 text-stone-400 dark:text-zinc-500 shrink-0" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search community connections, verse contexts, scriptures, or contributor notes..."
-              className="w-full bg-transparent text-xs sm:text-sm focus:outline-none"
+              className="w-full bg-transparent text-xs sm:text-sm focus:outline-none text-stone-900 dark:text-zinc-100 placeholder-stone-400 dark:placeholder-zinc-500"
             />
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
-                className="rounded-lg p-0.5 text-stone-400 hover:text-stone-700"
+                className="rounded-lg p-0.5 text-stone-400 hover:text-stone-700 dark:text-zinc-400 dark:hover:text-zinc-200"
               >
                 <X className="h-3.5 w-3.5" />
               </button>
@@ -171,11 +171,11 @@ export default function CommunityPage() {
               <select
                 value={selectedCollectionId}
                 onChange={(e) => setSelectedCollectionId(e.target.value)}
-                className="bg-transparent text-xs font-semibold focus:outline-none max-w-[130px] sm:max-w-[180px] truncate"
+                className="bg-transparent text-xs font-semibold focus:outline-none max-w-[130px] sm:max-w-[180px] truncate text-stone-900 dark:text-zinc-100"
               >
-                <option value="ALL">All Collections</option>
+                <option value="ALL" className="bg-white dark:bg-[#161616] text-stone-900 dark:text-zinc-100">All Collections</option>
                 {collections.map((c) => (
-                  <option key={c.id} value={c.id}>
+                  <option key={c.id} value={c.id} className="bg-white dark:bg-[#161616] text-stone-900 dark:text-zinc-100">
                     {c.name}
                   </option>
                 ))}
@@ -264,7 +264,7 @@ export default function CommunityPage() {
                     : 'bg-[#161616] border-zinc-800 text-zinc-400'
                 }`}
               >
-                <p className="text-sm font-semibold">
+                <p className="text-sm font-semibold text-stone-700 dark:text-zinc-200">
                   No community connections match your filter.
                 </p>
               </div>
@@ -432,7 +432,7 @@ export default function CommunityPage() {
                     : 'bg-[#161616] border-zinc-800 text-zinc-400'
                 }`}
               >
-                <p className="text-sm font-semibold">
+                <p className="text-sm font-semibold text-stone-700 dark:text-zinc-200">
                   No community contexts match your filter.
                 </p>
               </div>
@@ -587,7 +587,7 @@ export default function CommunityPage() {
                     : 'bg-[#161616] border-zinc-800 text-zinc-400'
                 }`}
               >
-                <p className="text-sm font-semibold">
+                <p className="text-sm font-semibold text-stone-700 dark:text-zinc-200">
                   No community verses match your filter.
                 </p>
               </div>
