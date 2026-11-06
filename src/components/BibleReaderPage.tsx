@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   ArrowLeftRight,
   Bookmark,
@@ -12,6 +12,7 @@ import {
   Globe,
   Link2,
   Pause,
+  Play,
   RotateCcw,
   Search,
   SlidersHorizontal,
@@ -25,7 +26,10 @@ import {
   findBookByName,
 } from '@/data/bibleBooks';
 import { getCrossReferencesForVerse } from '@/data/crossReferences';
-import { fetchChapterVerses } from '@/services/bibleService';
+import {
+  fetchAllTranslationsForChapter,
+  fetchChapterVerses,
+} from '@/services/bibleService';
 import { VerseData } from '@/types/bible';
 import { usePlatform } from '@/context/PlatformContext';
 import {
@@ -66,6 +70,7 @@ export default function BibleReaderPage() {
 
   const [verses, setVerses] = useState<VerseData[]>([]);
   const [isLoadingChapter, setIsLoadingChapter] = useState(false);
+  const [isLoadingAllVersions, setIsLoadingAllVersions] = useState(false);
 
   const [isBookSelectorOpen, setIsBookSelectorOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -77,8 +82,40 @@ export default function BibleReaderPage() {
   const [speakingVerse, setSpeakingVerse] = useState<number | null>(null);
   const [availableVoices, setAvailableVoices] = useState<VoiceOption[]>([]);
 
+  const toolbarMenuRef = useRef<HTMLDivElement | null>(null);
+
   const currentBookObj = findBookByName(currentBook) || BIBLE_BOOKS[39];
   const isLight = preferences.theme === 'light';
+
+  // Close dropdowns/popups when clicking outside OR scrolling the page
+  useEffect(() => {
+    if (!isDisplayMenuOpen && !isTranslationMenuOpen) return;
+
+    const handleOutsideClick = (e: MouseEvent | TouchEvent) => {
+      if (
+        toolbarMenuRef.current &&
+        !toolbarMenuRef.current.contains(e.target as Node)
+      ) {
+        setIsDisplayMenuOpen(false);
+        setIsTranslationMenuOpen(false);
+      }
+    };
+
+    const handleScrollClose = () => {
+      setIsDisplayMenuOpen(false);
+      setIsTranslationMenuOpen(false);
+    };
+
+    document.addEventListener('mousedown', handleOutsideClick);
+    document.addEventListener('touchstart', handleOutsideClick, { passive: true });
+    window.addEventListener('scroll', handleScrollClose, { passive: true });
+
+    return () => {
+      document.removeEventListener('mousedown', handleOutsideClick);
+      document.removeEventListener('touchstart', handleOutsideClick);
+      window.removeEventListener('scroll', handleScrollClose);
+    };
+  }, [isDisplayMenuOpen, isTranslationMenuOpen]);
 
   // Load ranked natural human voices
   useEffect(() => {
@@ -94,7 +131,8 @@ export default function BibleReaderPage() {
     };
   }, []);
 
-  // Fetch exact chapter verses for currentBook, currentChapter, and translation
+  // Fetch exact chapter verses for currentBook, currentChapter, and translation,
+  // then load all 6 translations in the background so version comparison is always accurate
   useEffect(() => {
     if (currentChapter === 0) {
       setVerses([]);
@@ -104,7 +142,13 @@ export default function BibleReaderPage() {
     setIsLoadingChapter(true);
     fetchChapterVerses(currentBook, currentChapter, translation)
       .then((data) => {
-        if (active) setVerses(data);
+        if (active) setVerses([...data]);
+        return fetchAllTranslationsForChapter(currentBook, currentChapter);
+      })
+      .then((allVersionData) => {
+        if (active && allVersionData) {
+          setVerses([...allVersionData]);
+        }
       })
       .finally(() => {
         if (active) setIsLoadingChapter(false);
@@ -119,6 +163,7 @@ export default function BibleReaderPage() {
     stopHumanSpeech();
     setIsSpeaking(false);
     setSpeakingVerse(null);
+    setCompareSingleVerseRef(null);
   }, [currentBook, currentChapter]);
 
   const handlePrevChapter = () => {
@@ -142,6 +187,29 @@ export default function BibleReaderPage() {
       if (nextBook) {
         navigateToPassage(nextBook.name, 1);
       }
+    }
+  };
+
+  // Compute Next Chapter label for the bottom button
+  const nextChapterLabel =
+    currentChapter < currentBookObj.chapters
+      ? `${currentBook} ${currentChapter + 1}`
+      : BIBLE_BOOKS.find((b) => b.id === currentBookObj.id + 1)
+      ? `${BIBLE_BOOKS.find((b) => b.id === currentBookObj.id + 1)!.name} 1`
+      : `${currentBook} ${currentChapter}`;
+
+  const handleToggleCompareSingleVerse = async (canonicalRef: string) => {
+    if (compareSingleVerseRef === canonicalRef) {
+      setCompareSingleVerseRef(null);
+      return;
+    }
+    setCompareSingleVerseRef(canonicalRef);
+    setIsLoadingAllVersions(true);
+    try {
+      const updated = await fetchAllTranslationsForChapter(currentBook, currentChapter);
+      setVerses([...updated]);
+    } finally {
+      setIsLoadingAllVersions(false);
     }
   };
 
@@ -245,20 +313,20 @@ export default function BibleReaderPage() {
       {/* =====================================================================
           MAIN BIBLE READING COLUMN
           ===================================================================== */}
-      <div className="flex-1 min-w-0 flex flex-col pb-24 lg:pb-12">
+      <div className="flex-1 min-w-0 flex flex-col pb-36 lg:pb-12">
         {/* Clean Single Top Reader Toolbar */}
         <div
-          className={`sticky top-13 lg:top-0 z-20 h-13 border-b backdrop-blur-md px-4 sm:px-8 flex items-center justify-between transition-colors ${
+          className={`sticky top-13 lg:top-0 z-20 h-13 border-b backdrop-blur-md px-3 sm:px-8 flex items-center justify-between transition-colors ${
             isLight
               ? 'bg-[#FBF9F5]/95 border-stone-200/80'
               : 'bg-[#0F0F0F]/95 border-zinc-800/80'
           }`}
         >
           {/* Left: Prev/Next Chapter + Book/Chapter Selector */}
-          <div className="flex items-center gap-1 sm:gap-2">
+          <div className="flex items-center gap-1 sm:gap-2 min-w-0">
             <button
               onClick={handlePrevChapter}
-              className={`rounded-lg p-1.5 transition ${
+              className={`rounded-lg p-1.5 transition shrink-0 ${
                 isLight
                   ? 'text-stone-500 hover:bg-stone-200/60 hover:text-stone-900'
                   : 'text-zinc-400 hover:bg-zinc-800 hover:text-white'
@@ -271,21 +339,21 @@ export default function BibleReaderPage() {
 
             <button
               onClick={() => setIsBookSelectorOpen(true)}
-              className={`rounded-xl px-3.5 py-1.5 text-xs sm:text-sm font-bold flex items-center gap-2 border transition ${
+              className={`rounded-xl px-3 py-1.5 text-xs sm:text-sm font-bold flex items-center gap-1.5 border transition truncate ${
                 isLight
                   ? 'bg-white hover:bg-stone-50 border-stone-200/90 text-stone-900 shadow-2xs'
                   : 'bg-[#1a1a1a] hover:bg-[#222222] border-zinc-800 text-zinc-100'
               }`}
             >
-              <span>
+              <span className="truncate">
                 {currentBook} {currentChapter === 0 ? 'Intro' : currentChapter}
               </span>
-              <span className="text-[10px] text-stone-400">▾</span>
+              <span className="text-[10px] text-stone-400 shrink-0">▾</span>
             </button>
 
             <button
               onClick={handleNextChapter}
-              className={`rounded-lg p-1.5 transition ${
+              className={`rounded-lg p-1.5 transition shrink-0 ${
                 isLight
                   ? 'text-stone-500 hover:bg-stone-200/60 hover:text-stone-900'
                   : 'text-zinc-400 hover:bg-zinc-800 hover:text-white'
@@ -298,7 +366,7 @@ export default function BibleReaderPage() {
           </div>
 
           {/* Right: Natural Voice Reader, Search, Typography, Translation Pill */}
-          <div className="flex items-center gap-1.5 relative">
+          <div ref={toolbarMenuRef} className="flex items-center gap-1 sm:gap-1.5 relative shrink-0">
             <button
               onClick={() => handleToggleAudio()}
               className={`rounded-xl px-2.5 py-1.5 text-xs font-semibold flex items-center gap-1.5 transition ${
@@ -326,19 +394,23 @@ export default function BibleReaderPage() {
             </button>
 
             <button
-              onClick={() => setIsSearchOpen(true)}
+              onClick={() => {
+                setIsDisplayMenuOpen(false);
+                setIsTranslationMenuOpen(false);
+                setIsSearchOpen(true);
+              }}
               className={`rounded-lg p-2 transition ${
                 isLight
                   ? 'text-stone-600 hover:bg-stone-200/60'
                   : 'text-zinc-300 hover:bg-zinc-800'
               }`}
-              title="Search Scriptures, People & Themes"
+              title="Search Scriptures"
               aria-label="Search Scriptures"
             >
               <Search className="h-4 w-4" />
             </button>
 
-            {/* Typography, Natural Voice & Display Settings */}
+            {/* Typography, Natural Voice & Display Settings — Constrained Inside Viewport */}
             <div className="relative">
               <button
                 onClick={() => {
@@ -358,7 +430,7 @@ export default function BibleReaderPage() {
 
               {isDisplayMenuOpen && (
                 <div
-                  className={`absolute right-0 mt-2 w-72 rounded-2xl border p-4 shadow-xl z-50 space-y-4 ${
+                  className={`fixed right-3 left-3 top-26 sm:left-auto sm:top-full sm:absolute sm:right-0 sm:mt-2 sm:w-72 max-w-[calc(100vw-1.5rem)] rounded-2xl border p-4 shadow-2xl z-50 space-y-4 ${
                     isLight
                       ? 'bg-white border-stone-200 text-stone-900'
                       : 'bg-[#1b1b1b] border-zinc-800 text-zinc-100'
@@ -431,7 +503,7 @@ export default function BibleReaderPage() {
                   {availableVoices.length > 0 && (
                     <div className="space-y-1.5">
                       <span className="text-xs text-stone-500 block">
-                        Reader Voice (Natural Neural Prioritized)
+                        Narrator Voice (Natural Neural)
                       </span>
                       <select
                         value={
@@ -486,14 +558,14 @@ export default function BibleReaderPage() {
               )}
             </div>
 
-            {/* Translation Selector Pill */}
+            {/* Translation Selector Pill — Compact Name-Only Dropdown (No Subtext, Stays Inside Screen) */}
             <div className="relative">
               <button
                 onClick={() => {
                   setIsTranslationMenuOpen((prev) => !prev);
                   setIsDisplayMenuOpen(false);
                 }}
-                className={`rounded-xl px-3 py-1.5 text-xs font-bold flex items-center gap-1.5 border transition ${
+                className={`rounded-xl px-2.5 sm:px-3 py-1.5 text-xs font-bold flex items-center gap-1.5 border transition ${
                   isLight
                     ? 'bg-white hover:bg-stone-50 border-stone-200/90 text-stone-800 shadow-2xs'
                     : 'bg-[#1a1a1a] hover:bg-[#242424] border-zinc-800 text-zinc-100'
@@ -510,45 +582,39 @@ export default function BibleReaderPage() {
 
               {isTranslationMenuOpen && (
                 <div
-                  className={`absolute right-0 mt-2 w-76 rounded-2xl border p-2.5 shadow-xl z-50 space-y-1 ${
+                  className={`absolute right-0 mt-2 w-60 max-w-[calc(100vw-1.5rem)] rounded-2xl border p-1.5 shadow-2xl z-50 space-y-0.5 ${
                     isLight
                       ? 'bg-white border-stone-200 text-stone-900'
                       : 'bg-[#1b1b1b] border-zinc-800 text-zinc-100'
                   }`}
                 >
-                  <div className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-stone-400">
-                    Bible Translation
-                  </div>
                   {BIBLE_TRANSLATIONS.map((t) => (
                     <button
                       key={t.id}
                       onClick={() => {
                         setTranslation(t.id);
                         setIsTranslationMenuOpen(false);
-                        showToast(`Translation set to ${t.name} (${t.abbreviation})`);
+                        showToast(`Switched to ${t.name} (${t.abbreviation})`);
                       }}
-                      className={`w-full rounded-xl p-2.5 text-left transition flex items-start justify-between gap-2 ${
+                      className={`w-full rounded-xl px-3 py-2 text-left text-xs font-semibold transition flex items-center justify-between gap-2 ${
                         translation === t.id
                           ? isLight
-                            ? 'bg-amber-50 border border-amber-200/80 text-stone-900'
-                            : 'bg-amber-500/20 border border-amber-500/40 text-white'
+                            ? 'bg-amber-50 text-amber-900 font-bold'
+                            : 'bg-amber-500/20 text-amber-300 font-bold'
                           : isLight
-                          ? 'hover:bg-stone-100/80 text-stone-700'
+                          ? 'hover:bg-stone-100 text-stone-700'
                           : 'hover:bg-zinc-800 text-zinc-200'
                       }`}
                     >
-                      <div>
-                        <div className="text-xs font-bold flex items-center gap-2">
-                          <span className={isLight ? 'text-amber-800' : 'text-amber-400'}>
-                            {t.abbreviation}
-                          </span>
-                          <span>{t.name}</span>
-                        </div>
-                        <p className="text-[11px] text-stone-500 mt-0.5">{t.description}</p>
-                      </div>
+                      <span className="truncate">
+                        <strong className={isLight ? 'text-amber-800' : 'text-amber-400'}>
+                          {t.abbreviation}
+                        </strong>{' '}
+                        — {t.name}
+                      </span>
                       {translation === t.id && (
                         <span
-                          className={`text-[11px] font-bold ${
+                          className={`text-xs font-bold shrink-0 ${
                             isLight ? 'text-amber-800' : 'text-amber-400'
                           }`}
                         >
@@ -599,9 +665,9 @@ export default function BibleReaderPage() {
         )}
 
         {/* Spacious Scripture Reading Canvas */}
-        <main className="mx-auto w-full max-w-2xl px-6 sm:px-10 pt-10 pb-12">
+        <main className="mx-auto w-full max-w-2xl px-5 sm:px-10 pt-8 sm:pt-10 pb-12">
           {/* Calm Centered Serif Chapter Heading */}
-          <header className="text-center mb-10 select-none">
+          <header className="text-center mb-8 sm:mb-10 select-none">
             <button
               onClick={() => setIsBookSelectorOpen(true)}
               className="group inline-flex flex-col items-center"
@@ -620,7 +686,7 @@ export default function BibleReaderPage() {
                   isLight ? 'text-stone-900' : 'text-white'
                 }`}
               >
-                {currentChapter === 0 ? 'Introduction' : `Chapter ${currentChapter}`}
+                {currentChapter === 0 ? 'Introduction' : currentChapter}
               </span>
             </button>
           </header>
@@ -945,7 +1011,7 @@ export default function BibleReaderPage() {
                             }`}
                           >
                             <Compass className="h-3.5 w-3.5" />
-                            <span>Chapter Context</span>
+                            <span>Verse Context</span>
                           </button>
 
                           <button
@@ -961,15 +1027,13 @@ export default function BibleReaderPage() {
                           </button>
 
                           <button
-                            onClick={() =>
-                              setCompareSingleVerseRef(
-                                compareSingleVerseRef === v.canonicalRef
-                                  ? null
-                                  : v.canonicalRef
-                              )
-                            }
+                            onClick={() => handleToggleCompareSingleVerse(v.canonicalRef)}
                             className={`rounded-xl px-3 py-1.5 text-xs font-semibold flex items-center gap-1.5 border transition ${
-                              isLight
+                              compareSingleVerseRef === v.canonicalRef
+                                ? isLight
+                                  ? 'bg-stone-900 text-white border-stone-900'
+                                  : 'bg-zinc-100 text-zinc-900 border-zinc-100'
+                                : isLight
                                 ? 'bg-stone-100 hover:bg-stone-200/80 border-stone-200 text-stone-700'
                                 : 'bg-zinc-800 border-zinc-700 text-zinc-200'
                             }`}
@@ -1003,34 +1067,47 @@ export default function BibleReaderPage() {
                           </button>
                         </div>
 
+                        {/* Inline 6-Version Comparison Grid — Each Version Has Its Authentic Scripture */}
                         {compareSingleVerseRef === v.canonicalRef && (
-                          <div className="pt-2.5 border-t border-stone-200/80 dark:border-zinc-800 grid grid-cols-1 sm:grid-cols-2 gap-2">
-                            {BIBLE_TRANSLATIONS.map((t) => (
-                              <div
-                                key={t.id}
-                                onClick={() => setTranslation(t.id)}
-                                className={`cursor-pointer rounded-xl p-2.5 border text-xs transition ${
-                                  translation === t.id
-                                    ? isLight
-                                      ? 'bg-amber-50/70 border-amber-300 text-stone-900'
+                          <div className="pt-3 border-t border-stone-200/80 dark:border-zinc-800 space-y-2">
+                            <div className="flex items-center justify-between">
+                              <span className="text-[11px] font-bold uppercase tracking-wider text-stone-400">
+                                Comparing All 6 Versions for {v.canonicalRef}
+                              </span>
+                              {isLoadingAllVersions && (
+                                <span className="text-[11px] text-amber-700 dark:text-amber-400 animate-pulse">
+                                  Loading exact translations...
+                                </span>
+                              )}
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                              {BIBLE_TRANSLATIONS.map((t) => (
+                                <div
+                                  key={t.id}
+                                  onClick={() => setTranslation(t.id)}
+                                  className={`cursor-pointer rounded-xl p-2.5 border text-xs transition ${
+                                    translation === t.id
+                                      ? isLight
+                                        ? 'bg-amber-50/70 border-amber-300 text-stone-900'
                                       : 'bg-amber-500/10 border-amber-500/40 text-zinc-100'
-                                    : isLight
-                                    ? 'bg-stone-50 border-stone-200/80 text-stone-700 hover:border-stone-300'
-                                    : 'bg-[#121212] border-zinc-800 text-zinc-300'
-                                }`}
-                              >
-                                <span
-                                  className={`font-bold block mb-0.5 ${
-                                    isLight ? 'text-amber-800' : 'text-amber-400'
+                                      : isLight
+                                      ? 'bg-stone-50 border-stone-200/80 text-stone-700 hover:border-stone-300'
+                                      : 'bg-[#121212] border-zinc-800 text-zinc-300'
                                   }`}
                                 >
-                                  {t.abbreviation}
-                                </span>
-                                <p className="font-serif leading-relaxed">
-                                  {v.translations[t.id]}
-                                </p>
-                              </div>
-                            ))}
+                                  <span
+                                    className={`font-bold block mb-0.5 ${
+                                      isLight ? 'text-amber-800' : 'text-amber-400'
+                                    }`}
+                                  >
+                                    {t.abbreviation} — {t.name}
+                                  </span>
+                                  <p className="font-serif leading-relaxed">
+                                    “{v.translations[t.id]}”
+                                  </p>
+                                </div>
+                              ))}
+                            </div>
                           </div>
                         )}
                       </div>
@@ -1041,17 +1118,17 @@ export default function BibleReaderPage() {
             </div>
           )}
 
-          {/* Clean End-of-Chapter Navigation Footer */}
+          {/* Prominent End-of-Chapter Navigation Footer (Click Next Chapter at the Bottom) */}
           <div
-            className={`mt-12 pt-6 border-t flex items-center justify-between ${
+            className={`mt-12 pt-6 border-t flex items-center justify-between gap-3 ${
               isLight ? 'border-stone-200/80' : 'border-zinc-800/80'
             }`}
           >
             <button
               onClick={handlePrevChapter}
-              className={`rounded-xl border px-4 py-2.5 text-xs font-semibold flex items-center gap-2 transition ${
+              className={`rounded-2xl border px-4 py-3 text-xs sm:text-sm font-bold flex items-center gap-2 transition ${
                 isLight
-                  ? 'bg-white hover:bg-stone-100 border-stone-200 text-stone-700 shadow-2xs'
+                  ? 'bg-white hover:bg-stone-100 border-stone-200 text-stone-700 shadow-xs'
                   : 'bg-[#161616] hover:bg-zinc-800 border-zinc-800 text-zinc-200'
               }`}
             >
@@ -1060,25 +1137,87 @@ export default function BibleReaderPage() {
             </button>
 
             <button
+              onClick={handleNextChapter}
+              className={`rounded-2xl px-5 py-3 text-xs sm:text-sm font-bold flex items-center gap-2 transition shadow-sm ${
+                isLight
+                  ? 'bg-amber-700 hover:bg-amber-800 text-white'
+                  : 'bg-amber-500 hover:bg-amber-400 text-zinc-950'
+              }`}
+            >
+              <span>Next Chapter ({nextChapterLabel})</span>
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </div>
+        </main>
+      </div>
+
+      {/* =====================================================================
+          MOBILE FLOATING CHAPTER & AUDIO BAR (Close to Bottom Nav Bar while Scrolling)
+          Matches Reference Screenshots 1, 2, 3, 4
+          ===================================================================== */}
+      <div className="lg:hidden fixed bottom-[70px] inset-x-0 z-30 px-4 pointer-events-none">
+        <div className="mx-auto max-w-md flex items-center gap-2.5">
+          {/* Play / Pause Audio Button */}
+          <button
+            onClick={() => handleToggleAudio()}
+            className={`pointer-events-auto h-11 w-11 rounded-full flex items-center justify-center shadow-lg border transition shrink-0 ${
+              isSpeaking
+                ? isLight
+                  ? 'bg-amber-700 border-amber-700 text-white'
+                  : 'bg-amber-500 border-amber-400 text-zinc-950'
+                : isLight
+                ? 'bg-white/95 border-stone-200/90 text-stone-800 backdrop-blur-md'
+                : 'bg-[#1e1e1e]/95 border-zinc-800 text-zinc-100 backdrop-blur-md'
+            }`}
+            aria-label={isSpeaking ? 'Pause Audio' : 'Play Chapter Audio'}
+          >
+            {isSpeaking ? (
+              <Pause className="h-4 w-4" />
+            ) : (
+              <Play className="h-4 w-4 ml-0.5" />
+            )}
+          </button>
+
+          {/* Floating Chapter Pill (< Current Chapter >) */}
+          <div
+            className={`pointer-events-auto flex-1 h-11 rounded-full border shadow-lg px-2 flex items-center justify-between backdrop-blur-md ${
+              isLight
+                ? 'bg-white/95 border-stone-200/90 text-stone-900'
+                : 'bg-[#1e1e1e]/95 border-zinc-800 text-zinc-100'
+            }`}
+          >
+            <button
+              onClick={handlePrevChapter}
+              className={`h-8 w-8 rounded-full flex items-center justify-center transition ${
+                isLight
+                  ? 'text-stone-600 hover:bg-stone-100'
+                  : 'text-zinc-300 hover:bg-zinc-800'
+              }`}
+              aria-label="Previous Chapter"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+
+            <button
               onClick={() => setIsBookSelectorOpen(true)}
-              className="text-xs font-bold text-stone-400 hover:text-stone-700"
+              className="px-3 py-1 text-xs font-bold tracking-tight truncate"
             >
               {currentBook} {currentChapter === 0 ? 'Intro' : currentChapter}
             </button>
 
             <button
               onClick={handleNextChapter}
-              className={`rounded-xl border px-4 py-2.5 text-xs font-semibold flex items-center gap-2 transition ${
+              className={`h-8 w-8 rounded-full flex items-center justify-center transition ${
                 isLight
-                  ? 'bg-white hover:bg-stone-100 border-stone-200 text-stone-700 shadow-2xs'
-                  : 'bg-[#161616] hover:bg-zinc-800 border-zinc-800 text-zinc-200'
+                  ? 'text-stone-600 hover:bg-stone-100'
+                  : 'text-zinc-300 hover:bg-zinc-800'
               }`}
+              aria-label="Next Chapter"
             >
-              <span>Next Chapter</span>
               <ChevronRight className="h-4 w-4" />
             </button>
           </div>
-        </main>
+        </div>
       </div>
 
       {/* =====================================================================

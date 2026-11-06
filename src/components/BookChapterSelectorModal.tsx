@@ -76,8 +76,12 @@ export default function BookChapterSelectorModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-0 sm:p-4">
+    <div
+      onClick={onClose}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-0 sm:p-4"
+    >
       <div
+        onClick={(e) => e.stopPropagation()}
         className={`relative flex h-full w-full max-w-lg flex-col sm:h-[84vh] sm:rounded-2xl sm:border shadow-2xl overflow-hidden ${
           isLight
             ? 'bg-white border-stone-200 text-stone-900'

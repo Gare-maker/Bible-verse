@@ -74,6 +74,9 @@ export interface VerseContextData {
   chapter: number;
   verse: number;
   translation: TranslationId;
+  selectedVerseText: string;
+  sectionHeading?: string;
+  verseSpecificAnalysis: string;
   bookAuthorAndDate: string;
   previousChapterRef: string;
   previousChapterSummary: string;

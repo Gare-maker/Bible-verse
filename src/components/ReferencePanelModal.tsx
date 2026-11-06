@@ -31,6 +31,7 @@ import { getCrossReferencesForVerse } from '@/data/crossReferences';
 import { getVerseByReference, getVerseText } from '@/data/scriptureDatabase';
 import {
   buildVerseContextData,
+  fetchVerseAllTranslations,
   resolveScriptureVerse,
 } from '@/services/bibleService';
 import { usePlatform } from '@/context/PlatformContext';
@@ -63,12 +64,16 @@ export default function ReferencePanelModal({
 
   const [selectedRefIndex, setSelectedRefIndex] = useState(0);
   const [activeTab, setActiveTab] = useState<InspectorMode>(initialMode);
-  const [compareTranslation, setCompareTranslation] = useState<TranslationId>(translation);
+  const [compareTranslation, setCompareTranslation] = useState<TranslationId>('KJV');
 
   const [primaryText, setPrimaryText] = useState<string>('');
   const [connectedText, setConnectedText] = useState<string>('');
   const [comparePrimaryText, setComparePrimaryText] = useState<string>('');
   const [compareConnectedText, setCompareConnectedText] = useState<string>('');
+  const [allVersionTexts, setAllVersionTexts] = useState<Record<TranslationId, string> | null>(
+    null
+  );
+  const [isLoadingVersions, setIsLoadingVersions] = useState(false);
 
   const [contextData, setContextData] = useState<VerseContextData | null>(null);
   const [isLoadingContext, setIsLoadingContext] = useState(false);
@@ -92,6 +97,7 @@ export default function ReferencePanelModal({
 
   const primaryVerseObj = primaryRef ? getVerseByReference(primaryRef) : undefined;
 
+  // Reset tab only when primaryRef or initialMode changes (NOT when translation changes!)
   useEffect(() => {
     setSelectedRefIndex(0);
     setActiveTab(initialMode);
@@ -99,8 +105,9 @@ export default function ReferencePanelModal({
     setFollowUpThread([]);
     setPersonalObservation('');
     setJustSaved(false);
-    setCompareTranslation(translation);
-  }, [primaryRef, initialMode, translation]);
+    setCompareTranslation(translation === 'NIV' ? 'KJV' : 'NIV');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [primaryRef, initialMode]);
 
   useEffect(() => {
     if (!primaryRef) return;
@@ -123,7 +130,24 @@ export default function ReferencePanelModal({
     };
   }, [primaryRef, activeConnection, translation]);
 
-  // Build Preceding-Chapter & Surrounding-Verse Context Data
+  // Load all 6 Bible versions for the selected verse so Compare always shows each version's own text
+  useEffect(() => {
+    if (!isOpen || !primaryRef) return;
+    let active = true;
+    setIsLoadingVersions(true);
+    fetchVerseAllTranslations(primaryRef)
+      .then((res) => {
+        if (active && res) setAllVersionTexts(res);
+      })
+      .finally(() => {
+        if (active) setIsLoadingVersions(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [isOpen, primaryRef]);
+
+  // Build Verse-Specific & Preceding-Chapter Context Data
   useEffect(() => {
     if (!isOpen || !primaryRef) return;
     let active = true;
@@ -259,7 +283,7 @@ export default function ReferencePanelModal({
         title: `Context & Study on ${primaryRef}`,
         content:
           personalObservation.trim() ||
-          contextData?.howPreviousChapterLeadsHere ||
+          contextData?.verseSpecificAnalysis ||
           aiExplanation?.summary ||
           `${primaryRef} (${translation}): "${primaryText}"`,
         scriptureRefs: [
@@ -275,7 +299,7 @@ export default function ReferencePanelModal({
 
   const panelBody = (
     <div
-      className={`flex flex-col h-full overflow-hidden ${
+      className={`flex flex-col h-full w-full max-w-full overflow-x-hidden overflow-y-hidden ${
         isLight ? 'bg-white text-stone-900' : 'bg-[#161616] text-zinc-100'
       }`}
     >
@@ -290,7 +314,7 @@ export default function ReferencePanelModal({
 
       {/* Header */}
       <div
-        className={`flex items-center justify-between px-5 py-3.5 border-b ${
+        className={`flex items-center justify-between px-4 sm:px-5 py-3 border-b ${
           isLight ? 'border-stone-200/90 bg-[#FBF9F5]' : 'border-zinc-800 bg-[#141414]'
         }`}
       >
@@ -327,7 +351,7 @@ export default function ReferencePanelModal({
 
         <button
           onClick={onClose}
-          className={`rounded-lg p-1.5 transition ${
+          className={`rounded-lg p-1.5 transition shrink-0 ${
             isLight
               ? 'text-stone-400 hover:bg-stone-200/60 hover:text-stone-800'
               : 'text-zinc-400 hover:bg-zinc-800 hover:text-white'
@@ -340,7 +364,7 @@ export default function ReferencePanelModal({
 
       {/* Mode Switcher Bar: Reference | Context | Explain | Compare */}
       <div
-        className={`flex items-center justify-between gap-1.5 px-4 py-2 border-b overflow-x-auto no-scrollbar ${
+        className={`flex items-center justify-between gap-1.5 px-3 sm:px-4 py-2 border-b overflow-x-auto no-scrollbar ${
           isLight ? 'bg-stone-50 border-stone-200/80' : 'bg-[#121212] border-zinc-800'
         }`}
       >
@@ -393,23 +417,21 @@ export default function ReferencePanelModal({
             <span>Explain</span>
           </button>
 
-          {activeConnection && (
-            <button
-              onClick={() => setActiveTab('compare')}
-              className={`rounded-lg px-2.5 py-1.5 text-xs font-semibold flex items-center gap-1 transition shrink-0 ${
-                activeTab === 'compare'
-                  ? isLight
-                    ? 'bg-stone-900 text-white shadow-xs'
-                    : 'bg-zinc-100 text-zinc-900'
-                  : isLight
-                  ? 'text-stone-600 hover:bg-stone-200/60'
-                  : 'text-zinc-400 hover:bg-zinc-800'
-              }`}
-            >
-              <ArrowLeftRight className="h-3.5 w-3.5" />
-              <span>Compare</span>
-            </button>
-          )}
+          <button
+            onClick={() => setActiveTab('compare')}
+            className={`rounded-lg px-2.5 py-1.5 text-xs font-semibold flex items-center gap-1 transition shrink-0 ${
+              activeTab === 'compare'
+                ? isLight
+                  ? 'bg-stone-900 text-white shadow-xs'
+                  : 'bg-zinc-100 text-zinc-900'
+                : isLight
+                ? 'text-stone-600 hover:bg-stone-200/60'
+                : 'text-zinc-400 hover:bg-zinc-800'
+            }`}
+          >
+            <ArrowLeftRight className="h-3.5 w-3.5" />
+            <span>Compare</span>
+          </button>
         </div>
 
         <button
@@ -437,7 +459,7 @@ export default function ReferencePanelModal({
       </div>
 
       {/* Scrollable Inspector Content */}
-      <div className="flex-1 overflow-y-auto p-5 space-y-5">
+      <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-5">
         {/* Selected Primary Scripture */}
         <div
           className={`rounded-xl border p-4 space-y-2 ${
@@ -610,7 +632,7 @@ export default function ReferencePanelModal({
                 }`}
               >
                 <p className="text-xs">
-                  No direct canonical cross-reference is indexed for {primaryRef} individually.
+                  No direct individual cross-reference is indexed for {primaryRef}. Open the Context tab to see how this verse fits within its surrounding verses and preceding chapter.
                 </p>
                 <div className="flex flex-wrap justify-center gap-2">
                   <button
@@ -622,7 +644,7 @@ export default function ReferencePanelModal({
                     }`}
                   >
                     <Compass className="h-3.5 w-3.5" />
-                    <span>View Chapter Context</span>
+                    <span>View Verse Context</span>
                   </button>
                   <button
                     onClick={handleExplainWithAI}
@@ -642,7 +664,7 @@ export default function ReferencePanelModal({
         )}
 
         {/* ===================================================================
-            TAB 2: CHAPTER & PRECEDING-CHAPTER CONTEXT + REFERENCES
+            TAB 2: VERSE-SPECIFIC CONTEXT, SURROUNDING PASSAGE & PREVIOUS CHAPTER
             =================================================================== */}
         {activeTab === 'context' && (
           <div className="space-y-4">
@@ -660,17 +682,126 @@ export default function ReferencePanelModal({
                   }`}
                 />
                 <p className="text-xs font-medium">
-                  Loading preceding chapter flow, surrounding verses, and canonical references...
+                  Analyzing {primaryRef} in context of its surrounding verses and preceding chapter...
                 </p>
               </div>
             ) : (
               <>
-                {/* 1. Preceding Chapter Bridge */}
+                {/* 1. Specific Context of the Selected Verse */}
                 <div
                   className={`rounded-xl border p-4 space-y-2.5 ${
                     isLight
-                      ? 'bg-amber-50/45 border-amber-200/80 text-stone-800'
+                      ? 'bg-amber-50/50 border-amber-200/90 text-stone-800'
                       : 'bg-[#1f1d18] border-amber-500/30 text-zinc-200'
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-2 flex-wrap">
+                    <span
+                      className={`text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 ${
+                        isLight ? 'text-amber-800' : 'text-amber-400'
+                      }`}
+                    >
+                      <Compass className="h-3.5 w-3.5" />
+                      1. Context of Selected Verse ({contextData.targetRef})
+                    </span>
+                    {contextData.sectionHeading && (
+                      <span
+                        className={`rounded-md px-2 py-0.5 text-[10px] font-bold italic ${
+                          isLight
+                            ? 'bg-white border border-amber-200 text-amber-900'
+                            : 'bg-zinc-900 border border-zinc-700 text-amber-300'
+                        }`}
+                      >
+                        Section: {contextData.sectionHeading}
+                      </span>
+                    )}
+                  </div>
+
+                  <p className="text-xs leading-relaxed">
+                    {contextData.verseSpecificAnalysis}
+                  </p>
+                </div>
+
+                {/* 2. Immediate Surrounding Verses (Leading -> Selected -> Following) */}
+                <div
+                  className={`rounded-xl border p-4 space-y-3 ${
+                    isLight
+                      ? 'bg-stone-50/80 border-stone-200/90 text-stone-800'
+                      : 'bg-[#1a1a1a] border-zinc-800 text-zinc-200'
+                  }`}
+                >
+                  <span
+                    className={`text-[10px] font-bold uppercase tracking-wider block ${
+                      isLight ? 'text-amber-800' : 'text-amber-400'
+                    }`}
+                  >
+                    2. Surrounding Verses in {contextData.book} {contextData.chapter} ({translation})
+                  </span>
+                  <p className="text-xs leading-relaxed text-stone-600 dark:text-zinc-300">
+                    {contextData.immediateLiteraryContext}
+                  </p>
+
+                  <div className="space-y-1.5">
+                    {contextData.leadingVersesInChapter.map((lv) => (
+                      <div
+                        key={lv.ref}
+                        onClick={() => navigateToReferenceString(lv.ref, false)}
+                        className={`cursor-pointer rounded-lg p-2.5 border text-xs font-serif leading-relaxed ${
+                          isLight
+                            ? 'bg-white border-stone-200/80 text-stone-700'
+                            : 'bg-[#121212] border-zinc-800 text-zinc-300'
+                        }`}
+                      >
+                        <span className="font-sans font-bold text-stone-400 mr-1.5">
+                          {lv.ref}
+                        </span>
+                        {lv.text}
+                      </div>
+                    ))}
+
+                    {/* Highlighted Selected Verse in Sequence */}
+                    <div
+                      className={`rounded-lg p-3 border-l-4 text-xs font-serif leading-relaxed ${
+                        isLight
+                          ? 'bg-amber-50/80 border-amber-700 text-stone-900 font-medium'
+                          : 'bg-amber-500/15 border-amber-400 text-zinc-100 font-medium'
+                      }`}
+                    >
+                      <span
+                        className={`font-sans font-bold mr-1.5 ${
+                          isLight ? 'text-amber-800' : 'text-amber-400'
+                        }`}
+                      >
+                        {contextData.targetRef} (Selected)
+                      </span>
+                      “{contextData.selectedVerseText}”
+                    </div>
+
+                    {contextData.followingVersesInChapter.map((fv) => (
+                      <div
+                        key={fv.ref}
+                        onClick={() => navigateToReferenceString(fv.ref, false)}
+                        className={`cursor-pointer rounded-lg p-2.5 border text-xs font-serif leading-relaxed ${
+                          isLight
+                            ? 'bg-white border-stone-200/80 text-stone-700'
+                            : 'bg-[#121212] border-zinc-800 text-zinc-300'
+                        }`}
+                      >
+                        <span className="font-sans font-bold text-stone-400 mr-1.5">
+                          {fv.ref}
+                        </span>
+                        {fv.text}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 3. Preceding Chapter Bridge */}
+                <div
+                  className={`rounded-xl border p-4 space-y-2.5 ${
+                    isLight
+                      ? 'bg-stone-50/80 border-stone-200/90 text-stone-800'
+                      : 'bg-[#1a1a1a] border-zinc-800 text-zinc-200'
                   }`}
                 >
                   <div className="flex items-center justify-between gap-2">
@@ -679,8 +810,7 @@ export default function ReferencePanelModal({
                         isLight ? 'text-amber-800' : 'text-amber-400'
                       }`}
                     >
-                      <Compass className="h-3.5 w-3.5" />
-                      1. Preceding Chapter Context ({contextData.previousChapterRef})
+                      3. Preceding Chapter ({contextData.previousChapterRef})
                     </span>
                     {contextData.chapter > 1 && (
                       <button
@@ -706,7 +836,7 @@ export default function ReferencePanelModal({
                   <p
                     className={`text-xs leading-relaxed pt-2 border-t ${
                       isLight
-                        ? 'border-amber-200/60 text-stone-700'
+                        ? 'border-stone-200/80 text-stone-700'
                         : 'border-zinc-800 text-zinc-300'
                     }`}
                   >
@@ -714,7 +844,6 @@ export default function ReferencePanelModal({
                     {contextData.howPreviousChapterLeadsHere}
                   </p>
 
-                  {/* Actual Closing Verses of the Previous Chapter */}
                   {contextData.previousChapterKeyVerses.length > 0 && (
                     <div className="space-y-1.5 pt-2">
                       <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400 block">
@@ -746,7 +875,7 @@ export default function ReferencePanelModal({
                   )}
                 </div>
 
-                {/* 2. Immediate Surrounding Verses in Current Chapter */}
+                {/* 4. Verified Cross-References in Context */}
                 <div
                   className={`rounded-xl border p-4 space-y-3 ${
                     isLight
@@ -759,75 +888,7 @@ export default function ReferencePanelModal({
                       isLight ? 'text-amber-800' : 'text-amber-400'
                     }`}
                   >
-                    2. Immediate Chapter Flow ({contextData.book} {contextData.chapter})
-                  </span>
-                  <p className="text-xs leading-relaxed text-stone-600 dark:text-zinc-300">
-                    {contextData.immediateLiteraryContext}
-                  </p>
-
-                  {contextData.leadingVersesInChapter.length > 0 && (
-                    <div className="space-y-1.5">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400 block">
-                        Verses Leading Up to {primaryRef}:
-                      </span>
-                      {contextData.leadingVersesInChapter.map((lv) => (
-                        <div
-                          key={lv.ref}
-                          onClick={() => navigateToReferenceString(lv.ref, false)}
-                          className={`cursor-pointer rounded-lg p-2.5 border text-xs font-serif leading-relaxed ${
-                            isLight
-                              ? 'bg-white border-stone-200/80 text-stone-700'
-                              : 'bg-[#121212] border-zinc-800 text-zinc-300'
-                          }`}
-                        >
-                          <span className="font-sans font-bold text-stone-400 mr-1.5">
-                            {lv.ref}
-                          </span>
-                          {lv.text}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {contextData.followingVersesInChapter.length > 0 && (
-                    <div className="space-y-1.5 pt-1">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400 block">
-                        Verses Immediately Following {primaryRef}:
-                      </span>
-                      {contextData.followingVersesInChapter.map((fv) => (
-                        <div
-                          key={fv.ref}
-                          onClick={() => navigateToReferenceString(fv.ref, false)}
-                          className={`cursor-pointer rounded-lg p-2.5 border text-xs font-serif leading-relaxed ${
-                            isLight
-                              ? 'bg-white border-stone-200/80 text-stone-700'
-                              : 'bg-[#121212] border-zinc-800 text-zinc-300'
-                          }`}
-                        >
-                          <span className="font-sans font-bold text-stone-400 mr-1.5">
-                            {fv.ref}
-                          </span>
-                          {fv.text}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {/* 3. Verified Cross-References in Context */}
-                <div
-                  className={`rounded-xl border p-4 space-y-3 ${
-                    isLight
-                      ? 'bg-stone-50/80 border-stone-200/90 text-stone-800'
-                      : 'bg-[#1a1a1a] border-zinc-800 text-zinc-200'
-                  }`}
-                >
-                  <span
-                    className={`text-[10px] font-bold uppercase tracking-wider block ${
-                      isLight ? 'text-amber-800' : 'text-amber-400'
-                    }`}
-                  >
-                    3. Canonical Cross-References Supporting This Context
+                    4. Canonical Cross-References Supporting This Context
                   </span>
 
                   {contextData.verifiedCrossReferences.length > 0 ? (
@@ -1127,63 +1188,119 @@ export default function ReferencePanelModal({
           </div>
         )}
 
-        {/* TAB 4: COMPARE BOTH SCRIPTURES */}
-        {activeTab === 'compare' && activeConnection && (
-          <div className="space-y-3.5">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-stone-500">Translation:</span>
-              <select
-                value={compareTranslation}
-                onChange={(e) => {
-                  const nextTrans = e.target.value as TranslationId;
-                  setCompareTranslation(nextTrans);
-                  setTranslation(nextTrans);
-                }}
-                className={`rounded-lg border px-2.5 py-1 text-xs font-bold ${
-                  isLight
-                    ? 'bg-stone-50 border-stone-300 text-amber-800'
-                    : 'bg-[#141414] border-zinc-700 text-amber-300'
-                }`}
-              >
-                {BIBLE_TRANSLATIONS.map((t) => (
-                  <option key={t.id} value={t.id}>
-                    {t.abbreviation} — {t.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="space-y-3">
-              <div
-                className={`rounded-xl border p-3.5 space-y-1.5 ${
-                  isLight ? 'bg-stone-50 border-stone-200' : 'bg-[#1a1a1a] border-zinc-800'
-                }`}
-              >
-                <div className="flex items-center justify-between text-xs font-bold">
-                  <span className="text-stone-400">Primary</span>
-                  <span className={isLight ? 'text-amber-800' : 'text-amber-300'}>
-                    {primaryRef} ({compareTranslation})
+        {/* TAB 4: COMPARE VERSIONS & SCRIPTURES */}
+        {activeTab === 'compare' && (
+          <div className="space-y-4">
+            {/* Side-by-Side Connected Scripture Comparison (if a connection exists) */}
+            {activeConnection && (
+              <div className="space-y-3 pb-3 border-b border-stone-200 dark:border-zinc-800">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-stone-400">
+                    Compare Connected Passages
                   </span>
+                  <select
+                    value={compareTranslation}
+                    onChange={(e) => setCompareTranslation(e.target.value as TranslationId)}
+                    className={`rounded-lg border px-2.5 py-1 text-xs font-bold ${
+                      isLight
+                        ? 'bg-stone-50 border-stone-300 text-amber-800'
+                        : 'bg-[#141414] border-zinc-700 text-amber-300'
+                    }`}
+                  >
+                    {BIBLE_TRANSLATIONS.map((t) => (
+                      <option key={t.id} value={t.id}>
+                        {t.abbreviation} — {t.name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
-                <p className="font-serif text-sm leading-relaxed">“{comparePrimaryText}”</p>
+
+                <div
+                  className={`rounded-xl border p-3.5 space-y-1.5 ${
+                    isLight ? 'bg-stone-50 border-stone-200' : 'bg-[#1a1a1a] border-zinc-800'
+                  }`}
+                >
+                  <div className="flex items-center justify-between text-xs font-bold">
+                    <span className="text-stone-400">Primary</span>
+                    <span className={isLight ? 'text-amber-800' : 'text-amber-300'}>
+                      {primaryRef} ({compareTranslation})
+                    </span>
+                  </div>
+                  <p className="font-serif text-sm leading-relaxed">“{comparePrimaryText}”</p>
+                </div>
+
+                <div
+                  className={`rounded-xl border p-3.5 space-y-1.5 ${
+                    isLight
+                      ? 'bg-amber-50/40 border-amber-200'
+                      : 'bg-[#1f1d18] border-amber-500/30'
+                  }`}
+                >
+                  <div className="flex items-center justify-between text-xs font-bold">
+                    <span className="text-stone-400">Connected</span>
+                    <span className={isLight ? 'text-amber-800' : 'text-amber-300'}>
+                      {activeConnection.connectedRef} ({compareTranslation})
+                    </span>
+                  </div>
+                  <p className="font-serif text-sm leading-relaxed">
+                    “{compareConnectedText}”
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* All 6 Bible Versions Comparison for Selected Verse */}
+            <div className="space-y-2.5">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-stone-400">
+                  All 6 Bible Versions for {primaryRef}
+                </span>
+                {isLoadingVersions && (
+                  <span className="text-[11px] text-amber-700 dark:text-amber-400 animate-pulse">
+                    Loading versions...
+                  </span>
+                )}
               </div>
 
-              <div
-                className={`rounded-xl border p-3.5 space-y-1.5 ${
-                  isLight
-                    ? 'bg-amber-50/40 border-amber-200'
-                    : 'bg-[#1f1d18] border-amber-500/30'
-                }`}
-              >
-                <div className="flex items-center justify-between text-xs font-bold">
-                  <span className="text-stone-400">Connected</span>
-                  <span className={isLight ? 'text-amber-800' : 'text-amber-300'}>
-                    {activeConnection.connectedRef} ({compareTranslation})
-                  </span>
-                </div>
-                <p className="font-serif text-sm leading-relaxed">
-                  “{compareConnectedText}”
-                </p>
+              <div className="space-y-2">
+                {BIBLE_TRANSLATIONS.map((t) => {
+                  const vText =
+                    allVersionTexts?.[t.id] ||
+                    primaryVerseObj?.translations[t.id] ||
+                    primaryText;
+                  const isCurrent = translation === t.id;
+                  return (
+                    <div
+                      key={t.id}
+                      onClick={() => setTranslation(t.id)}
+                      className={`cursor-pointer rounded-xl p-3 border text-xs transition ${
+                        isCurrent
+                          ? isLight
+                            ? 'bg-amber-50/70 border-amber-300 text-stone-900'
+                            : 'bg-amber-500/15 border-amber-500/40 text-zinc-100'
+                          : isLight
+                          ? 'bg-stone-50/80 border-stone-200/90 text-stone-800 hover:bg-stone-100'
+                          : 'bg-[#1a1a1a] border-zinc-800 text-zinc-200 hover:bg-zinc-800/70'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-1">
+                        <span
+                          className={`font-bold ${
+                            isLight ? 'text-amber-800' : 'text-amber-400'
+                          }`}
+                        >
+                          {t.abbreviation} — {t.name}
+                        </span>
+                        {isCurrent && (
+                          <span className="text-[10px] font-bold text-emerald-600">
+                            Active
+                          </span>
+                        )}
+                      </div>
+                      <p className="font-serif text-sm leading-relaxed">“{vText}”</p>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -1280,9 +1397,15 @@ export default function ReferencePanelModal({
         {panelBody}
       </aside>
 
-      {/* Mobile & Tablet Bottom Sheet Drawer (< lg) */}
-      <div className="lg:hidden fixed inset-0 z-50 flex items-end justify-center bg-black/40 backdrop-blur-xs">
-        <div className="w-full max-h-[85vh] rounded-t-3xl overflow-hidden shadow-2xl border-t border-stone-200 dark:border-zinc-800 flex flex-col">
+      {/* Mobile & Tablet Bottom Sheet Drawer (< lg) — Closes on Backdrop Click */}
+      <div
+        onClick={onClose}
+        className="lg:hidden fixed inset-0 z-50 flex items-end justify-center bg-black/40 backdrop-blur-xs"
+      >
+        <div
+          onClick={(e) => e.stopPropagation()}
+          className="w-full max-w-full max-h-[85vh] rounded-t-3xl overflow-hidden shadow-2xl border-t border-stone-200 dark:border-zinc-800 flex flex-col"
+        >
           {panelBody}
         </div>
       </div>

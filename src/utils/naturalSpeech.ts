@@ -198,3 +198,4 @@ export function speakScriptureNaturally(options: SpeakVerseQueueOptions) {
 
   speakNext();
 }
+

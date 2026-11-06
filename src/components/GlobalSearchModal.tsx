@@ -109,8 +109,12 @@ export default function GlobalSearchModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/40 backdrop-blur-sm p-2 sm:p-6 overflow-y-auto">
+    <div
+      onClick={onClose}
+      className="fixed inset-0 z-50 flex items-start justify-center bg-black/40 backdrop-blur-sm p-2 sm:p-6 overflow-y-auto"
+    >
       <div
+        onClick={(e) => e.stopPropagation()}
         className={`relative w-full max-w-2xl rounded-2xl border shadow-2xl overflow-hidden my-auto sm:my-8 ${
           isLight
             ? 'bg-white border-stone-200 text-stone-900'

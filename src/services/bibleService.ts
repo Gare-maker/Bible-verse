@@ -17,76 +17,131 @@ import {
 } from '@/data/bibleBooks';
 import { getCrossReferencesForVerse } from '@/data/crossReferences';
 
+const ALL_TRANSLATION_IDS: TranslationId[] = ['NIV', 'KJV', 'ESV', 'NKJV', 'NLT', 'ASV'];
+
 // Track which (book:chapter:translation) combinations have been fetched from the live canonical API
 const fetchedTranslationCache = new Set<string>();
+const inFlightRequests = new Map<string, Promise<VerseData[]>>();
+
+async function fetchSingleTranslationFromApi(
+  book: string,
+  chapter: number,
+  translation: TranslationId
+): Promise<VerseData[]> {
+  const cacheKey = `${book.toLowerCase()}:${chapter}:${translation}`;
+  if (fetchedTranslationCache.has(cacheKey)) {
+    return getChapterVersesSync(book, chapter);
+  }
+
+  const existingPromise = inFlightRequests.get(cacheKey);
+  if (existingPromise) {
+    return existingPromise;
+  }
+
+  const promise = (async () => {
+    try {
+      const params = new URLSearchParams({
+        book,
+        chapter: String(chapter),
+        translation,
+      });
+      const res = await fetch(`/api/bible?${params.toString()}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data.verses) && data.verses.length > 0) {
+          const merged: VerseData[] = data.verses.map(
+            (vItem: { verse: number; text: string }) => {
+              const ref = `${book} ${chapter}:${vItem.verse}`;
+              const existing = getVerseByReference(ref);
+              if (existing) {
+                existing.translations[translation] = vItem.text;
+                return existing;
+              }
+              const newVerse: VerseData = {
+                book,
+                chapter,
+                verse: vItem.verse,
+                canonicalRef: ref,
+                translations: {
+                  NIV: vItem.text,
+                  KJV: vItem.text,
+                  ESV: vItem.text,
+                  NKJV: vItem.text,
+                  NLT: vItem.text,
+                  ASV: vItem.text,
+                },
+              };
+              newVerse.translations[translation] = vItem.text;
+              return newVerse;
+            }
+          );
+
+          registerFetchedChapterVerses(merged);
+          fetchedTranslationCache.add(cacheKey);
+        }
+      }
+    } catch {
+      // Offline fallback uses pre-verified scriptureDatabase
+    } finally {
+      inFlightRequests.delete(cacheKey);
+    }
+    return getChapterVersesSync(book, chapter);
+  })();
+
+  inFlightRequests.set(cacheKey, promise);
+  return promise;
+}
 
 /**
  * Fetches all verses for a given Book, Chapter, and Translation.
- * - Uses verified local multi-translation database + live `/api/bible` canonical endpoint (bolls.life / bible-api.com)
- *   so every translation (NIV, KJV, ESV, NKJV, NLT, ASV) displays its authentic, verbatim text.
- * - Never fabricates or generates synthetic scripture text.
+ * Also prefetches the remaining 5 translations in the background so version comparison is instant and accurate.
  */
 export async function fetchChapterVerses(
   book: string,
   chapter: number,
   translation: TranslationId = 'NIV'
 ): Promise<VerseData[]> {
-  const cacheKey = `${book.toLowerCase()}:${chapter}:${translation}`;
-  const local = getChapterVersesSync(book, chapter);
+  const result = await fetchSingleTranslationFromApi(book, chapter, translation);
 
-  // If we already fetched this exact translation from the canonical API or have full chapter locally
-  if (fetchedTranslationCache.has(cacheKey) && local.length > 0) {
-    return local;
+  // Prefetch the remaining 5 translations in the background so Compare Translations has every distinct version
+  if (typeof window !== 'undefined') {
+    const otherTranslations = ALL_TRANSLATION_IDS.filter((t) => t !== translation);
+    void Promise.all(
+      otherTranslations.map((t) => fetchSingleTranslationFromApi(book, chapter, t))
+    );
   }
 
-  try {
-    const params = new URLSearchParams({
-      book,
-      chapter: String(chapter),
-      translation,
-    });
-    const res = await fetch(`/api/bible?${params.toString()}`);
-    if (res.ok) {
-      const data = await res.json();
-      if (Array.isArray(data.verses) && data.verses.length > 0) {
-        const merged: VerseData[] = data.verses.map(
-          (vItem: { verse: number; text: string }) => {
-            const ref = `${book} ${chapter}:${vItem.verse}`;
-            const existing = getVerseByReference(ref);
-            if (existing) {
-              existing.translations[translation] = vItem.text;
-              return existing;
-            }
-            const newVerse: VerseData = {
-              book,
-              chapter,
-              verse: vItem.verse,
-              canonicalRef: ref,
-              translations: {
-                NIV: vItem.text,
-                KJV: vItem.text,
-                ESV: vItem.text,
-                NKJV: vItem.text,
-                NLT: vItem.text,
-                ASV: vItem.text,
-              },
-            };
-            newVerse.translations[translation] = vItem.text;
-            return newVerse;
-          }
-        );
+  return result;
+}
 
-        // Also preserve any local verses if API returned partial
-        registerFetchedChapterVerses(merged);
-        fetchedTranslationCache.add(cacheKey);
-        return getChapterVersesSync(book, chapter);
-      }
-    }
-  } catch {
-    // Offline or network error — return only verified local scripture verses
-  }
+/**
+ * Fetches all 6 translations (NIV, KJV, ESV, NKJV, NLT, ASV) in parallel for a chapter
+ * so that version comparison always shows each translation's authentic, distinct scripture text.
+ */
+export async function fetchAllTranslationsForChapter(
+  book: string,
+  chapter: number
+): Promise<VerseData[]> {
+  await Promise.all(
+    ALL_TRANSLATION_IDS.map((t) => fetchSingleTranslationFromApi(book, chapter, t))
+  );
+  return getChapterVersesSync(book, chapter);
+}
 
-  return local;
+/**
+ * Resolves all 6 translations for a single canonical verse reference (e.g. "Matthew 1:23" or "Deuteronomy 32:6").
+ */
+export async function fetchVerseAllTranslations(
+  ref: string
+): Promise<Record<TranslationId, string> | null> {
+  const parsed = parseScriptureReference(ref);
+  if (!parsed) return null;
+  const verseNum = parsed.verse || 1;
+  await fetchAllTranslationsForChapter(parsed.book, parsed.chapter);
+  const canonicalRef = `${parsed.book} ${parsed.chapter}:${verseNum}`;
+  const verseObj = getVerseByReference(canonicalRef);
+  if (!verseObj) return null;
+  return { ...verseObj.translations };
 }
 
 /**
@@ -119,16 +174,29 @@ export async function resolveScriptureVerse(
     translation
   );
   const target = chapterVerses.find((v) => v.verse === verseNum);
-  if (!target) return null;
+  if (target) {
+    return {
+      canonicalRef: target.canonicalRef,
+      text: target.translations[translation] || target.translations.NIV,
+      verseData: target,
+    };
+  }
 
-  return {
-    canonicalRef: target.canonicalRef,
-    text: target.translations[translation] || target.translations.NIV,
-    verseData: target,
-  };
+  if (existing) {
+    return {
+      canonicalRef: existing.canonicalRef,
+      text: existing.translations[translation] || existing.translations.NIV,
+      verseData: existing,
+    };
+  }
+
+  return null;
 }
 
-// Curated scholarly summaries of how preceding chapters lead into key chapters
+// ============================================================================
+// PRECEDING CHAPTER & VERSE-SPECIFIC CONTEXT ENGINE
+// ============================================================================
+
 const PRECEDING_CHAPTER_BRIDGES: Record<
   string,
   {
@@ -138,33 +206,39 @@ const PRECEDING_CHAPTER_BRIDGES: Record<
 > = {
   'deuteronomy:32': {
     previousSummary:
-      'In Deuteronomy 31, Moses completes writing the Torah at age 120, commissions Joshua as his successor, and is commanded by the LORD (Deut 31:19–30) to teach Israel a prophetic Song that will serve as a covenant witness across future generations.',
+      'In Deuteronomy 31, the 120-year-old Moses completes writing the Book of the Law, commissions Joshua to lead Israel across the Jordan (31:7–8), and receives the LORD’s command to write a prophetic Song of Witness (31:19–30) before ascending Mount Nebo.',
     bridgeExplanation:
-      'Deuteronomy 31:30 directly introduces Deuteronomy 32 ("And Moses recited the words of this song from beginning to end in the hearing of the whole assembly of Israel"). Every verse in Chapter 32 flows out of that solemn covenant courtroom scene on the Plains of Moab.',
-  },
-  'matthew:18': {
-    previousSummary:
-      'In Matthew 17, following the Transfiguration on the mountain (17:1–13) and Jesus’ second prediction of His coming suffering and resurrection in Galilee (17:22–23), Jesus models humility by paying the temple tax so as not to cause others to stumble (17:24–27).',
-    bridgeExplanation:
-      'This leads directly into Matthew 18, where the disciples ask "Who is the greatest in the kingdom of heaven?" (18:1). Jesus places a little child among them (18:2–6), tells the Parable of the Wandering Sheep (18:12–14), and then explains in 18:15–20 how the church must lovingly seek and restore a wandering brother or sister.',
+      'Deuteronomy 31:30 concludes with Moses assembling the elders and tribes to recite the Song from beginning to end. Deuteronomy 32:1–43 is that exact Song—calling heaven and earth as covenant witnesses (32:1–2), proclaiming the perfection of God the Rock (32:3–4), exposing Israel’s unfaithfulness (32:5–6), and recounting God’s fatherly care in the wilderness (32:7–14).',
   },
   'matthew:1': {
     previousSummary:
-      'Standing at the threshold of the New Testament, Matthew 1 bridges the close of the Old Testament prophetic canon (Malachi 3–4 and the royal genealogies of 1 Chronicles 1–3) with the arrival of the promised Messiah.',
+      'Standing at the threshold of the New Testament after the Old Testament prophetic expectation (Malachi 3–4 and the Davidic promises of 2 Samuel 7 and Isaiah 7–9), Matthew 1 bridges the entire Hebrew genealogy from Abraham and David to the birth of Jesus the Messiah.',
     bridgeExplanation:
-      'Matthew 1:1–17 traces the legal royal lineage from Abraham (Genesis 12:3) and King David (2 Samuel 7:12) through the Babylonian exile down to Joseph and Mary, setting the stage for 1:18–25 where the virgin conception of Jesus fulfills Isaiah 7:14.',
+      'Verses 1–17 trace three fourteen-generation eras (Abraham to David, David to the Babylonian Exile, and the Exile to the Christ), establishing Jesus’ legal throne right through Joseph before verses 18–25 explain His supernatural virgin conception by the Holy Spirit in fulfillment of Isaiah 7:14.',
+  },
+  'matthew:18': {
+    previousSummary:
+      'In Matthew 17, Jesus is transfigured in glory on the mountain (17:1–8), heals a boy with a demon (17:14–20), predicts His betrayal and resurrection in Galilee (17:22–23), and pays the temple tax so as not to cause offense (17:24–27).',
+    bridgeExplanation:
+      'Immediately following Matthew 17, the disciples ask in Matthew 18:1, "Who, then, is the greatest in the kingdom of heaven?" Jesus answers by placing a child among them (18:2–5), warning against causing "little ones" to stumble (18:6–10), telling the Parable of the Wandering Sheep (18:12–14), and then giving practical instructions on how to lovingly restore a sinning brother (18:15–20) and forgive from the heart (18:21–35).',
   },
   'isaiah:7': {
     previousSummary:
-      'In Isaiah 6, the prophet beholds the thrice-holy LORD enthroned in the temple in the year King Uzziah died (6:1–4) and receives his prophetic commission to speak God’s word to an unbelieving nation (6:8–13).',
+      'In Isaiah 6 (the year King Uzziah died, 740 BC), Isaiah beholds the thrice-holy LORD enthroned in the temple, receives cleansing by a live coal from the altar, and is commissioned to speak God’s word to a hardened nation until only a holy remnant remains (6:1–13).',
     bridgeExplanation:
-      'Moving from Uzziah’s death in Chapter 6 to the reign of his grandson King Ahaz in Chapter 7, Aram and Ephraim besiege Jerusalem to overthrow the Davidic line (7:1–9). When Ahaz refuses to trust the LORD, Isaiah delivers the sign of Immanuel in 7:14.',
+      'Moving directly from Isaiah’s temple commission in Chapter 6 into the historical crisis of King Ahaz in Chapter 7 (c. 734 BC), Aram (Syria) and Ephraim (Northern Israel) form a coalition to overthrow Jerusalem and replace the Davidic king. When Ahaz refuses to trust God (7:10–12), Isaiah addresses the whole House of David with the sign of Immanuel (7:13–14).',
+  },
+  'isaiah:53': {
+    previousSummary:
+      'In Isaiah 52, the prophet proclaims the good news of Zion’s redemption ("How beautiful on the mountains are the feet of those who bring good news," 52:7) and introduces the fourth Servant Song in 52:13–15, declaring that the Servant will be raised and lifted up yet marred beyond human likeness.',
+    bridgeExplanation:
+      'Isaiah 53:1–12 is the direct continuation of the Servant Song begun in Isaiah 52:13–15. What startled the nations in 52:15 is explained in 53:1–6: the Servant’s suffering was not for His own sin, but a substitutionary bearing of our iniquities.',
   },
   'john:1': {
     previousSummary:
-      'John 1 intentionally reaches back to the opening chapter of the entire Bible—Genesis 1 ("In the beginning God created the heavens and the earth" by His spoken Word, "And God said, Let there be light").',
+      'Echoing the opening Hebrew words of Genesis 1:1 ("In the beginning God created the heavens and the earth"), John 1 reaches back before creation itself into eternity past to reveal the divine identity of the Word (Logos).',
     bridgeExplanation:
-      'By opening with "In the beginning was the Word" (John 1:1), the Apostle grounds the life and ministry of Jesus Christ in eternal pre-existence before creation, moving from eternity past (1:1–5) to the witness of John the Baptist (1:6–8) and the Incarnation (1:14).',
+      'John 1 moves from the eternal pre-existence of the Word with God (1:1–2), through creation and light shining in the darkness (1:3–5), the witness of John the Baptist (1:6–8, 15), the incarnation of the Word made flesh full of grace and truth (1:14–18), to the calling of the first disciples (1:19–51).',
   },
   'genesis:1': {
     previousSummary:
@@ -175,10 +249,82 @@ const PRECEDING_CHAPTER_BRIDGES: Record<
 };
 
 /**
+ * Generates a specific, verse-level contextual explanation for the exact selected verse
+ * by examining the selected verse text, its section heading, the immediately preceding verses,
+ * and the immediately following verses.
+ */
+function buildSpecificVerseAnalysis(params: {
+  book: string;
+  chapter: number;
+  verseNum: number;
+  selectedText: string;
+  sectionHeading?: string;
+  leadingVerses: { ref: string; text: string }[];
+  followingVerses: { ref: string; text: string }[];
+  directCrossRefs: { ref: string; category: string; title: string }[];
+}): string {
+  const {
+    book,
+    chapter,
+    verseNum,
+    selectedText,
+    sectionHeading,
+    leadingVerses,
+    followingVerses,
+    directCrossRefs,
+  } = params;
+
+  const ref = `${book} ${chapter}:${verseNum}`;
+  const lastLeading =
+    leadingVerses.length > 0 ? leadingVerses[leadingVerses.length - 1] : null;
+  const firstFollowing = followingVerses.length > 0 ? followingVerses[0] : null;
+
+  const parts: string[] = [];
+
+  if (sectionHeading) {
+    parts.push(
+      `${ref} belongs to the section "${sectionHeading}" in ${book} ${chapter}.`
+    );
+  } else {
+    parts.push(`${ref} is a key statement in the progression of ${book} ${chapter}.`);
+  }
+
+  if (lastLeading) {
+    parts.push(
+      `Immediately before this, ${lastLeading.ref} states: "${lastLeading.text}" — which sets up the direct statement in verse ${verseNum}: "${selectedText}"`
+    );
+  } else {
+    parts.push(
+      `Opening the chapter at verse ${verseNum}, the text declares: "${selectedText}"`
+    );
+  }
+
+  if (firstFollowing) {
+    parts.push(
+      `The thought continues immediately in ${firstFollowing.ref} ("${firstFollowing.text}"), showing that ${ref} must be read together with verses ${Math.max(
+        1,
+        verseNum - 2
+      )}–${verseNum + 2}.`
+    );
+  }
+
+  if (directCrossRefs.length > 0) {
+    parts.push(
+      `Canonically, ${ref} directly connects with ${directCrossRefs
+        .map((r) => `${r.ref} (${r.category}: ${r.title})`)
+        .join('; ')}.`
+    );
+  }
+
+  return parts.join(' ');
+}
+
+/**
  * Builds comprehensive, 100% scripture-grounded Context Data for any selected verse:
- * 1. Preceding Chapter context & actual closing verses from Chapter N-1
+ * 1. Specific Verse Analysis (what this exact verse is doing in its immediate paragraph/section)
  * 2. Immediate surrounding verses in the current chapter (leading up to & following the selected verse)
- * 3. Verified canonical cross-references for the verse and chapter
+ * 3. Preceding Chapter context & actual closing verses from Chapter N-1
+ * 4. Verified canonical cross-references for the verse and chapter
  */
 export async function buildVerseContextData(
   canonicalRef: string,
@@ -192,12 +338,25 @@ export async function buildVerseContextData(
   const bookObj = findBookByName(book);
   if (!bookObj) return null;
 
-  // 1. Fetch current chapter verses
+  // 1. Fetch current chapter verses in the active translation
   const currentChapterVerses = await fetchChapterVerses(book, chapter, translation);
+  const selectedVerseObj = currentChapterVerses.find((v) => v.verse === verseNum);
+  const selectedVerseText =
+    selectedVerseObj?.translations[translation] ||
+    selectedVerseObj?.translations.NIV ||
+    getVerseText(`${book} ${chapter}:${verseNum}`, translation);
 
-  // Extract preceding verses in the current chapter (up to 4 verses immediately before `verseNum`)
+  // Find the nearest section heading at or above `verseNum` in the current chapter
+  let sectionHeading: string | undefined;
+  for (const v of currentChapterVerses) {
+    if (v.verse <= verseNum && v.heading) {
+      sectionHeading = v.heading;
+    }
+  }
+
+  // Extract preceding verses in the current chapter (up to 3 verses immediately before `verseNum`)
   const leadingVersesInChapter = currentChapterVerses
-    .filter((v) => v.verse < verseNum && v.verse >= Math.max(1, verseNum - 4))
+    .filter((v) => v.verse < verseNum && v.verse >= Math.max(1, verseNum - 3))
     .map((v) => ({
       ref: v.canonicalRef,
       text: v.translations[translation] || v.translations.NIV,
@@ -229,8 +388,8 @@ export async function buildVerseContextData(
     chapter > 1
       ? `${book} ${chapter - 1}`
       : bookObj.id > 1
-      ? `${prevBookName} ${prevChapterNum} (Preceding Canonical Book)`
-      : 'Eternal Prologue (Before Creation)';
+      ? `${prevBookName} ${prevChapterNum} (Preceding Book)`
+      : 'Creation Prologue';
 
   let previousChapterKeyVerses: { ref: string; text: string }[] = [];
   if (chapter > 1 || bookObj.id > 1) {
@@ -246,7 +405,7 @@ export async function buildVerseContextData(
     }));
   }
 
-  // 3. ResolveVerified Cross-References for this verse + their exact scripture texts
+  // 3. Resolve Verified Cross-References for this verse + their exact scripture texts
   const directRefs = getCrossReferencesForVerse(`${book} ${chapter}:${verseNum}`);
   const verifiedCrossReferences = await Promise.all(
     directRefs.map(async (r) => {
@@ -261,7 +420,7 @@ export async function buildVerseContextData(
     })
   );
 
-  // 4. Collect all verified cross-references across the current chapter so the reader sees the chapter's reference web
+  // 4. Collect all verified cross-references across the current chapter
   const chapterCrossReferences: VerseContextData['chapterCrossReferences'] = [];
   for (const v of currentChapterVerses) {
     const vRefs = getCrossReferencesForVerse(v.canonicalRef);
@@ -286,27 +445,38 @@ export async function buildVerseContextData(
   const previousChapterSummary = curatedBridge
     ? curatedBridge.previousSummary
     : chapter > 1
-    ? `${book} ${chapter - 1} establishes the narrative and theological setting that transitions directly into ${book} ${chapter}. See the closing verses of ${book} ${chapter - 1} below.`
-    : `${book} 1 opens the book of ${book} (${bookObj.category}), building upon the preceding canonical revelation.`;
+    ? `${book} ${chapter - 1} establishes the narrative and theological setting that transitions directly into ${book} ${chapter}. Read the closing verses of ${book} ${chapter - 1} below to see how the prior chapter ends.`
+    : `${book} 1 opens the book of ${book} (${bookObj.category}), building upon ${previousChapterRef}.`;
 
   const howPreviousChapterLeadsHere = curatedBridge
     ? curatedBridge.bridgeExplanation
     : leadingVersesInChapter.length > 0
-    ? `Following the transition from ${previousChapterRef}, ${book} ${chapter} builds through ${leadingVersesInChapter[0].ref}${leadingVersesInChapter.length > 1 ? `–${leadingVersesInChapter[leadingVersesInChapter.length - 1].ref}` : ''} directly into ${book} ${chapter}:${verseNum}.`
-    : `${book} ${chapter}:${verseNum} opens this section of ${book}, directly continuing the theme from ${previousChapterRef}.`;
+    ? `Continuing from the conclusion of ${previousChapterRef}, ${book} ${chapter} progresses through ${leadingVersesInChapter.map((l) => l.ref).join(', ')} directly to ${book} ${chapter}:${verseNum}.`
+    : `${book} ${chapter}:${verseNum} opens this chapter directly after the conclusion of ${previousChapterRef}.`;
+
+  const verseSpecificAnalysis = buildSpecificVerseAnalysis({
+    book,
+    chapter,
+    verseNum,
+    selectedText: selectedVerseText,
+    sectionHeading,
+    leadingVerses: leadingVersesInChapter,
+    followingVerses: followingVersesInChapter,
+    directCrossRefs: verifiedCrossReferences,
+  });
 
   const immediateLiteraryContext =
     leadingVersesInChapter.length > 0 || followingVersesInChapter.length > 0
-      ? `Within ${book} ${chapter}, verse ${verseNum} is framed by ${
+      ? `In ${book} ${chapter}, verse ${verseNum} is directly preceded by ${
           leadingVersesInChapter.length > 0
-            ? `the preceding verses (${leadingVersesInChapter.map((l) => l.ref).join(', ')})`
+            ? leadingVersesInChapter.map((l) => l.ref).join(', ')
             : 'the chapter opening'
         }${
           followingVersesInChapter.length > 0
-            ? ` and continues into ${followingVersesInChapter.map((f) => f.ref).join(', ')}`
+            ? ` and followed by ${followingVersesInChapter.map((f) => f.ref).join(', ')}`
             : ''
-        }. Read the surrounding verses below to trace the unbroken flow of thought.`
-      : `${book} ${chapter}:${verseNum} stands within the canonical witness of ${book} ${chapter}.`;
+        }. Read the surrounding passage below in order:`
+      : `${book} ${chapter}:${verseNum} stands within ${book} ${chapter}.`;
 
   return {
     targetRef: `${book} ${chapter}:${verseNum}`,
@@ -314,6 +484,9 @@ export async function buildVerseContextData(
     chapter,
     verse: verseNum,
     translation,
+    selectedVerseText,
+    sectionHeading,
+    verseSpecificAnalysis,
     bookAuthorAndDate,
     previousChapterRef,
     previousChapterSummary,

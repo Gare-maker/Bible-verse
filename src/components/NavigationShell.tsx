@@ -542,9 +542,13 @@ export default function NavigationShell({ children }: { children: React.ReactNod
           PROFILE, SUPABASE CONNECTION & CLOUD SYNC MODAL (Light/Dark Aware)
           ===================================================================== */}
       {isProfileOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 overflow-y-auto">
+        <div
+          onClick={() => setIsProfileOpen(false)}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-3 sm:p-4 overflow-y-auto"
+        >
           <div
-            className={`relative w-full max-w-md rounded-2xl border p-6 shadow-2xl space-y-5 my-auto ${
+            onClick={(e) => e.stopPropagation()}
+            className={`relative w-full max-w-md max-h-[88vh] overflow-y-auto rounded-2xl border p-5 sm:p-6 shadow-2xl space-y-5 my-auto ${
               isLight
                 ? 'bg-white border-stone-200 text-stone-900'
                 : 'bg-[#181818] border-zinc-800 text-zinc-100'
