@@ -215,7 +215,7 @@ export interface NotebookCollection {
 export interface UserPreferences {
   defaultTranslation: TranslationId;
   theme: 'dark' | 'light';
-  fontSize: 'small' | 'medium' | 'large' | 'xlarge';
+  fontSize: 'xsmall' | 'small' | 'medium' | 'large' | 'xlarge';
   redLetterEnabled: boolean;
   showReferenceBadges: boolean;
   userName: string;

@@ -3,7 +3,6 @@
 import React, { useMemo, useState } from 'react';
 import {
   Bookmark,
-  BookOpen,
   Compass,
   Edit3,
   ExternalLink,
@@ -19,40 +18,23 @@ import {
   X,
 } from 'lucide-react';
 import {
-  ReferenceCategory,
   SavedConnection,
   SavedContextItem,
   SavedVerseItem,
 } from '@/types/bible';
-import { getVerseText } from '@/data/scriptureDatabase';
-import { buildVerseContextData, resolveScriptureVerse } from '@/services/bibleService';
 import { usePlatform } from '@/context/PlatformContext';
 
 type SavedTab = 'connections' | 'context' | 'verses';
 
-const REFERENCE_CATEGORIES: ReferenceCategory[] = [
-  'Prophecy fulfilment',
-  'Direct quotation',
-  'Prophecy',
-  'Allusion',
-  'Thematic connection',
-  'Parallel passage',
-  'Historical connection',
-];
-
 export default function NotesPage() {
   const {
-    translation,
     savedConnections,
-    saveConnectionToNotes,
     updateSavedConnection,
     deleteSavedConnection,
     savedContexts,
-    saveContextItem,
     updateSavedContext,
     deleteSavedContext,
     savedVerses,
-    saveBibleVerseItem,
     updateSavedVerse,
     deleteSavedVerse,
     collections,
@@ -63,6 +45,13 @@ export default function NotesPage() {
 
   const isLight = preferences.theme === 'light';
 
+  // Requirement 5.1: Initial Page Position — Always start at the very top
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    }
+  }, []);
+
   const [activeTab, setActiveTab] = useState<SavedTab>('connections');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCollectionId, setSelectedCollectionId] = useState<string>('ALL');
@@ -71,19 +60,6 @@ export default function NotesPage() {
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [editNotesDraft, setEditNotesDraft] = useState('');
   const [editCollectionDraft, setEditCollectionDraft] = useState<string>('');
-
-  // Create New Saved Item Modal
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [addType, setAddType] = useState<SavedTab>('connections');
-  const [primaryRefInput, setPrimaryRefInput] = useState('Matthew 1:23');
-  const [connectedRefInput, setConnectedRefInput] = useState('Isaiah 7:14');
-  const [newCategory, setNewCategory] = useState<ReferenceCategory>('Prophecy fulfilment');
-  const [newPersonalNotes, setNewPersonalNotes] = useState('');
-  const [newCollectionId, setNewCollectionId] = useState<string>(
-    collections[0]?.id || 'col-messianic'
-  );
-  const [newShareToCommunity, setNewShareToCommunity] = useState<boolean>(false);
-  const [isSavingNew, setIsSavingNew] = useState(false);
 
   // Create New Collection Modal
   const [isNewCollectionOpen, setIsNewCollectionOpen] = useState(false);
@@ -158,77 +134,7 @@ export default function NotesPage() {
     setEditCollectionDraft(currentCol || collections[0]?.id || 'col-messianic');
   };
 
-  const handleCreateNewSavedItem = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!primaryRefInput.trim()) return;
-    setIsSavingNew(true);
 
-    try {
-      const resolvedPrimary = await resolveScriptureVerse(
-        primaryRefInput.trim(),
-        translation
-      );
-      const pRef = resolvedPrimary?.canonicalRef || primaryRefInput.trim();
-      const pText =
-        resolvedPrimary?.text || getVerseText(pRef, translation);
-
-      if (addType === 'connections') {
-        const resolvedConnected = await resolveScriptureVerse(
-          connectedRefInput.trim(),
-          translation
-        );
-        const cRef = resolvedConnected?.canonicalRef || connectedRefInput.trim();
-        const cText =
-          resolvedConnected?.text || getVerseText(cRef, translation);
-
-        saveConnectionToNotes({
-          title: `${pRef} ↔ ${cRef}`,
-          primaryRef: pRef,
-          connectedRef: cRef,
-          primaryText: pText,
-          connectedText: cText,
-          translation,
-          category: newCategory,
-          personalObservation: newPersonalNotes.trim(),
-          collectionId: newCollectionId,
-          sharedToCommunity: newShareToCommunity,
-        });
-        setActiveTab('connections');
-      } else if (addType === 'context') {
-        const ctx = await buildVerseContextData(pRef, translation);
-        saveContextItem({
-          verseRef: pRef,
-          verseText: pText,
-          translation,
-          mainTheme: ctx?.mainTheme || `Main Theme of ${pRef}`,
-          verseBreakdown: ctx?.verseBreakdown || [pText],
-          contextSummary:
-            ctx?.howPreviousChapterLeadsHere ||
-            ctx?.immediateLiteraryContext ||
-            `Context breakdown for ${pRef}`,
-          personalNotes: newPersonalNotes.trim(),
-          collectionId: newCollectionId,
-          sharedToCommunity: newShareToCommunity,
-        });
-        setActiveTab('context');
-      } else {
-        saveBibleVerseItem({
-          verseRef: pRef,
-          verseText: pText,
-          translation,
-          personalNotes: newPersonalNotes.trim(),
-          collectionId: newCollectionId,
-          sharedToCommunity: newShareToCommunity,
-        });
-        setActiveTab('verses');
-      }
-
-      setNewPersonalNotes('');
-      setIsAddModalOpen(false);
-    } finally {
-      setIsSavingNew(false);
-    }
-  };
 
   const handleCreateCollectionSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -244,153 +150,59 @@ export default function NotesPage() {
     <div className="flex-1 min-w-0 pb-28 lg:pb-16">
       <div className="mx-auto w-full max-w-4xl px-5 sm:px-8 pt-8 sm:pt-10 space-y-6">
         {/* ===================================================================
-            PROMINENT LARGE HEADER TITLE: "Saved"
+            PROMINENT LARGE HEADER TITLE: "Saved" (No Add Save button)
             =================================================================== */}
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <h1
-              className={`text-3xl sm:text-4xl font-serif font-bold tracking-tight ${
-                isLight ? 'text-stone-900' : 'text-white'
-              }`}
-            >
-              Saved
-            </h1>
-            <p className="text-xs sm:text-sm text-stone-500 mt-1">
-              Your saved scripture connections, verse contexts, Bible verses, and personal insights.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setIsNewCollectionOpen(true)}
-              className={`rounded-xl border px-3.5 py-2 text-xs font-bold flex items-center gap-1.5 transition ${
-                isLight
-                  ? 'bg-white hover:bg-stone-100 border-stone-200 text-stone-700'
-                  : 'bg-[#181818] hover:bg-zinc-800 border-zinc-800 text-zinc-200'
-              }`}
-            >
-              <FolderPlus className="h-3.5 w-3.5" />
-              <span>New Collection</span>
-            </button>
-
-            <button
-              onClick={() => {
-                setAddType(activeTab);
-                setIsAddModalOpen(true);
-              }}
-              className={`rounded-xl px-4 py-2 text-xs font-bold flex items-center gap-1.5 transition shadow-xs ${
-                isLight
-                  ? 'bg-amber-700 hover:bg-amber-800 text-white'
-                  : 'bg-amber-500 hover:bg-amber-400 text-zinc-950'
-              }`}
-            >
-              <Plus className="h-4 w-4" />
-              <span>Add Save</span>
-            </button>
-          </div>
-        </div>
-
-        {/* ===================================================================
-            SEARCH BAR ABOVE THE TABS
-            =================================================================== */}
-        <div
-          className={`rounded-2xl border px-4 py-3 flex items-center gap-3 shadow-2xs ${
-            isLight
-              ? 'bg-white border-stone-200/90 text-stone-900'
-              : 'bg-[#161616] border-zinc-800 text-zinc-100'
-          }`}
-        >
-          <Search className="h-4 w-4 text-stone-400 shrink-0" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search saved connections, verse contexts, Bible verses, or your personal notes..."
-            className="w-full bg-transparent text-xs sm:text-sm focus:outline-none"
-          />
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery('')}
-              className="rounded-lg p-1 text-stone-400 hover:text-stone-700"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          )}
-        </div>
-
-        {/* ===================================================================
-            TABS (Connections | Context | Bible Verses) + COLLECTION FILTER
-            =================================================================== */}
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          {/* 3 Tabs */}
-          <div
-            className={`inline-flex items-center rounded-2xl border p-1 gap-1 ${
-              isLight
-                ? 'bg-stone-100/90 border-stone-200/90'
-                : 'bg-[#161616] border-zinc-800'
+        <div>
+          <h1
+            className={`text-3xl sm:text-4xl font-serif font-bold tracking-tight ${
+              isLight ? 'text-stone-900' : 'text-white'
             }`}
           >
-            <button
-              onClick={() => setActiveTab('connections')}
-              className={`rounded-xl px-3.5 py-2 text-xs font-bold flex items-center gap-1.5 transition ${
-                activeTab === 'connections'
-                  ? isLight
-                    ? 'bg-white text-stone-900 shadow-xs'
-                    : 'bg-zinc-800 text-white'
-                  : isLight
-                  ? 'text-stone-600 hover:text-stone-900'
-                  : 'text-zinc-400 hover:text-zinc-200'
-              }`}
-            >
-              <Link2 className="h-3.5 w-3.5" />
-              <span>Connections ({filteredConnections.length})</span>
-            </button>
+            Saved
+          </h1>
+          <p className="text-xs sm:text-sm text-stone-500 mt-1">
+            Your saved scripture connections, verse contexts, Bible verses, and personal insights.
+          </p>
+        </div>
 
-            <button
-              onClick={() => setActiveTab('context')}
-              className={`rounded-xl px-3.5 py-2 text-xs font-bold flex items-center gap-1.5 transition ${
-                activeTab === 'context'
-                  ? isLight
-                    ? 'bg-white text-stone-900 shadow-xs'
-                    : 'bg-zinc-800 text-white'
-                  : isLight
-                  ? 'text-stone-600 hover:text-stone-900'
-                  : 'text-zinc-400 hover:text-zinc-200'
-              }`}
-            >
-              <Compass className="h-3.5 w-3.5" />
-              <span>Context ({filteredContexts.length})</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('verses')}
-              className={`rounded-xl px-3.5 py-2 text-xs font-bold flex items-center gap-1.5 transition ${
-                activeTab === 'verses'
-                  ? isLight
-                    ? 'bg-white text-stone-900 shadow-xs'
-                    : 'bg-zinc-800 text-white'
-                  : isLight
-                  ? 'text-stone-600 hover:text-stone-900'
-                  : 'text-zinc-400 hover:text-zinc-200'
-              }`}
-            >
-              <Bookmark className="h-3.5 w-3.5" />
-              <span>Bible Verses ({filteredVerses.length})</span>
-            </button>
+        {/* ===================================================================
+            SEARCH & COLLECTION CONTROLS (Side-by-Side on the same row)
+            =================================================================== */}
+        <div className="flex items-center gap-2 w-full">
+          {/* Search Input on the Left */}
+          <div
+            className={`flex-1 min-w-0 rounded-2xl border px-3.5 py-2.5 flex items-center gap-2.5 shadow-2xs ${
+              isLight
+                ? 'bg-white border-stone-200/90 text-stone-900'
+                : 'bg-[#161616] border-zinc-800 text-zinc-100'
+            }`}
+          >
+            <Search className="h-4 w-4 text-stone-400 shrink-0" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search saves..."
+              className="w-full bg-transparent text-xs sm:text-sm focus:outline-none"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="rounded-lg p-0.5 text-stone-400 hover:text-stone-700 shrink-0"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            )}
           </div>
 
-          {/* Collection Filter Close to Tabs */}
-          <div className="flex items-center gap-2">
-            <Folder
-              className={`h-4 w-4 ${isLight ? 'text-amber-700' : 'text-amber-400'}`}
-            />
-            <span className="text-xs font-semibold text-stone-500">Collection:</span>
+          {/* Collection Selector & Add Collection on the Right */}
+          <div className="flex items-center gap-1.5 shrink-0">
             <select
               value={selectedCollectionId}
               onChange={(e) => setSelectedCollectionId(e.target.value)}
-              className={`rounded-xl border px-3 py-2 text-xs font-bold ${
+              className={`rounded-2xl border px-3 py-2.5 text-xs font-semibold max-w-[130px] sm:max-w-[190px] truncate ${
                 isLight
-                  ? 'bg-white border-stone-200 text-stone-800'
+                  ? 'bg-white border-stone-200/90 text-stone-800'
                   : 'bg-[#161616] border-zinc-800 text-zinc-100'
               }`}
             >
@@ -401,6 +213,80 @@ export default function NotesPage() {
                 </option>
               ))}
             </select>
+
+            <button
+              onClick={() => setIsNewCollectionOpen(true)}
+              className={`rounded-2xl border p-2.5 text-xs font-bold transition shrink-0 ${
+                isLight
+                  ? 'bg-white hover:bg-stone-50 border-stone-200/90 text-stone-700'
+                  : 'bg-[#161616] hover:bg-zinc-800 border-zinc-800 text-zinc-200'
+              }`}
+              title="Add Collection"
+              aria-label="Add Collection"
+            >
+              <FolderPlus className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+
+        {/* ===================================================================
+            TABS (Connections | Context | Bible Verses — No Numerical Counters)
+            =================================================================== */}
+        <div className="overflow-x-auto no-scrollbar">
+          <div
+            className={`inline-flex items-center rounded-2xl border p-1 gap-1 ${
+              isLight
+                ? 'bg-stone-100/90 border-stone-200/90'
+                : 'bg-[#161616] border-zinc-800'
+            }`}
+          >
+            <button
+              onClick={() => setActiveTab('connections')}
+              className={`rounded-xl px-3.5 py-1.5 text-xs font-bold whitespace-nowrap flex items-center gap-1.5 transition ${
+                activeTab === 'connections'
+                  ? isLight
+                    ? 'bg-white text-stone-900 shadow-xs'
+                    : 'bg-zinc-800 text-white'
+                  : isLight
+                  ? 'text-stone-600 hover:text-stone-900'
+                  : 'text-zinc-400 hover:text-zinc-200'
+              }`}
+            >
+              <Link2 className="h-3.5 w-3.5" />
+              <span>Connections</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('context')}
+              className={`rounded-xl px-3.5 py-1.5 text-xs font-bold whitespace-nowrap flex items-center gap-1.5 transition ${
+                activeTab === 'context'
+                  ? isLight
+                    ? 'bg-white text-stone-900 shadow-xs'
+                    : 'bg-zinc-800 text-white'
+                  : isLight
+                  ? 'text-stone-600 hover:text-stone-900'
+                  : 'text-zinc-400 hover:text-zinc-200'
+              }`}
+            >
+              <Compass className="h-3.5 w-3.5" />
+              <span>Context</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('verses')}
+              className={`rounded-xl px-3.5 py-1.5 text-xs font-bold whitespace-nowrap flex items-center gap-1.5 transition ${
+                activeTab === 'verses'
+                  ? isLight
+                    ? 'bg-white text-stone-900 shadow-xs'
+                    : 'bg-zinc-800 text-white'
+                  : isLight
+                  ? 'text-stone-600 hover:text-stone-900'
+                  : 'text-zinc-400 hover:text-zinc-200'
+              }`}
+            >
+              <Bookmark className="h-3.5 w-3.5" />
+              <span>Bible Verses</span>
+            </button>
           </div>
         </div>
 
@@ -434,75 +320,50 @@ export default function NotesPage() {
                 return (
                   <div
                     key={conn.id}
-                    className={`rounded-2xl border p-5 space-y-4 transition ${
+                    className={`rounded-2xl border p-4 sm:p-5 space-y-3 transition ${
                       isLight
                         ? 'bg-white border-stone-200/90 text-stone-900 shadow-2xs'
                         : 'bg-[#161616] border-zinc-800 text-zinc-100'
                     }`}
                   >
-                    <div className="flex flex-wrap items-start justify-between gap-3">
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span
-                            className={`rounded-lg px-2.5 py-0.5 text-xs font-bold ${
-                              isLight
-                                ? 'bg-amber-100 text-amber-900'
-                                : 'bg-amber-500/20 text-amber-300'
-                            }`}
-                          >
-                            {conn.primaryRef} ↔ {conn.connectedRef}
+                    {/* Top Row: Verse connection, concise category, community icon on left; Share, Edit, Delete on right */}
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2 flex-wrap min-w-0">
+                        <span
+                          className={`text-xs sm:text-sm font-bold tracking-tight ${
+                            isLight ? 'text-amber-900' : 'text-amber-400'
+                          }`}
+                        >
+                          {conn.primaryRef} ↔ {conn.connectedRef}
+                        </span>
+                        <span className="text-[11px] text-stone-500 dark:text-zinc-400 font-medium truncate">
+                          • {conn.category || 'Connected'}
+                        </span>
+                        {conn.sharedToCommunity && (
+                          <span title="Shared to Community" className="text-emerald-600 dark:text-emerald-400">
+                            <Globe className="h-3.5 w-3.5" />
                           </span>
-                          <span
-                            className={`rounded-lg border px-2.5 py-0.5 text-[11px] font-semibold ${
-                              isLight
-                                ? 'bg-stone-50 border-stone-200 text-stone-700'
-                                : 'bg-zinc-900 border-zinc-700 text-zinc-300'
-                            }`}
-                          >
-                            Collection: {getCollectionName(conn.collectionId)}
-                          </span>
-                          <span
-                            className={`rounded-lg px-2 py-0.5 text-[11px] font-semibold flex items-center gap-1 ${
-                              conn.sharedToCommunity
-                                ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300'
-                                : 'bg-stone-200/70 text-stone-600 dark:bg-zinc-800 dark:text-zinc-400'
-                            }`}
-                          >
-                            {conn.sharedToCommunity ? (
-                              <>
-                                <Globe className="h-3 w-3" />
-                                <span>Shared to Community</span>
-                              </>
-                            ) : (
-                              <>
-                                <Lock className="h-3 w-3" />
-                                <span>Personal Save</span>
-                              </>
-                            )}
-                          </span>
-                        </div>
-                        <h3 className="text-base font-bold pt-0.5">{conn.title}</h3>
+                        )}
                       </div>
 
-                      {/* Actions */}
-                      <div className="flex items-center gap-1.5">
+                      <div className="flex items-center gap-1 shrink-0">
                         <button
                           onClick={() =>
                             updateSavedConnection(conn.id, {
                               sharedToCommunity: !conn.sharedToCommunity,
                             })
                           }
-                          className={`rounded-xl border px-3 py-1.5 text-xs font-semibold flex items-center gap-1.5 transition ${
+                          className={`rounded-lg p-1.5 border transition ${
                             conn.sharedToCommunity
                               ? 'bg-emerald-600 border-emerald-600 text-white'
                               : isLight
-                              ? 'bg-stone-50 hover:bg-stone-100 border-stone-200 text-stone-700'
-                              : 'bg-zinc-800 border-zinc-700 text-zinc-200'
+                              ? 'bg-stone-50 hover:bg-stone-100 border-stone-200 text-stone-600'
+                              : 'bg-zinc-800 border-zinc-700 text-zinc-300'
                           }`}
-                          title="Toggle Share to Community"
+                          title={conn.sharedToCommunity ? 'Shared to Community' : 'Share to Community'}
+                          aria-label="Toggle Share to Community"
                         >
                           <Share2 className="h-3.5 w-3.5" />
-                          <span>{conn.sharedToCommunity ? 'Shared' : 'Share to Community'}</span>
                         </button>
 
                         <button
@@ -513,78 +374,60 @@ export default function NotesPage() {
                               conn.collectionId
                             )
                           }
-                          className={`rounded-xl border p-2 transition ${
+                          className={`rounded-lg p-1.5 border transition ${
                             isLight
                               ? 'bg-stone-50 hover:bg-stone-100 border-stone-200 text-stone-600'
                               : 'bg-zinc-800 border-zinc-700 text-zinc-300'
                           }`}
                           title="Edit Personal Notes & Collection"
+                          aria-label="Edit Notes"
                         >
                           <Edit3 className="h-3.5 w-3.5" />
                         </button>
 
                         <button
                           onClick={() => deleteSavedConnection(conn.id)}
-                          className={`rounded-xl border p-2 transition ${
+                          className={`rounded-lg p-1.5 border transition ${
                             isLight
                               ? 'bg-stone-50 hover:bg-rose-50 border-stone-200 text-stone-500 hover:text-rose-600'
                               : 'bg-zinc-800 border-zinc-700 text-zinc-400 hover:text-rose-400'
                           }`}
                           title="Delete"
+                          aria-label="Delete"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                         </button>
                       </div>
                     </div>
 
-                    {/* Connected Scriptures Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {/* Connected Scriptures Grid (No redundant Open button!) */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
                       <div
-                        className={`rounded-xl border p-3.5 space-y-1.5 ${
+                        className={`rounded-xl border p-3 space-y-1 ${
                           isLight
                             ? 'bg-[#FBF9F5] border-stone-200/80'
                             : 'bg-[#121212] border-zinc-800'
                         }`}
                       >
-                        <div className="flex items-center justify-between text-xs font-bold">
-                          <span className={isLight ? 'text-amber-800' : 'text-amber-400'}>
-                            {conn.primaryRef} ({conn.translation})
-                          </span>
-                          <button
-                            onClick={() => navigateToReferenceString(conn.primaryRef, false)}
-                            className="text-[11px] text-stone-500 hover:underline flex items-center gap-1"
-                          >
-                            <span>Open</span>
-                            <ExternalLink className="h-3 w-3" />
-                          </button>
-                        </div>
-                        <p className="font-serif text-sm leading-relaxed">
+                        <span className={`text-xs font-bold block ${isLight ? 'text-amber-800' : 'text-amber-400'}`}>
+                          {conn.primaryRef} ({conn.translation})
+                        </span>
+                        <p className="font-serif text-xs sm:text-sm leading-relaxed text-stone-800 dark:text-zinc-200">
                           “{conn.primaryText}”
                         </p>
                       </div>
 
                       <div
-                        className={`rounded-xl border p-3.5 space-y-1.5 ${
+                        className={`rounded-xl border p-3 space-y-1 ${
                           isLight
                             ? 'bg-amber-50/40 border-amber-200/80'
                             : 'bg-[#1c1a15] border-amber-500/30'
                         }`}
                       >
-                        <div className="flex items-center justify-between text-xs font-bold">
-                          <span className={isLight ? 'text-amber-800' : 'text-amber-400'}>
-                            {conn.connectedRef} ({conn.translation})
-                          </span>
-                          <button
-                            onClick={() =>
-                              navigateToReferenceString(conn.connectedRef, false)
-                            }
-                            className="text-[11px] text-stone-500 hover:underline flex items-center gap-1"
-                          >
-                            <span>Open</span>
-                            <ExternalLink className="h-3 w-3" />
-                          </button>
-                        </div>
-                        <p className="font-serif text-sm leading-relaxed">
+                        <span className={`text-xs font-bold block ${isLight ? 'text-amber-800' : 'text-amber-400'}`}>
+                          {conn.connectedRef} ({conn.translation})
+                        </span>
+                        <p className="font-serif text-xs sm:text-sm leading-relaxed text-stone-800 dark:text-zinc-200">
                           “{conn.connectedText}”
                         </p>
                       </div>
@@ -724,107 +567,76 @@ export default function NotesPage() {
                 return (
                   <div
                     key={ctx.id}
-                    className={`rounded-2xl border p-5 space-y-4 transition ${
+                    className={`rounded-2xl border p-4 sm:p-5 space-y-3 transition ${
                       isLight
                         ? 'bg-white border-stone-200/90 text-stone-900 shadow-2xs'
                         : 'bg-[#161616] border-zinc-800 text-zinc-100'
                     }`}
                   >
-                    <div className="flex flex-wrap items-start justify-between gap-3">
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span
-                            className={`rounded-lg px-2.5 py-0.5 text-xs font-bold ${
-                              isLight
-                                ? 'bg-amber-100 text-amber-900'
-                                : 'bg-amber-500/20 text-amber-300'
-                            }`}
-                          >
-                            {ctx.verseRef} ({ctx.translation})
-                          </span>
-                          <span
-                            className={`rounded-lg border px-2.5 py-0.5 text-[11px] font-semibold ${
-                              isLight
-                                ? 'bg-stone-50 border-stone-200 text-stone-700'
-                                : 'bg-zinc-900 border-zinc-700 text-zinc-300'
-                            }`}
-                          >
-                            Collection: {getCollectionName(ctx.collectionId)}
-                          </span>
-                          <span
-                            className={`rounded-lg px-2 py-0.5 text-[11px] font-semibold flex items-center gap-1 ${
-                              ctx.sharedToCommunity
-                                ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300'
-                                : 'bg-stone-200/70 text-stone-600 dark:bg-zinc-800 dark:text-zinc-400'
-                            }`}
-                          >
-                            {ctx.sharedToCommunity ? (
-                              <>
-                                <Globe className="h-3 w-3" />
-                                <span>Shared to Community</span>
-                              </>
-                            ) : (
-                              <>
-                                <Lock className="h-3 w-3" />
-                                <span>Personal Save</span>
-                              </>
-                            )}
-                          </span>
-                        </div>
-                        <h3 className="text-base font-bold pt-0.5">{ctx.mainTheme}</h3>
-                      </div>
-
-                      <div className="flex items-center gap-1.5">
-                        <button
-                          onClick={() => navigateToReferenceString(ctx.verseRef, false)}
-                          className={`rounded-xl border px-3 py-1.5 text-xs font-semibold flex items-center gap-1 transition ${
-                            isLight
-                              ? 'bg-stone-50 hover:bg-stone-100 border-stone-200 text-stone-700'
-                              : 'bg-zinc-800 border-zinc-700 text-zinc-200'
+                    {/* Top Row: Verse ref, main theme, community icon on left; Share, Edit, Delete on right */}
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2 flex-wrap min-w-0">
+                        <span
+                          className={`text-xs sm:text-sm font-bold tracking-tight ${
+                            isLight ? 'text-amber-900' : 'text-amber-400'
                           }`}
                         >
-                          <BookOpen className="h-3.5 w-3.5" />
-                          <span>Open</span>
-                        </button>
+                          {ctx.verseRef} ({ctx.translation})
+                        </span>
+                        <span className="text-[11px] text-stone-500 dark:text-zinc-400 font-medium truncate">
+                          • {ctx.mainTheme}
+                        </span>
+                        {ctx.sharedToCommunity && (
+                          <span title="Shared to Community" className="text-emerald-600 dark:text-emerald-400">
+                            <Globe className="h-3.5 w-3.5" />
+                          </span>
+                        )}
+                      </div>
 
+                      <div className="flex items-center gap-1 shrink-0">
                         <button
                           onClick={() =>
                             updateSavedContext(ctx.id, {
                               sharedToCommunity: !ctx.sharedToCommunity,
                             })
                           }
-                          className={`rounded-xl border px-3 py-1.5 text-xs font-semibold flex items-center gap-1.5 transition ${
+                          className={`rounded-lg p-1.5 border transition ${
                             ctx.sharedToCommunity
                               ? 'bg-emerald-600 border-emerald-600 text-white'
                               : isLight
-                              ? 'bg-stone-50 hover:bg-stone-100 border-stone-200 text-stone-700'
-                              : 'bg-zinc-800 border-zinc-700 text-zinc-200'
+                              ? 'bg-stone-50 hover:bg-stone-100 border-stone-200 text-stone-600'
+                              : 'bg-zinc-800 border-zinc-700 text-zinc-300'
                           }`}
+                          title={ctx.sharedToCommunity ? 'Shared to Community' : 'Share to Community'}
+                          aria-label="Toggle Share to Community"
                         >
                           <Share2 className="h-3.5 w-3.5" />
-                          <span>{ctx.sharedToCommunity ? 'Shared' : 'Share to Community'}</span>
                         </button>
 
                         <button
                           onClick={() =>
                             handleStartEdit(ctx.id, ctx.personalNotes, ctx.collectionId)
                           }
-                          className={`rounded-xl border p-2 transition ${
+                          className={`rounded-lg p-1.5 border transition ${
                             isLight
                               ? 'bg-stone-50 hover:bg-stone-100 border-stone-200 text-stone-600'
                               : 'bg-zinc-800 border-zinc-700 text-zinc-300'
                           }`}
+                          title="Edit Personal Notes"
+                          aria-label="Edit Notes"
                         >
                           <Edit3 className="h-3.5 w-3.5" />
                         </button>
 
                         <button
                           onClick={() => deleteSavedContext(ctx.id)}
-                          className={`rounded-xl border p-2 transition ${
+                          className={`rounded-lg p-1.5 border transition ${
                             isLight
                               ? 'bg-stone-50 hover:bg-rose-50 border-stone-200 text-stone-500 hover:text-rose-600'
                               : 'bg-zinc-800 border-zinc-700 text-zinc-400 hover:text-rose-400'
                           }`}
+                          title="Delete"
+                          aria-label="Delete"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                         </button>
@@ -991,10 +803,10 @@ export default function NotesPage() {
                         : 'bg-[#161616] border-zinc-800 text-zinc-100'
                     }`}
                   >
-                    <div className="flex flex-wrap items-start justify-between gap-3">
-                      <div className="flex items-center gap-2 flex-wrap">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-2 min-w-0">
                         <span
-                          className={`rounded-lg px-2.5 py-1 text-xs font-bold ${
+                          className={`shrink-0 rounded-md px-2 py-0.5 text-xs font-semibold ${
                             isLight
                               ? 'bg-amber-100 text-amber-900'
                               : 'bg-amber-500/20 text-amber-300'
@@ -1002,67 +814,34 @@ export default function NotesPage() {
                         >
                           {vItem.verseRef} ({vItem.translation})
                         </span>
-                        <span
-                          className={`rounded-lg border px-2.5 py-0.5 text-[11px] font-semibold ${
-                            isLight
-                              ? 'bg-stone-50 border-stone-200 text-stone-700'
-                              : 'bg-zinc-900 border-zinc-700 text-zinc-300'
-                          }`}
-                        >
-                          Collection: {getCollectionName(vItem.collectionId)}
+                        <span className="text-[11px] text-stone-500 dark:text-zinc-400 font-medium truncate">
+                          • {getCollectionName(vItem.collectionId)}
                         </span>
-                        <span
-                          className={`rounded-lg px-2 py-0.5 text-[11px] font-semibold flex items-center gap-1 ${
-                            vItem.sharedToCommunity
-                              ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300'
-                              : 'bg-stone-200/70 text-stone-600 dark:bg-zinc-800 dark:text-zinc-400'
-                          }`}
-                        >
-                          {vItem.sharedToCommunity ? (
-                            <>
-                              <Globe className="h-3 w-3" />
-                              <span>Shared to Community</span>
-                            </>
-                          ) : (
-                            <>
-                              <Lock className="h-3 w-3" />
-                              <span>Personal Save</span>
-                            </>
-                          )}
-                        </span>
+                        {vItem.sharedToCommunity && (
+                          <span title="Shared to Community" className="text-emerald-600 dark:text-emerald-400">
+                            <Globe className="h-3.5 w-3.5" />
+                          </span>
+                        )}
                       </div>
 
-                      <div className="flex items-center gap-1.5">
-                        <button
-                          onClick={() => navigateToReferenceString(vItem.verseRef, false)}
-                          className={`rounded-xl border px-3 py-1.5 text-xs font-semibold flex items-center gap-1 transition ${
-                            isLight
-                              ? 'bg-stone-50 hover:bg-stone-100 border-stone-200 text-stone-700'
-                              : 'bg-zinc-800 border-zinc-700 text-zinc-200'
-                          }`}
-                        >
-                          <BookOpen className="h-3.5 w-3.5" />
-                          <span>Open</span>
-                        </button>
-
+                      <div className="flex items-center gap-1 shrink-0">
                         <button
                           onClick={() =>
                             updateSavedVerse(vItem.id, {
                               sharedToCommunity: !vItem.sharedToCommunity,
                             })
                           }
-                          className={`rounded-xl border px-3 py-1.5 text-xs font-semibold flex items-center gap-1.5 transition ${
+                          className={`rounded-lg p-1.5 border transition ${
                             vItem.sharedToCommunity
                               ? 'bg-emerald-600 border-emerald-600 text-white'
                               : isLight
-                              ? 'bg-stone-50 hover:bg-stone-100 border-stone-200 text-stone-700'
-                              : 'bg-zinc-800 border-zinc-700 text-zinc-200'
+                              ? 'bg-stone-50 hover:bg-stone-100 border-stone-200 text-stone-600'
+                              : 'bg-zinc-800 border-zinc-700 text-zinc-300'
                           }`}
+                          title={vItem.sharedToCommunity ? 'Shared to Community' : 'Share to Community'}
+                          aria-label="Toggle Share to Community"
                         >
                           <Share2 className="h-3.5 w-3.5" />
-                          <span>
-                            {vItem.sharedToCommunity ? 'Shared' : 'Share to Community'}
-                          </span>
                         </button>
 
                         <button
@@ -1073,22 +852,26 @@ export default function NotesPage() {
                               vItem.collectionId
                             )
                           }
-                          className={`rounded-xl border p-2 transition ${
+                          className={`rounded-lg p-1.5 border transition ${
                             isLight
                               ? 'bg-stone-50 hover:bg-stone-100 border-stone-200 text-stone-600'
                               : 'bg-zinc-800 border-zinc-700 text-zinc-300'
                           }`}
+                          title="Edit Personal Notes & Collection"
+                          aria-label="Edit Notes"
                         >
                           <Edit3 className="h-3.5 w-3.5" />
                         </button>
 
                         <button
                           onClick={() => deleteSavedVerse(vItem.id)}
-                          className={`rounded-xl border p-2 transition ${
+                          className={`rounded-lg p-1.5 border transition ${
                             isLight
                               ? 'bg-stone-50 hover:bg-rose-50 border-stone-200 text-stone-500 hover:text-rose-600'
                               : 'bg-zinc-800 border-zinc-700 text-zinc-400 hover:text-rose-400'
                           }`}
+                          title="Delete"
+                          aria-label="Delete"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                         </button>
@@ -1214,185 +997,7 @@ export default function NotesPage() {
         )}
       </div>
 
-      {/* =====================================================================
-          MODAL: ADD NEW SAVED CONNECTION / CONTEXT / BIBLE VERSE
-          ===================================================================== */}
-      {isAddModalOpen && (
-        <div
-          onClick={() => setIsAddModalOpen(false)}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 overflow-y-auto"
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            className={`w-full max-w-lg rounded-2xl border p-6 shadow-2xl space-y-4 my-auto ${
-              isLight
-                ? 'bg-white border-stone-200 text-stone-900'
-                : 'bg-[#181818] border-zinc-800 text-zinc-100'
-            }`}
-          >
-            <div className="flex items-center justify-between">
-              <h2 className="text-base font-bold">Add to Saved</h2>
-              <button
-                onClick={() => setIsAddModalOpen(false)}
-                className="rounded-lg p-1 text-stone-400 hover:text-stone-700"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
 
-            <div className="grid grid-cols-3 gap-2">
-              {(['connections', 'context', 'verses'] as const).map((t) => (
-                <button
-                  key={t}
-                  type="button"
-                  onClick={() => setAddType(t)}
-                  className={`rounded-xl py-2 text-xs font-bold border capitalize transition ${
-                    addType === t
-                      ? isLight
-                        ? 'bg-amber-700 border-amber-700 text-white'
-                        : 'bg-amber-500 border-amber-500 text-zinc-950'
-                      : isLight
-                      ? 'bg-stone-50 border-stone-200 text-stone-700'
-                      : 'bg-zinc-900 border-zinc-700 text-zinc-300'
-                  }`}
-                >
-                  {t === 'verses' ? 'Bible Verse' : t}
-                </button>
-              ))}
-            </div>
-
-            <form onSubmit={handleCreateNewSavedItem} className="space-y-3.5 text-xs">
-              <div>
-                <label className="font-bold text-stone-500 block mb-1">
-                  {addType === 'connections' ? 'Primary Scripture Reference' : 'Scripture Reference'}
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={primaryRefInput}
-                  onChange={(e) => setPrimaryRefInput(e.target.value)}
-                  placeholder="e.g. Matthew 1:23 or Deuteronomy 32:6"
-                  className={`w-full rounded-xl border px-3 py-2 ${
-                    isLight
-                      ? 'bg-stone-50 border-stone-300 text-stone-900'
-                      : 'bg-zinc-900 border-zinc-700 text-white'
-                  }`}
-                />
-              </div>
-
-              {addType === 'connections' && (
-                <>
-                  <div>
-                    <label className="font-bold text-stone-500 block mb-1">
-                      Connected Scripture Reference
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={connectedRefInput}
-                      onChange={(e) => setConnectedRefInput(e.target.value)}
-                      placeholder="e.g. Isaiah 7:14"
-                      className={`w-full rounded-xl border px-3 py-2 ${
-                        isLight
-                          ? 'bg-stone-50 border-stone-300 text-stone-900'
-                          : 'bg-zinc-900 border-zinc-700 text-white'
-                      }`}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="font-bold text-stone-500 block mb-1">
-                      Connection Type
-                    </label>
-                    <select
-                      value={newCategory}
-                      onChange={(e) => setNewCategory(e.target.value as ReferenceCategory)}
-                      className={`w-full rounded-xl border px-3 py-2 ${
-                        isLight
-                          ? 'bg-stone-50 border-stone-300 text-stone-900'
-                          : 'bg-zinc-900 border-zinc-700 text-white'
-                      }`}
-                    >
-                      {REFERENCE_CATEGORIES.map((cat) => (
-                        <option key={cat} value={cat}>
-                          {cat}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </>
-              )}
-
-              <div>
-                <label className="font-bold text-stone-500 block mb-1">Collection</label>
-                <select
-                  value={newCollectionId}
-                  onChange={(e) => setNewCollectionId(e.target.value)}
-                  className={`w-full rounded-xl border px-3 py-2 ${
-                    isLight
-                      ? 'bg-stone-50 border-stone-300 text-stone-900'
-                      : 'bg-zinc-900 border-zinc-700 text-white'
-                  }`}
-                >
-                  {collections.map((col) => (
-                    <option key={col.id} value={col.id}>
-                      {col.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="font-bold text-stone-500 block mb-1">
-                  Personal Notes & Insights
-                </label>
-                <textarea
-                  rows={3}
-                  value={newPersonalNotes}
-                  onChange={(e) => setNewPersonalNotes(e.target.value)}
-                  placeholder="Write your personal reflections so you or others in the community can read your perspective..."
-                  className={`w-full rounded-xl border p-3 ${
-                    isLight
-                      ? 'bg-stone-50 border-stone-300 text-stone-900'
-                      : 'bg-zinc-900 border-zinc-700 text-white'
-                  }`}
-                />
-              </div>
-
-              <label className="flex items-center gap-2 font-semibold cursor-pointer pt-1">
-                <input
-                  type="checkbox"
-                  checked={newShareToCommunity}
-                  onChange={(e) => setNewShareToCommunity(e.target.checked)}
-                  className="h-4 w-4 accent-amber-700 rounded"
-                />
-                <span>Also share this save (with my notes) to the Community</span>
-              </label>
-
-              <div className="flex justify-end gap-2 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setIsAddModalOpen(false)}
-                  className="rounded-xl border px-4 py-2 font-semibold text-stone-500"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSavingNew}
-                  className={`rounded-xl px-5 py-2 font-bold ${
-                    isLight
-                      ? 'bg-amber-700 hover:bg-amber-800 text-white'
-                      : 'bg-amber-500 text-zinc-950'
-                  }`}
-                >
-                  {isSavingNew ? 'Saving...' : 'Save Item'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
 
       {/* =====================================================================
           MODAL: CREATE NEW COLLECTION

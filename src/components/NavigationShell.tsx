@@ -218,19 +218,6 @@ export default function NavigationShell({ children }: { children: React.ReactNod
                   />
                   <span>Saved</span>
                 </span>
-                <span
-                  className={`rounded-full px-2 py-0.5 text-[11px] font-bold ${
-                    activePage === 'saved' || activePage === 'notes'
-                      ? isLight
-                        ? 'bg-amber-700 text-white'
-                        : 'bg-amber-500 text-zinc-950'
-                      : isLight
-                      ? 'bg-stone-200 text-stone-700'
-                      : 'bg-zinc-800 text-zinc-300'
-                  }`}
-                >
-                  {totalSavedCount}
-                </span>
               </button>
 
               <button
@@ -256,19 +243,6 @@ export default function NavigationShell({ children }: { children: React.ReactNod
                     }`}
                   />
                   <span>Community</span>
-                </span>
-                <span
-                  className={`rounded-full px-2 py-0.5 text-[11px] font-bold ${
-                    activePage === 'community'
-                      ? isLight
-                        ? 'bg-amber-700 text-white'
-                        : 'bg-amber-500 text-zinc-950'
-                      : isLight
-                      ? 'bg-stone-200 text-stone-700'
-                      : 'bg-zinc-800 text-zinc-300'
-                  }`}
-                >
-                  {totalCommunityCount}
                 </span>
               </button>
             </nav>
@@ -429,15 +403,15 @@ export default function NavigationShell({ children }: { children: React.ReactNod
           MOBILE & TABLET TOP HEADER (< lg)
           ===================================================================== */}
       <header
-        className={`lg:hidden sticky top-0 z-30 h-13 backdrop-blur-md px-4 flex items-center justify-between shadow-xs ${
+        className={`lg:hidden sticky top-0 z-30 h-12 px-4 flex items-center justify-between shadow-xs ${
           isLight
-            ? 'bg-[#FBF9F5]/95 text-stone-900'
-            : 'bg-[#121212]/95 text-zinc-100'
+            ? 'bg-[#FBF9F5] text-stone-900'
+            : 'bg-[#0F0F0F] text-zinc-100'
         }`}
       >
         <button
           onClick={() => setActivePage('bible')}
-          className="flex items-center gap-2 text-left py-2.5"
+          className="flex items-center gap-2 text-left py-2"
         >
           <div
             className={`h-7 w-7 rounded-lg flex items-center justify-center ${
@@ -491,6 +465,7 @@ export default function NavigationShell({ children }: { children: React.ReactNod
 
       {/* =====================================================================
           MOBILE BOTTOM NAVBAR (< lg) — Strictly Pinned to Bottom with 3 Items
+          (No Numerical Indicators & Single-Line Labels)
           ===================================================================== */}
       <nav
         aria-label="Mobile Bottom Navigation"
@@ -518,7 +493,7 @@ export default function NavigationShell({ children }: { children: React.ReactNod
             <BookOpen className="h-4 w-4" />
           </div>
           <span
-            className={`text-[11px] font-bold tracking-tight ${
+            className={`text-[11px] font-bold tracking-tight whitespace-nowrap ${
               activePage === 'bible'
                 ? isLight
                   ? 'text-amber-800'
@@ -537,7 +512,7 @@ export default function NavigationShell({ children }: { children: React.ReactNod
           className="flex flex-col items-center justify-center gap-1 group"
         >
           <div
-            className={`relative rounded-full px-4 py-1 flex items-center justify-center transition ${
+            className={`rounded-full px-4 py-1 flex items-center justify-center transition ${
               activePage === 'saved' || activePage === 'notes'
                 ? isLight
                   ? 'bg-amber-700/15 text-amber-800'
@@ -548,22 +523,9 @@ export default function NavigationShell({ children }: { children: React.ReactNod
             }`}
           >
             <Bookmark className="h-4 w-4" />
-            <span
-              className={`ml-1 rounded-full px-1.5 text-[10px] font-bold ${
-                activePage === 'saved' || activePage === 'notes'
-                  ? isLight
-                    ? 'bg-amber-700 text-white'
-                    : 'bg-amber-500 text-zinc-950'
-                  : isLight
-                  ? 'bg-stone-200 text-stone-700'
-                  : 'bg-zinc-800 text-zinc-300'
-              }`}
-            >
-              {totalSavedCount}
-            </span>
           </div>
           <span
-            className={`text-[11px] font-bold tracking-tight ${
+            className={`text-[11px] font-bold tracking-tight whitespace-nowrap ${
               activePage === 'saved' || activePage === 'notes'
                 ? isLight
                   ? 'text-amber-800'
@@ -582,7 +544,7 @@ export default function NavigationShell({ children }: { children: React.ReactNod
           className="flex flex-col items-center justify-center gap-1 group"
         >
           <div
-            className={`relative rounded-full px-4 py-1 flex items-center justify-center transition ${
+            className={`rounded-full px-4 py-1 flex items-center justify-center transition ${
               activePage === 'community'
                 ? isLight
                   ? 'bg-amber-700/15 text-amber-800'
@@ -593,22 +555,9 @@ export default function NavigationShell({ children }: { children: React.ReactNod
             }`}
           >
             <Users className="h-4 w-4" />
-            <span
-              className={`ml-1 rounded-full px-1.5 text-[10px] font-bold ${
-                activePage === 'community'
-                  ? isLight
-                    ? 'bg-amber-700 text-white'
-                    : 'bg-amber-500 text-zinc-950'
-                  : isLight
-                  ? 'bg-stone-200 text-stone-700'
-                  : 'bg-zinc-800 text-zinc-300'
-              }`}
-            >
-              {totalCommunityCount}
-            </span>
           </div>
           <span
-            className={`text-[11px] font-bold tracking-tight ${
+            className={`text-[11px] font-bold tracking-tight whitespace-nowrap ${
               activePage === 'community'
                 ? isLight
                   ? 'text-amber-800'
