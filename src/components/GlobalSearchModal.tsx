@@ -123,8 +123,8 @@ export default function GlobalSearchModal({
       >
         {/* Search Input Header */}
         <div
-          className={`flex items-center gap-3 px-5 py-4 border-b ${
-            isLight ? 'bg-stone-50/70 border-stone-200' : 'bg-[#181818] border-zinc-800'
+          className={`flex items-center gap-3 px-5 py-4 ${
+            isLight ? 'bg-stone-50/70' : 'bg-[#181818]'
           }`}
         >
           <Search className={`h-5 w-5 shrink-0 ${isLight ? 'text-amber-700' : 'text-amber-400'}`} />

@@ -89,11 +89,7 @@ export default function BookChapterSelectorModal({
         }`}
       >
         {/* Header */}
-        <div
-          className={`flex items-center justify-between px-5 pt-4 pb-3 border-b ${
-            isLight ? 'border-stone-200/80' : 'border-zinc-800/80'
-          }`}
-        >
+        <div className="flex items-center justify-between px-5 pt-4 pb-3">
           <div className="flex items-center gap-3">
             <button
               onClick={onClose}
@@ -157,8 +153,8 @@ export default function BookChapterSelectorModal({
 
         {/* Search & Testament Filters */}
         <div
-          className={`px-5 py-3 space-y-2.5 border-b ${
-            isLight ? 'bg-stone-50/70 border-stone-200/70' : 'bg-[#181818] border-zinc-800/70'
+          className={`px-5 py-3 space-y-2.5 ${
+            isLight ? 'bg-stone-50/70' : 'bg-[#181818]'
           }`}
         >
           <form onSubmit={handleDirectReferenceSubmit} className="relative">
@@ -256,11 +252,7 @@ export default function BookChapterSelectorModal({
             ))}
           </div>
         ) : (
-          <div
-            className={`flex-1 overflow-y-auto px-5 py-2 divide-y ${
-              isLight ? 'divide-stone-100' : 'divide-zinc-800/40'
-            }`}
-          >
+          <div className="flex-1 overflow-y-auto px-5 py-2 space-y-1">
             {filteredBooks.map((book) => {
               const isExpanded =
                 expandedBook.toLowerCase() === book.name.toLowerCase() ||

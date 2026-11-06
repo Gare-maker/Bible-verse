@@ -314,8 +314,8 @@ export default function ReferencePanelModal({
 
       {/* Header */}
       <div
-        className={`flex items-center justify-between px-4 sm:px-5 py-3 border-b ${
-          isLight ? 'border-stone-200/90 bg-[#FBF9F5]' : 'border-zinc-800 bg-[#141414]'
+        className={`flex items-center justify-between px-4 sm:px-5 py-3 ${
+          isLight ? 'bg-[#FBF9F5]' : 'bg-[#141414]'
         }`}
       >
         <div className="min-w-0">
@@ -364,8 +364,8 @@ export default function ReferencePanelModal({
 
       {/* Mode Switcher Bar: Reference | Context | Explain | Compare */}
       <div
-        className={`flex items-center justify-between gap-1.5 px-3 sm:px-4 py-2 border-b overflow-x-auto no-scrollbar ${
-          isLight ? 'bg-stone-50 border-stone-200/80' : 'bg-[#121212] border-zinc-800'
+        className={`flex items-center justify-between gap-1.5 px-3 sm:px-4 py-2 overflow-x-auto no-scrollbar ${
+          isLight ? 'bg-stone-50' : 'bg-[#121212]'
         }`}
       >
         <div className="flex items-center gap-1">
@@ -485,8 +485,8 @@ export default function ReferencePanelModal({
           </p>
           {primaryVerseObj?.footnote && (
             <div
-              className={`pt-2 border-t flex items-center gap-2 text-xs ${
-                isLight ? 'border-stone-200 text-stone-600' : 'border-zinc-800 text-zinc-300'
+              className={`pt-2 flex items-center gap-2 text-xs ${
+                isLight ? 'text-stone-600' : 'text-zinc-300'
               }`}
             >
               <span
@@ -585,10 +585,10 @@ export default function ReferencePanelModal({
                 </div>
 
                 <blockquote
-                  className={`font-serif text-sm sm:text-base leading-relaxed rounded-xl p-3.5 border-l-4 ${
+                  className={`font-serif text-sm sm:text-base leading-relaxed rounded-xl p-3.5 border ${
                     isLight
-                      ? 'bg-white text-stone-900 border-amber-700 shadow-2xs'
-                      : 'bg-[#141414] text-zinc-100 border-amber-500'
+                      ? 'bg-white text-stone-900 border-stone-200 shadow-2xs'
+                      : 'bg-[#141414] text-zinc-100 border-zinc-800'
                   }`}
                 >
                   “{connectedText}”
@@ -761,10 +761,10 @@ export default function ReferencePanelModal({
 
                     {/* Highlighted Selected Verse in Sequence */}
                     <div
-                      className={`rounded-lg p-3 border-l-4 text-xs font-serif leading-relaxed ${
+                      className={`rounded-lg p-3 border text-xs font-serif leading-relaxed ${
                         isLight
-                          ? 'bg-amber-50/80 border-amber-700 text-stone-900 font-medium'
-                          : 'bg-amber-500/15 border-amber-400 text-zinc-100 font-medium'
+                          ? 'bg-amber-50/80 border-amber-300 text-stone-900 font-medium'
+                          : 'bg-amber-500/15 border-amber-500/40 text-zinc-100 font-medium'
                       }`}
                     >
                       <span
@@ -834,10 +834,10 @@ export default function ReferencePanelModal({
                   </p>
 
                   <p
-                    className={`text-xs leading-relaxed pt-2 border-t ${
+                    className={`text-xs leading-relaxed pt-2 ${
                       isLight
-                        ? 'border-stone-200/80 text-stone-700'
-                        : 'border-zinc-800 text-zinc-300'
+                        ? 'text-stone-700'
+                        : 'text-zinc-300'
                     }`}
                   >
                     <strong>How It Leads Into {primaryRef}:</strong>{' '}
@@ -1193,7 +1193,7 @@ export default function ReferencePanelModal({
           <div className="space-y-4">
             {/* Side-by-Side Connected Scripture Comparison (if a connection exists) */}
             {activeConnection && (
-              <div className="space-y-3 pb-3 border-b border-stone-200 dark:border-zinc-800">
+              <div className="space-y-3 pb-3">
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-[11px] font-bold uppercase tracking-wider text-stone-400">
                     Compare Connected Passages
@@ -1390,8 +1390,8 @@ export default function ReferencePanelModal({
     <>
       {/* Desktop Docked Right Inspector Panel (lg and up) */}
       <aside
-        className={`hidden lg:block w-[410px] xl:w-[450px] shrink-0 border-l sticky top-0 h-screen z-20 ${
-          isLight ? 'border-stone-200/90 bg-white' : 'border-zinc-800 bg-[#161616]'
+        className={`hidden lg:block w-[410px] xl:w-[450px] shrink-0 sticky top-0 h-screen z-20 shadow-lg ${
+          isLight ? 'bg-white' : 'bg-[#161616]'
         }`}
       >
         {panelBody}
@@ -1404,7 +1404,7 @@ export default function ReferencePanelModal({
       >
         <div
           onClick={(e) => e.stopPropagation()}
-          className="w-full max-w-full max-h-[85vh] rounded-t-3xl overflow-hidden shadow-2xl border-t border-stone-200 dark:border-zinc-800 flex flex-col"
+          className="w-full max-w-full max-h-[85vh] rounded-t-3xl overflow-hidden shadow-2xl border border-stone-200 dark:border-zinc-800 flex flex-col"
         >
           {panelBody}
         </div>

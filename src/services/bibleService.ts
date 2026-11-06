@@ -465,6 +465,37 @@ export async function buildVerseContextData(
     directCrossRefs: verifiedCrossReferences,
   });
 
+  const mainTheme = sectionHeading
+    ? `${sectionHeading} (${book} ${chapter}:${verseNum})`
+    : verifiedCrossReferences.length > 0
+    ? `${verifiedCrossReferences[0].title} (${book} ${chapter}:${verseNum})`
+    : `Central Message of ${book} ${chapter}:${verseNum} — ${
+        introMeta?.theme || bookObj.category
+      }`;
+
+  const lastLeading =
+    leadingVersesInChapter.length > 0
+      ? leadingVersesInChapter[leadingVersesInChapter.length - 1]
+      : null;
+  const firstFollowing =
+    followingVersesInChapter.length > 0 ? followingVersesInChapter[0] : null;
+
+  const verseBreakdown: string[] = [
+    `What Is Being Discussed in ${book} ${chapter}:${verseNum}: "${selectedVerseText}" — ${
+      sectionHeading
+        ? `This verse is a core statement within "${sectionHeading}", addressing the reader directly with the truth of ${book} ${chapter}.`
+        : `This verse anchors the argument of ${book} ${chapter}, expressing ${
+            introMeta?.theme || `the message of ${book}`
+          }.`
+    }`,
+    lastLeading
+      ? `How the Preceding Verse Leads Here: Immediately prior in ${lastLeading.ref} ("${lastLeading.text}"), the passage establishes the premise that verse ${verseNum} directly builds upon.`
+      : `How the Preceding Chapter Leads Here: ${howPreviousChapterLeadsHere}`,
+    firstFollowing
+      ? `How It Ties Into the Whole Passage: Immediately after in ${firstFollowing.ref} ("${firstFollowing.text}"), the author continues this exact train of thought, tying verse ${verseNum} into the wider flow of ${book} ${chapter}.`
+      : `How It Ties Into the Whole Book: ${previousChapterSummary}`,
+  ];
+
   const immediateLiteraryContext =
     leadingVersesInChapter.length > 0 || followingVersesInChapter.length > 0
       ? `In ${book} ${chapter}, verse ${verseNum} is directly preceded by ${
@@ -486,6 +517,8 @@ export async function buildVerseContextData(
     translation,
     selectedVerseText,
     sectionHeading,
+    mainTheme,
+    verseBreakdown,
     verseSpecificAnalysis,
     bookAuthorAndDate,
     previousChapterRef,

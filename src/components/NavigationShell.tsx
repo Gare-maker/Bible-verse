@@ -15,6 +15,7 @@ import {
   Sun,
   Upload,
   User,
+  Users,
   X,
 } from 'lucide-react';
 import { usePlatform } from '@/context/PlatformContext';
@@ -44,6 +45,11 @@ export default function NavigationShell({ children }: { children: React.ReactNod
     preferences,
     updatePreferences,
     savedConnections,
+    savedContexts,
+    savedVerses,
+    communityConnections,
+    communityContexts,
+    communityVerses,
     personalNotes,
     exportNotebookJson,
     importNotebookJson,
@@ -62,7 +68,16 @@ export default function NavigationShell({ children }: { children: React.ReactNod
   const [isSyncingSb, setIsSyncingSb] = useState(false);
 
   const isLight = preferences.theme === 'light';
-  const totalNotesCount = savedConnections.length + personalNotes.length;
+  const totalSavedCount =
+    (savedConnections?.length || 0) +
+    (savedContexts?.length || 0) +
+    (savedVerses?.length || 0) +
+    (personalNotes?.length || 0);
+
+  const totalCommunityCount =
+    (communityConnections?.length || 0) +
+    (communityContexts?.length || 0) +
+    (communityVerses?.length || 0);
 
   const handleExportDownload = () => {
     const json = exportNotebookJson();
@@ -97,10 +112,10 @@ export default function NavigationShell({ children }: { children: React.ReactNod
           DESKTOP LEFT SIDEBAR (lg and up) — Real Native App Layout
           ===================================================================== */}
       <aside
-        className={`hidden lg:flex lg:w-64 xl:w-68 shrink-0 flex-col justify-between border-r select-none sticky top-0 h-screen ${
+        className={`hidden lg:flex lg:w-64 xl:w-68 shrink-0 flex-col justify-between select-none sticky top-0 h-screen ${
           isLight
-            ? 'bg-[#F4F1EA] border-stone-200/90 text-stone-800'
-            : 'bg-[#141414] border-zinc-800/90 text-zinc-200'
+            ? 'bg-[#F4F1EA] text-stone-800'
+            : 'bg-[#141414] text-zinc-200'
         }`}
       >
         <div className="p-4 space-y-6 overflow-y-auto no-scrollbar">
@@ -136,7 +151,7 @@ export default function NavigationShell({ children }: { children: React.ReactNod
             </div>
           </button>
 
-          {/* Primary Navigation — Strictly 2 Destinations: Bible & Notes */}
+          {/* Primary Navigation — 3 Main Destinations: Bible, Saved, Community */}
           <div className="space-y-1">
             <div
               className={`px-2.5 pb-1 text-[10px] font-bold uppercase tracking-wider ${
@@ -180,9 +195,9 @@ export default function NavigationShell({ children }: { children: React.ReactNod
               </button>
 
               <button
-                onClick={() => setActivePage('notes')}
+                onClick={() => setActivePage('saved')}
                 className={`w-full rounded-xl px-3 py-2.5 text-sm font-semibold flex items-center justify-between transition ${
-                  activePage === 'notes'
+                  activePage === 'saved' || activePage === 'notes'
                     ? isLight
                       ? 'bg-white text-stone-900 shadow-sm border border-stone-200/80'
                       : 'bg-zinc-800 text-white shadow-sm'
@@ -192,20 +207,20 @@ export default function NavigationShell({ children }: { children: React.ReactNod
                 }`}
               >
                 <span className="flex items-center gap-2.5">
-                  <NotebookPen
+                  <Bookmark
                     className={`h-4 w-4 ${
-                      activePage === 'notes'
+                      activePage === 'saved' || activePage === 'notes'
                         ? isLight
                           ? 'text-amber-700'
                           : 'text-amber-400'
                         : 'opacity-70'
                     }`}
                   />
-                  <span>Notes & Research</span>
+                  <span>Saved</span>
                 </span>
                 <span
                   className={`rounded-full px-2 py-0.5 text-[11px] font-bold ${
-                    activePage === 'notes'
+                    activePage === 'saved' || activePage === 'notes'
                       ? isLight
                         ? 'bg-amber-700 text-white'
                         : 'bg-amber-500 text-zinc-950'
@@ -214,7 +229,46 @@ export default function NavigationShell({ children }: { children: React.ReactNod
                       : 'bg-zinc-800 text-zinc-300'
                   }`}
                 >
-                  {totalNotesCount}
+                  {totalSavedCount}
+                </span>
+              </button>
+
+              <button
+                onClick={() => setActivePage('community')}
+                className={`w-full rounded-xl px-3 py-2.5 text-sm font-semibold flex items-center justify-between transition ${
+                  activePage === 'community'
+                    ? isLight
+                      ? 'bg-white text-stone-900 shadow-sm border border-stone-200/80'
+                      : 'bg-zinc-800 text-white shadow-sm'
+                    : isLight
+                    ? 'text-stone-600 hover:bg-stone-200/60 hover:text-stone-900'
+                    : 'text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-200'
+                }`}
+              >
+                <span className="flex items-center gap-2.5">
+                  <Users
+                    className={`h-4 w-4 ${
+                      activePage === 'community'
+                        ? isLight
+                          ? 'text-amber-700'
+                          : 'text-amber-400'
+                        : 'opacity-70'
+                    }`}
+                  />
+                  <span>Community</span>
+                </span>
+                <span
+                  className={`rounded-full px-2 py-0.5 text-[11px] font-bold ${
+                    activePage === 'community'
+                      ? isLight
+                        ? 'bg-amber-700 text-white'
+                        : 'bg-amber-500 text-zinc-950'
+                      : isLight
+                      ? 'bg-stone-200 text-stone-700'
+                      : 'bg-zinc-800 text-zinc-300'
+                  }`}
+                >
+                  {totalCommunityCount}
                 </span>
               </button>
             </nav>
@@ -279,7 +333,7 @@ export default function NavigationShell({ children }: { children: React.ReactNod
                 <span>Saved Connections</span>
               </span>
               <button
-                onClick={() => setActivePage('notes')}
+                onClick={() => setActivePage('saved')}
                 className={`text-[11px] font-semibold hover:underline ${
                   isLight ? 'text-amber-700' : 'text-amber-400'
                 }`}
@@ -321,8 +375,8 @@ export default function NavigationShell({ children }: { children: React.ReactNod
 
         {/* Bottom Sidebar Account & Theme Bar */}
         <div
-          className={`p-3 border-t flex items-center justify-between gap-2 ${
-            isLight ? 'border-stone-200/90 bg-[#EFECE4]/60' : 'border-zinc-800/90 bg-[#111111]'
+          className={`p-3 flex items-center justify-between gap-2 ${
+            isLight ? 'bg-[#EFECE4]/60' : 'bg-[#111111]'
           }`}
         >
           <button
@@ -375,10 +429,10 @@ export default function NavigationShell({ children }: { children: React.ReactNod
           MOBILE & TABLET TOP HEADER (< lg)
           ===================================================================== */}
       <header
-        className={`lg:hidden sticky top-0 z-30 h-13 border-b backdrop-blur-md px-4 flex items-center justify-between ${
+        className={`lg:hidden sticky top-0 z-30 h-13 backdrop-blur-md px-4 flex items-center justify-between shadow-xs ${
           isLight
-            ? 'bg-[#FBF9F5]/95 border-stone-200/90 text-stone-900'
-            : 'bg-[#121212]/95 border-zinc-800 text-zinc-100'
+            ? 'bg-[#FBF9F5]/95 text-stone-900'
+            : 'bg-[#121212]/95 text-zinc-100'
         }`}
       >
         <button
@@ -436,14 +490,14 @@ export default function NavigationShell({ children }: { children: React.ReactNod
       <div className="flex-1 min-w-0 flex flex-col">{children}</div>
 
       {/* =====================================================================
-          MOBILE BOTTOM NAVBAR (< lg) — Strictly Pinned to Bottom with 2 Items
+          MOBILE BOTTOM NAVBAR (< lg) — Strictly Pinned to Bottom with 3 Items
           ===================================================================== */}
       <nav
         aria-label="Mobile Bottom Navigation"
-        className={`lg:hidden fixed bottom-0 inset-x-0 z-40 h-16 border-t grid grid-cols-2 px-6 backdrop-blur-lg shadow-[0_-4px_20px_rgba(0,0,0,0.05)] ${
+        className={`lg:hidden fixed bottom-0 inset-x-0 z-40 h-16 grid grid-cols-3 px-3 backdrop-blur-lg shadow-[0_-4px_24px_rgba(0,0,0,0.06)] ${
           isLight
-            ? 'bg-white/95 border-stone-200/90 text-stone-900'
-            : 'bg-[#141414]/95 border-zinc-800 text-zinc-100'
+            ? 'bg-white/95 text-stone-900'
+            : 'bg-[#141414]/95 text-zinc-100'
         }`}
       >
         <button
@@ -451,7 +505,7 @@ export default function NavigationShell({ children }: { children: React.ReactNod
           className="flex flex-col items-center justify-center gap-1 group"
         >
           <div
-            className={`rounded-full px-5 py-1 flex items-center justify-center transition ${
+            className={`rounded-full px-4 py-1 flex items-center justify-center transition ${
               activePage === 'bible'
                 ? isLight
                   ? 'bg-amber-700/15 text-amber-800'
@@ -479,12 +533,12 @@ export default function NavigationShell({ children }: { children: React.ReactNod
         </button>
 
         <button
-          onClick={() => setActivePage('notes')}
+          onClick={() => setActivePage('saved')}
           className="flex flex-col items-center justify-center gap-1 group"
         >
           <div
-            className={`relative rounded-full px-5 py-1 flex items-center justify-center transition ${
-              activePage === 'notes'
+            className={`relative rounded-full px-4 py-1 flex items-center justify-center transition ${
+              activePage === 'saved' || activePage === 'notes'
                 ? isLight
                   ? 'bg-amber-700/15 text-amber-800'
                   : 'bg-amber-500/20 text-amber-400'
@@ -493,10 +547,10 @@ export default function NavigationShell({ children }: { children: React.ReactNod
                 : 'text-zinc-400 group-hover:text-zinc-200'
             }`}
           >
-            <NotebookPen className="h-4 w-4" />
+            <Bookmark className="h-4 w-4" />
             <span
-              className={`ml-1.5 rounded-full px-1.5 text-[10px] font-bold ${
-                activePage === 'notes'
+              className={`ml-1 rounded-full px-1.5 text-[10px] font-bold ${
+                activePage === 'saved' || activePage === 'notes'
                   ? isLight
                     ? 'bg-amber-700 text-white'
                     : 'bg-amber-500 text-zinc-950'
@@ -505,12 +559,12 @@ export default function NavigationShell({ children }: { children: React.ReactNod
                   : 'bg-zinc-800 text-zinc-300'
               }`}
             >
-              {totalNotesCount}
+              {totalSavedCount}
             </span>
           </div>
           <span
             className={`text-[11px] font-bold tracking-tight ${
-              activePage === 'notes'
+              activePage === 'saved' || activePage === 'notes'
                 ? isLight
                   ? 'text-amber-800'
                   : 'text-amber-400'
@@ -519,7 +573,52 @@ export default function NavigationShell({ children }: { children: React.ReactNod
                 : 'text-zinc-400'
             }`}
           >
-            Notes
+            Saved
+          </span>
+        </button>
+
+        <button
+          onClick={() => setActivePage('community')}
+          className="flex flex-col items-center justify-center gap-1 group"
+        >
+          <div
+            className={`relative rounded-full px-4 py-1 flex items-center justify-center transition ${
+              activePage === 'community'
+                ? isLight
+                  ? 'bg-amber-700/15 text-amber-800'
+                  : 'bg-amber-500/20 text-amber-400'
+                : isLight
+                ? 'text-stone-500 group-hover:text-stone-800'
+                : 'text-zinc-400 group-hover:text-zinc-200'
+            }`}
+          >
+            <Users className="h-4 w-4" />
+            <span
+              className={`ml-1 rounded-full px-1.5 text-[10px] font-bold ${
+                activePage === 'community'
+                  ? isLight
+                    ? 'bg-amber-700 text-white'
+                    : 'bg-amber-500 text-zinc-950'
+                  : isLight
+                  ? 'bg-stone-200 text-stone-700'
+                  : 'bg-zinc-800 text-zinc-300'
+              }`}
+            >
+              {totalCommunityCount}
+            </span>
+          </div>
+          <span
+            className={`text-[11px] font-bold tracking-tight ${
+              activePage === 'community'
+                ? isLight
+                  ? 'text-amber-800'
+                  : 'text-amber-400'
+                : isLight
+                ? 'text-stone-500'
+                : 'text-zinc-400'
+            }`}
+          >
+            Community
           </span>
         </button>
       </nav>
@@ -554,11 +653,7 @@ export default function NavigationShell({ children }: { children: React.ReactNod
                 : 'bg-[#181818] border-zinc-800 text-zinc-100'
             }`}
           >
-            <div
-              className={`flex items-center justify-between border-b pb-3 ${
-                isLight ? 'border-stone-200' : 'border-zinc-800'
-              }`}
-            >
+            <div className="flex items-center justify-between pb-3">
               <div className="flex items-center gap-2.5">
                 <User className={`h-5 w-5 ${isLight ? 'text-amber-700' : 'text-amber-400'}`} />
                 <h2 className="text-base font-bold">

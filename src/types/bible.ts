@@ -76,6 +76,8 @@ export interface VerseContextData {
   translation: TranslationId;
   selectedVerseText: string;
   sectionHeading?: string;
+  mainTheme: string;
+  verseBreakdown: string[];
   verseSpecificAnalysis: string;
   bookAuthorAndDate: string;
   previousChapterRef: string;
@@ -149,6 +151,41 @@ export interface SavedConnection {
   followUpThread: FollowUpMessage[];
   personalObservation: string;
   collectionId?: string;
+  sharedToCommunity?: boolean;
+  authorName?: string;
+  likesCount?: number;
+  dateSaved: string;
+  updatedAt: string;
+}
+
+export interface SavedContextItem {
+  id: string;
+  verseRef: string;
+  verseText: string;
+  translation: TranslationId;
+  mainTheme: string;
+  verseBreakdown: string[];
+  contextSummary: string;
+  personalNotes: string;
+  collectionId?: string;
+  sharedToCommunity?: boolean;
+  authorName?: string;
+  likesCount?: number;
+  dateSaved: string;
+  updatedAt: string;
+}
+
+export interface SavedVerseItem {
+  id: string;
+  verseRef: string;
+  verseText: string;
+  translation: TranslationId;
+  highlightColor?: string;
+  personalNotes: string;
+  collectionId?: string;
+  sharedToCommunity?: boolean;
+  authorName?: string;
+  likesCount?: number;
   dateSaved: string;
   updatedAt: string;
 }
@@ -160,6 +197,8 @@ export interface PersonalNote {
   scriptureRefs: string[];
   aiExplanation?: AIExplanationData;
   collectionId?: string;
+  sharedToCommunity?: boolean;
+  authorName?: string;
   createdAt: string;
   updatedAt: string;
 }
