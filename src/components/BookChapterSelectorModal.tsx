@@ -201,10 +201,10 @@ export default function BookChapterSelectorModal({
                 }`}
               >
                 {tab === 'ALL'
-                  ? 'All 66 Books'
+                  ? 'All'
                   : tab === 'OT'
-                  ? 'Old Testament (39)'
-                  : 'New Testament (27)'}
+                  ? 'Old Testament'
+                  : 'New Testament'}
               </button>
             ))}
           </div>
