@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   BookOpen,
   Compass,
@@ -11,8 +11,10 @@ import {
 } from 'lucide-react';
 import { BIBLE_BOOKS, parseScriptureReference } from '@/data/bibleBooks';
 import { searchLocalScriptures } from '@/data/scriptureDatabase';
+import { resolveScriptureVerse } from '@/services/bibleService';
 import { CANONICAL_CROSS_REFERENCES, getCrossReferencesForVerse } from '@/data/crossReferences';
 import { usePlatform } from '@/context/PlatformContext';
+import { VerseData } from '@/types/bible';
 
 interface GlobalSearchModalProps {
   isOpen: boolean;
@@ -67,8 +69,44 @@ export default function GlobalSearchModal({
   const { translation, navigateToPassage, navigateToReferenceString, preferences } = usePlatform();
   const isLight = preferences.theme === 'light';
   const [query, setQuery] = useState('');
+  const [resolvedDirectVerse, setResolvedDirectVerse] = useState<VerseData | null>(null);
 
   const parsedDirectRef = useMemo(() => parseScriptureReference(query), [query]);
+
+  useEffect(() => {
+    let active = true;
+    if (parsedDirectRef && parsedDirectRef.verse) {
+      const refStr = `${parsedDirectRef.book} ${parsedDirectRef.chapter}:${parsedDirectRef.verse}`;
+      resolveScriptureVerse(refStr, translation).then((res) => {
+        if (!active) return;
+        if (res?.verseData) {
+          setResolvedDirectVerse(res.verseData);
+        } else if (res?.text) {
+          setResolvedDirectVerse({
+            book: parsedDirectRef.book,
+            chapter: parsedDirectRef.chapter,
+            verse: parsedDirectRef.verse!,
+            canonicalRef: refStr,
+            translations: {
+              NIV: res.text,
+              KJV: res.text,
+              ESV: res.text,
+              NKJV: res.text,
+              NLT: res.text,
+              ASV: res.text,
+            },
+          });
+        } else {
+          setResolvedDirectVerse(null);
+        }
+      });
+    } else {
+      setResolvedDirectVerse(null);
+    }
+    return () => {
+      active = false;
+    };
+  }, [parsedDirectRef, translation]);
 
   const matchingBooks = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -80,8 +118,18 @@ export default function GlobalSearchModal({
 
   const matchingVerses = useMemo(() => {
     if (!query.trim()) return [];
-    return searchLocalScriptures(query, translation).slice(0, 12);
-  }, [query, translation]);
+    const localMatches = searchLocalScriptures(query, translation);
+    const list: VerseData[] = [...localMatches];
+    if (
+      resolvedDirectVerse &&
+      !list.some(
+        (v) => v.canonicalRef.toLowerCase() === resolvedDirectVerse.canonicalRef.toLowerCase()
+      )
+    ) {
+      list.unshift(resolvedDirectVerse);
+    }
+    return list.slice(0, 12);
+  }, [query, translation, resolvedDirectVerse]);
 
   const matchingCrossRefs = useMemo(() => {
     const q = query.trim().toLowerCase();

@@ -1342,6 +1342,202 @@ export const CORE_SCRIPTURE_VERSES: VerseData[] = [
       ASV: 'For therein is revealed a righteousness of God from faith unto faith: as it is written, But the righteous shall live by faith.',
     }
   ),
+  v(
+    'John',
+    3,
+    16,
+    {
+      NIV: 'For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life.',
+      KJV: 'For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life.',
+      ESV: '“For God so loved the world, that he gave his only Son, that whoever believes in him should not perish but have eternal life.',
+      NKJV: 'For God so loved the world that He gave His only begotten Son, that whoever believes in Him should not perish but have everlasting life.',
+      NLT: '“For this is how God loved the world: He gave his one and only Son, so that everyone who believes in him will not perish but have eternal life.',
+      ASV: 'For God so loved the world, that he gave his only begotten Son, that whosoever believeth on him should not perish, but have eternal life.',
+    },
+    { isRedLetter: true }
+  ),
+  v(
+    'Matthew',
+    3,
+    5,
+    {
+      NIV: 'People went out to him from Jerusalem and all Judea and the whole region of the Jordan.',
+      KJV: 'Then went out to him Jerusalem, and all Judaea, and all the region round about Jordan,',
+      ESV: 'Then Jerusalem and all Judea and all the region about the Jordan were going out to him,',
+      NKJV: 'Then Jerusalem, all Judea, and all the region around the Jordan went out to him',
+      NLT: 'People from Jerusalem and from all of Judea and all over the Jordan Valley went out to see and hear John.',
+      ASV: 'Then went out unto him Jerusalem, and all Judaea, and all the region round about the Jordan;',
+    }
+  ),
+  v(
+    'Matthew',
+    3,
+    14,
+    {
+      NIV: 'But John tried to deter him, saying, “I need to be baptized by you, and do you come to me?”',
+      KJV: 'But John forbad him, saying, I have need to be baptized of thee, and comest thou to me?',
+      ESV: 'John would have prevented him, saying, “I need to be baptized by you, and do you come to me?”',
+      NKJV: 'And John tried to prevent Him, saying, “I need to be baptized by You, and are You coming to me?”',
+      NLT: 'But John tried to talk him out of it. “I am the one who needs to be baptized by you,” he said, “so why are you coming to me?”',
+      ASV: 'But John would have hindered him, saying, I have need to be baptized of thee, and comest thou to me?',
+    }
+  ),
+  v(
+    'Romans',
+    8,
+    28,
+    {
+      NIV: 'And we know that in all things God works for the good of those who love him, who have been called according to his purpose.',
+      KJV: 'And we know that all things work together for good to them that love God, to them who are the called according to his purpose.',
+      ESV: 'And we know that for those who love God all things work together for good, for those who are called according to his purpose.',
+      NKJV: 'And we know that all things work together for good to those who love God, to those who are the called according to His purpose.',
+      NLT: 'And we know that God causes everything to work together for the good of those who love God and are called according to his purpose for them.',
+      ASV: 'And we know that to them that love God all things work together for good, even to them that are called according to his purpose.',
+    }
+  ),
+  v(
+    'Exodus',
+    12,
+    13,
+    {
+      NIV: 'The blood will be a sign for you on the houses where you are, and when I see the blood, I will pass over you. No destructive plague will touch you when I strike Egypt.',
+      KJV: 'And the blood shall be to you for a token upon the houses where ye are: and when I see the blood, I will pass over you, and the plague shall not be upon you to destroy you, when I smite the land of Egypt.',
+      ESV: 'The blood shall be a sign for you, on the houses where you are. And when I see the blood, I will pass over you, and no plague will befall you to destroy you, when I strike the land of Egypt.',
+      NKJV: 'Now the blood shall be a sign for you on the houses where you are. And when I see the blood, I will pass over you; and the plague shall not be on you to destroy you when I strike the land of Egypt.',
+      NLT: 'But the blood on your doorposts will serve as a sign, marking the houses where you are staying. When I see the blood, I will pass over you. This plague of death will not touch you when I strike the land of Egypt.',
+      ASV: 'And the blood shall be to you for a token upon the houses where ye are: and when I see the blood, I will pass over you, and there shall no plague be upon you to destroy you, when I smite the land of Egypt.',
+    }
+  ),
+  v(
+    '1 Corinthians',
+    5,
+    7,
+    {
+      NIV: 'Get rid of the old yeast, so that you may be a new unleavened batch—as you really are. For Christ, our Passover lamb, has been sacrificed.',
+      KJV: 'Purge out therefore the old leaven, that ye may be a new lump, as ye are unleavened. For even Christ our passover is sacrificed for us:',
+      ESV: 'Cleanse out the old leaven that you may be a new lump, as you really are unleavened. For Christ, our Passover lamb, has been sacrificed.',
+      NKJV: 'Therefore purge out the old leaven, that you may be a new lump, since you truly are unleavened. For indeed Christ, our Passover, was sacrificed for us.',
+      NLT: 'Remove this wicked person from among you so that you can stay pure. Christ, our Passover Lamb, has been sacrificed for us.',
+      ASV: 'Purge out the old leaven, that ye may be a new lump, even as ye are unleavened. For our passover also hath been sacrificed, even Christ:',
+    }
+  ),
+  v(
+    'John',
+    1,
+    29,
+    {
+      NIV: 'The next day John saw Jesus coming toward him and said, “Look, the Lamb of God, who takes away the sin of the world!',
+      KJV: 'The next day John seeth Jesus coming unto him, and saith, Behold the Lamb of God, which taketh away the sin of the world.',
+      ESV: 'The next day he saw Jesus coming toward him, and said, “Behold, the Lamb of God, who takes away the sin of the world!',
+      NKJV: 'The next day John saw Jesus coming toward him, and said, “Behold! The Lamb of God who takes away the sin of the world!”',
+      NLT: 'The next day John saw Jesus coming toward him and said, “Look! The Lamb of God who takes away the sin of the world!',
+      ASV: 'On the morrow he seeth Jesus coming unto him, and saith, Behold, the Lamb of God, that taketh away the sin of the world!',
+    }
+  ),
+  v(
+    'Genesis',
+    22,
+    8,
+    {
+      NIV: 'Abraham answered, “God himself will provide the lamb for the burnt offering, my son.” And the two of them went on together.',
+      KJV: 'And Abraham said, My son, God will provide himself a lamb for a burnt offering: so they went both of them together.',
+      ESV: 'Abraham said, “God will provide for himself the lamb for a burnt offering, my son.” So they went both of them together.',
+      NKJV: 'And Abraham said, “My son, God will provide for Himself the lamb for a burnt offering.” So the two of them went together.',
+      NLT: '“God will provide a sheep for the burnt offering, my son,” Abraham answered. And they both walked on together.',
+      ASV: 'And Abraham said, God will provide himself the lamb for a burnt-offering, my son: so they went both of them together.',
+    }
+  ),
+  v(
+    'Romans',
+    5,
+    14,
+    {
+      NIV: 'Nevertheless, death reigned from the time of Adam to the time of Moses, even over those who did not sin by breaking a command, as did Adam, who is a pattern of the one to come.',
+      KJV: 'Nevertheless death reigned from Adam to Moses, even over them that had not sinned after the similitude of Adam’s transgression, who is the figure of him that was to come.',
+      ESV: 'Yet death reigned from Adam to Moses, even over those whose sinning was not like the transgression of Adam, who was a type of the one who was to come.',
+      NKJV: 'Nevertheless death reigned from Adam to Moses, even over those who had not sinned according to the likeness of the transgression of Adam, who is a type of Him who was to come.',
+      NLT: 'Still, everyone died—from the time of Adam to the time of Moses—even those who did not disobey an explicit commandment of God, as Adam did. Now Adam is a symbol, a representation of Christ, who was yet to come.',
+      ASV: 'Nevertheless death reigned from Adam until Moses, even over them that had not sinned after the likeness of Adam’s transgression, who is a figure of him that was to come.',
+    }
+  ),
+  v(
+    'Genesis',
+    14,
+    18,
+    {
+      NIV: 'Then Melchizedek king of Salem brought out bread and wine. He was priest of God Most High,',
+      KJV: 'And Melchizedek king of Salem brought forth bread and wine: and he was the priest of the most high God.',
+      ESV: 'And Melchizedek king of Salem brought out bread and wine. (He was priest of God Most High.)',
+      NKJV: 'Then Melchizedek king of Salem brought out bread and wine; he was the priest of God Most High.',
+      NLT: 'And Melchizedek, the king of Salem and a priest of God Most High, brought Abram some bread and wine.',
+      ASV: 'And Melchizedek king of Salem brought forth bread and wine: and he was priest of God Most High.',
+    }
+  ),
+  v(
+    'Hebrews',
+    7,
+    3,
+    {
+      NIV: 'Without father or mother, without genealogy, without beginning of days or end of life, resembling the Son of God, he remains a priest forever.',
+      KJV: 'Without father, without mother, without descent, having neither beginning of days, nor end of life; but made like unto the Son of God; abideth a priest continually.',
+      ESV: 'He is without father or mother or genealogy, having neither beginning of days nor end of life, but resembling the Son of God he continues a priest forever.',
+      NKJV: 'without father, without mother, without genealogy, having neither beginning of days nor end of life, but made like the Son of God, remains a priest continually.',
+      NLT: 'There is no record of his father or mother or any of his ancestors—no beginning or end to his life. He remains a priest forever, resembling the Son of God.',
+      ASV: 'without father, without mother, without genealogy, having neither beginning of days nor end of life, but made like unto the Son of God, abideth a priest continually.',
+    }
+  ),
+  v(
+    '1 Samuel',
+    30,
+    2,
+    {
+      NIV: 'and had taken captive the women and everyone else in it, both young and old. They killed none of them, but carried them off as they went on their way.',
+      KJV: 'And had taken the women captives, that were therein: they slew not any, either great or small, but carried them away, and went on their way.',
+      ESV: 'and had taken captive the women and all who were in it, both small and great. They killed no one, but carried them off and went their way.',
+      NKJV: 'and had taken captive the women and those who were there, from small to great; they did not kill anyone, but carried them away and went their way.',
+      NLT: 'They hadgran taken captive all the women and children and everyone else, without killing anyone.',
+      ASV: 'and had taken captive the women and all that were therein, both small and great: they slew not any, but carried them off, and went their way.',
+    }
+  ),
+  v(
+    'Judges',
+    18,
+    18,
+    {
+      NIV: 'When these men went into Micah’s house and took the carved image, the ephod, the household gods and the cast idol, the priest said to them, “What are you doing?”',
+      KJV: 'And these went into Micah’s house, and fetched the carved image, the ephod, and the teraphim, and the molten image. Then said the priest unto them, What do ye?',
+      ESV: 'And when these went into Micah’s house and took the carved image, the ephod, the household gods, and the metal image, the priest said to them, “What are you doing?”',
+      NKJV: 'When these went into Micah’s house and took the carved image, the ephod, the household idols, and the molded image, the priest said to them, “What are you doing?”',
+      NLT: 'When the young men went into Micah’s house and took the carved idol, the ephod, the household idols, and the cast idol, the priest said, “What are you doing?”',
+      ASV: 'And when these went into Micah’s house, and fetched the graven image, the ephod, and the teraphim, and the molten image, the priest said unto them, What do ye?',
+    }
+  ),
+  v(
+    '2 Samuel',
+    15,
+    2,
+    {
+      NIV: 'He would get up early and stand by the side of the road leading to the city gate. Whenever anyone came with a complaint to be placed before the king for a decision, Absalom would call out to him, “What town are you from?” He would answer, “Your servant is from one of the tribes of Israel.”',
+      KJV: 'And Absalom rose up early, and stood beside the way of the gate: and it was so, that when any man that had a controversy came to the king for judgment, then Absalom called unto him, and said, Of what city art thou? And he said, Thy servant is of one of the tribes of Israel.',
+      ESV: 'And Absalom used to rise early and stand beside the way of the gate. And when any man had a dispute to come before the king for judgment, Absalom would call to him and say, “From what city are you?” And when he said, “Your servant is of such and such a tribe in Israel,”',
+      NKJV: 'Now Absalom would rise early and stand beside the way to the gate. So it was, whenever anyone who had a lawsuit came to the king for a decision, that Absalom would call to him and say, “What city are you from?” And he would say, “Your servant is from such and such a tribe of Israel.”',
+      NLT: 'He got up early every morning and went out to the gate of the city. When people brought a case to the king for judgment, Absalom would ask where in Israel they were from, and they would tell him their tribe.',
+      ASV: 'And Absalom rose up early, and stood beside the way of the gate: and it was so, that, when any man had a suit which should come to the king for judgment, then Absalom called unto him, and said, Of what city art thou? And he said, Thy servant is of one of the tribes of Israel.',
+    }
+  ),
+  v(
+    '2 Kings',
+    4,
+    9,
+    {
+      NIV: 'She said to her husband, “I know that this man who often comes our way is a holy man of God.',
+      KJV: 'And she said unto her husband, Behold now, I perceive that this is an holy man of God, which passeth by us continually.',
+      ESV: 'And she said to her husband, “Behold now, I know that this is a holy man of God who is continually passing our way.',
+      NKJV: 'And she said to her husband, “Look now, I know that this is a holy man of God, who passes by us regularly.',
+      NLT: 'She said to her husband, “I am sure this man who stops in from time to time is a holy man of God.',
+      ASV: 'And she said unto her husband, Behold now, I perceive that this is a holy man of God, that passeth by us continually.',
+    }
+  ),
 ];
 
 // Fast index by canonical reference and by book+chapter
@@ -1392,12 +1588,37 @@ export function registerFetchedChapterVerses(verses: VerseData[]) {
 }
 
 export function searchLocalScriptures(query: string, translation: TranslationId): VerseData[] {
-  const q = query.trim().toLowerCase();
-  if (!q) return [];
-  return CORE_SCRIPTURE_VERSES.filter((v) => {
-    const refMatch = v.canonicalRef.toLowerCase().includes(q);
-    const textMatch = v.translations[translation].toLowerCase().includes(q) || v.translations.NIV.toLowerCase().includes(q);
-    const headingMatch = v.heading?.toLowerCase().includes(q);
+  const cleaned = query
+    .trim()
+    .replace(/^["'“”‘’]+|["'“”‘’]+$/g, '')
+    .trim()
+    .toLowerCase();
+  if (!cleaned) return [];
+
+  const allVerses = Array.from(verseByRefMap.values());
+  const exactMatches = allVerses.filter((v) => {
+    const refMatch = v.canonicalRef.toLowerCase().includes(cleaned);
+    const transValues = Object.values(v.translations);
+    const textMatch = transValues.some((txt) => txt.toLowerCase().includes(cleaned));
+    const headingMatch = v.heading?.toLowerCase().includes(cleaned);
     return refMatch || textMatch || headingMatch;
   });
+
+  if (exactMatches.length > 0) return exactMatches;
+
+  // Token-based fallback for multi-word archaic or partial phrases (e.g. "Thou comest this way")
+  const tokens = cleaned
+    .split(/\s+/)
+    .map((t) => t.replace(/[^a-z0-9]/gi, ''))
+    .filter((t) => t.length >= 3);
+
+  if (tokens.length >= 2) {
+    return allVerses.filter((v) => {
+      const combined = `${v.canonicalRef} ${Object.values(v.translations).join(' ')} ${v.heading || ''}`.toLowerCase();
+      const matchedCount = tokens.filter((tok) => combined.includes(tok)).length;
+      return matchedCount >= Math.max(2, Math.ceil(tokens.length * 0.6));
+    });
+  }
+
+  return [];
 }

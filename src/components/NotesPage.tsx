@@ -66,6 +66,25 @@ export default function NotesPage() {
   const [colNameInput, setColNameInput] = useState('');
   const [colDescInput, setColDescInput] = useState('');
 
+  // Delete Confirmation Modal State
+  const [pendingDelete, setPendingDelete] = useState<{
+    id: string;
+    type: 'connection' | 'context' | 'verse';
+    label: string;
+  } | null>(null);
+
+  const handleConfirmDelete = () => {
+    if (!pendingDelete) return;
+    if (pendingDelete.type === 'connection') {
+      deleteSavedConnection(pendingDelete.id);
+    } else if (pendingDelete.type === 'context') {
+      deleteSavedContext(pendingDelete.id);
+    } else if (pendingDelete.type === 'verse') {
+      deleteSavedVerse(pendingDelete.id);
+    }
+    setPendingDelete(null);
+  };
+
   // Filter Saved Connections
   const filteredConnections = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
@@ -320,14 +339,14 @@ export default function NotesPage() {
                 return (
                   <div
                     key={conn.id}
-                    className={`rounded-2xl border p-4 sm:p-5 space-y-3 transition ${
+                    className={`rounded-2xl border overflow-hidden transition ${
                       isLight
                         ? 'bg-white border-stone-200/90 text-stone-900 shadow-2xs'
                         : 'bg-[#161616] border-zinc-800 text-zinc-100'
                     }`}
                   >
                     {/* Top Row: Verse connection, concise category, community icon on left; Share, Edit, Delete on right */}
-                    <div className="flex items-center justify-between gap-2">
+                    <div className="px-4 sm:px-5 py-3.5 flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2 flex-wrap min-w-0">
                         <span
                           className={`text-xs sm:text-sm font-bold tracking-tight ${
@@ -386,7 +405,13 @@ export default function NotesPage() {
                         </button>
 
                         <button
-                          onClick={() => deleteSavedConnection(conn.id)}
+                          onClick={() =>
+                            setPendingDelete({
+                              id: conn.id,
+                              type: 'connection',
+                              label: `Saved Connection: ${conn.primaryRef} ↔ ${conn.connectedRef}`,
+                            })
+                          }
                           className={`rounded-lg p-1.5 border transition ${
                             isLight
                               ? 'bg-stone-50 hover:bg-rose-50 border-stone-200 text-stone-500 hover:text-rose-600'
@@ -400,48 +425,47 @@ export default function NotesPage() {
                       </div>
                     </div>
 
-                    {/* Connected Scriptures Grid (No redundant Open button!) */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
-                      <div
-                        className={`rounded-xl border p-3 space-y-1 ${
-                          isLight
-                            ? 'bg-[#FBF9F5] border-stone-200/80'
-                            : 'bg-[#121212] border-zinc-800'
-                        }`}
-                      >
-                        <span className={`text-xs font-bold block ${isLight ? 'text-amber-800' : 'text-amber-400'}`}>
-                          {conn.primaryRef} ({conn.translation})
-                        </span>
-                        <p className="font-serif text-xs sm:text-sm leading-relaxed text-stone-800 dark:text-zinc-200">
-                          “{conn.primaryText}”
-                        </p>
-                      </div>
+                    <div
+                      className={`h-px w-full ${
+                        isLight ? 'bg-stone-200/90' : 'bg-zinc-800'
+                      }`}
+                    />
 
-                      <div
-                        className={`rounded-xl border p-3 space-y-1 ${
-                          isLight
-                            ? 'bg-amber-50/40 border-amber-200/80'
-                            : 'bg-[#1c1a15] border-amber-500/30'
-                        }`}
-                      >
-                        <span className={`text-xs font-bold block ${isLight ? 'text-amber-800' : 'text-amber-400'}`}>
-                          {conn.connectedRef} ({conn.translation})
-                        </span>
-                        <p className="font-serif text-xs sm:text-sm leading-relaxed text-stone-800 dark:text-zinc-200">
-                          “{conn.connectedText}”
-                        </p>
-                      </div>
+                    {/* Primary Scripture Section */}
+                    <div className="px-4 sm:px-5 py-3.5 space-y-1">
+                      <span className={`text-xs font-bold block ${isLight ? 'text-amber-800' : 'text-amber-400'}`}>
+                        {conn.primaryRef} ({conn.translation})
+                      </span>
+                      <p className="font-serif text-xs sm:text-sm leading-relaxed text-stone-800 dark:text-zinc-200">
+                        “{conn.primaryText}”
+                      </p>
                     </div>
+
+                    <div
+                      className={`h-px w-full ${
+                        isLight ? 'bg-stone-200/90' : 'bg-zinc-800'
+                      }`}
+                    />
+
+                    {/* Connected Scripture Section */}
+                    <div className="px-4 sm:px-5 py-3.5 space-y-1">
+                      <span className={`text-xs font-bold block ${isLight ? 'text-amber-800' : 'text-amber-400'}`}>
+                        {conn.connectedRef} ({conn.translation})
+                      </span>
+                      <p className="font-serif text-xs sm:text-sm leading-relaxed text-stone-800 dark:text-zinc-200">
+                        “{conn.connectedText}”
+                      </p>
+                    </div>
+
+                    <div
+                      className={`h-px w-full ${
+                        isLight ? 'bg-stone-200/90' : 'bg-zinc-800'
+                      }`}
+                    />
 
                     {/* Personal Notes / Reflections Section */}
                     {isEditing ? (
-                      <div
-                        className={`rounded-xl border p-3.5 space-y-3 ${
-                          isLight
-                            ? 'bg-stone-50 border-stone-200'
-                            : 'bg-[#121212] border-zinc-800'
-                        }`}
-                      >
+                      <div className="px-4 sm:px-5 py-3.5 space-y-3">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                           <div>
                             <label className="text-[11px] font-bold text-stone-500 dark:text-zinc-400 block mb-1">
@@ -508,13 +532,7 @@ export default function NotesPage() {
                         </div>
                       </div>
                     ) : (
-                      <div
-                        className={`rounded-xl border p-3.5 text-xs leading-relaxed ${
-                          isLight
-                            ? 'bg-stone-50/80 border-stone-200/80 text-stone-700'
-                            : 'bg-[#121212] border-zinc-800 text-zinc-300'
-                        }`}
-                      >
+                      <div className="px-4 sm:px-5 py-3.5 text-xs leading-relaxed text-stone-700 dark:text-zinc-300">
                         <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400 dark:text-zinc-500 block mb-1">
                           Personal Notes & Reflections
                         </span>
@@ -567,14 +585,14 @@ export default function NotesPage() {
                 return (
                   <div
                     key={ctx.id}
-                    className={`rounded-2xl border p-4 sm:p-5 space-y-3 transition ${
+                    className={`rounded-2xl border overflow-hidden transition ${
                       isLight
                         ? 'bg-white border-stone-200/90 text-stone-900 shadow-2xs'
                         : 'bg-[#161616] border-zinc-800 text-zinc-100'
                     }`}
                   >
                     {/* Top Row: Verse ref, main theme, community icon on left; Share, Edit, Delete on right */}
-                    <div className="flex items-center justify-between gap-2">
+                    <div className="px-4 sm:px-5 py-3.5 flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2 flex-wrap min-w-0">
                         <span
                           className={`text-xs sm:text-sm font-bold tracking-tight ${
@@ -629,7 +647,13 @@ export default function NotesPage() {
                         </button>
 
                         <button
-                          onClick={() => deleteSavedContext(ctx.id)}
+                          onClick={() =>
+                            setPendingDelete({
+                              id: ctx.id,
+                              type: 'context',
+                              label: `Saved Context: ${ctx.verseRef} (${ctx.mainTheme})`,
+                            })
+                          }
                           className={`rounded-lg p-1.5 border transition ${
                             isLight
                               ? 'bg-stone-50 hover:bg-rose-50 border-stone-200 text-stone-500 hover:text-rose-600'
@@ -643,42 +667,40 @@ export default function NotesPage() {
                       </div>
                     </div>
 
-                    {/* Verse Text */}
                     <div
-                      className={`rounded-xl border p-3.5 font-serif text-sm leading-relaxed ${
-                        isLight
-                          ? 'bg-[#FBF9F5] border-stone-200/80 text-stone-900'
-                          : 'bg-[#121212] border-zinc-800 text-zinc-100'
+                      className={`h-px w-full ${
+                        isLight ? 'bg-stone-200/90' : 'bg-zinc-800'
                       }`}
-                    >
+                    />
+
+                    {/* Verse Text */}
+                    <div className="px-4 sm:px-5 py-3.5 font-serif text-sm leading-relaxed text-stone-900 dark:text-zinc-100">
                       “{ctx.verseText}”
                     </div>
 
-                    {/* Context Breakdown */}
-                    <div className="space-y-2">
-                      {ctx.verseBreakdown.map((pt, i) => (
+                    {/* Context Breakdown separated by clean horizontal lines */}
+                    {ctx.verseBreakdown.map((pt, i) => (
+                      <React.Fragment key={i}>
                         <div
-                          key={i}
-                          className={`rounded-xl border p-3 text-xs leading-relaxed ${
-                            isLight
-                              ? 'bg-amber-50/35 border-amber-200/70 text-stone-800'
-                              : 'bg-[#1b1914] border-amber-500/25 text-zinc-200'
+                          className={`h-px w-full ${
+                            isLight ? 'bg-stone-200/80' : 'bg-zinc-800'
                           }`}
-                        >
+                        />
+                        <div className="px-4 sm:px-5 py-3 text-xs leading-relaxed text-stone-700 dark:text-zinc-200">
                           {pt}
                         </div>
-                      ))}
-                    </div>
+                      </React.Fragment>
+                    ))}
+
+                    <div
+                      className={`h-px w-full ${
+                        isLight ? 'bg-stone-200/90' : 'bg-zinc-800'
+                      }`}
+                    />
 
                     {/* Personal Notes */}
                     {isEditing ? (
-                      <div
-                        className={`rounded-xl border p-3.5 space-y-3 ${
-                          isLight
-                            ? 'bg-stone-50 border-stone-200'
-                            : 'bg-[#121212] border-zinc-800'
-                        }`}
-                      >
+                      <div className="px-4 sm:px-5 py-3.5 space-y-3">
                         <div>
                           <label className="text-[11px] font-bold text-stone-500 dark:text-zinc-400 block mb-1">
                             Collection
@@ -742,13 +764,7 @@ export default function NotesPage() {
                         </div>
                       </div>
                     ) : (
-                      <div
-                        className={`rounded-xl border p-3.5 text-xs leading-relaxed ${
-                          isLight
-                            ? 'bg-stone-50/80 border-stone-200/80 text-stone-700'
-                            : 'bg-[#121212] border-zinc-800 text-zinc-300'
-                        }`}
-                      >
+                      <div className="px-4 sm:px-5 py-3.5 text-xs leading-relaxed text-stone-700 dark:text-zinc-300">
                         <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400 dark:text-zinc-500 block mb-1">
                           Personal Notes & Reflections
                         </span>
@@ -797,13 +813,13 @@ export default function NotesPage() {
                 return (
                   <div
                     key={vItem.id}
-                    className={`rounded-2xl border p-5 space-y-4 transition ${
+                    className={`rounded-2xl border overflow-hidden transition ${
                       isLight
                         ? 'bg-white border-stone-200/90 text-stone-900 shadow-2xs'
                         : 'bg-[#161616] border-zinc-800 text-zinc-100'
                     }`}
                   >
-                    <div className="flex items-center justify-between gap-3">
+                    <div className="px-4 sm:px-5 py-3.5 flex items-center justify-between gap-3">
                       <div className="flex items-center gap-2 min-w-0">
                         <span
                           className={`shrink-0 rounded-md px-2 py-0.5 text-xs font-semibold ${
@@ -864,7 +880,13 @@ export default function NotesPage() {
                         </button>
 
                         <button
-                          onClick={() => deleteSavedVerse(vItem.id)}
+                          onClick={() =>
+                            setPendingDelete({
+                              id: vItem.id,
+                              type: 'verse',
+                              label: `Saved Bible Verse: ${vItem.verseRef} (${vItem.translation})`,
+                            })
+                          }
                           className={`rounded-lg p-1.5 border transition ${
                             isLight
                               ? 'bg-stone-50 hover:bg-rose-50 border-stone-200 text-stone-500 hover:text-rose-600'
@@ -878,26 +900,26 @@ export default function NotesPage() {
                       </div>
                     </div>
 
-                    {/* Scripture Text */}
                     <div
-                      className={`rounded-xl border p-4 font-serif text-base leading-relaxed ${
-                        isLight
-                          ? 'bg-[#FBF9F5] border-stone-200/80 text-stone-900'
-                          : 'bg-[#121212] border-zinc-800 text-zinc-100'
+                      className={`h-px w-full ${
+                        isLight ? 'bg-stone-200/90' : 'bg-zinc-800'
                       }`}
-                    >
+                    />
+
+                    {/* Scripture Text */}
+                    <div className="px-4 sm:px-5 py-4 font-serif text-base leading-relaxed text-stone-900 dark:text-zinc-100">
                       “{vItem.verseText}”
                     </div>
 
+                    <div
+                      className={`h-px w-full ${
+                        isLight ? 'bg-stone-200/90' : 'bg-zinc-800'
+                      }`}
+                    />
+
                     {/* Personal Notes */}
                     {isEditing ? (
-                      <div
-                        className={`rounded-xl border p-3.5 space-y-3 ${
-                          isLight
-                            ? 'bg-stone-50 border-stone-200'
-                            : 'bg-[#121212] border-zinc-800'
-                        }`}
-                      >
+                      <div className="px-4 sm:px-5 py-3.5 space-y-3">
                         <div>
                           <label className="text-[11px] font-bold text-stone-500 dark:text-zinc-400 block mb-1">
                             Collection
@@ -961,13 +983,7 @@ export default function NotesPage() {
                         </div>
                       </div>
                     ) : (
-                      <div
-                        className={`rounded-xl border p-3.5 text-xs leading-relaxed ${
-                          isLight
-                            ? 'bg-stone-50/80 border-stone-200/80 text-stone-700'
-                            : 'bg-[#121212] border-zinc-800 text-zinc-300'
-                        }`}
-                      >
+                      <div className="px-4 sm:px-5 py-3.5 text-xs leading-relaxed text-stone-700 dark:text-zinc-300">
                         <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400 dark:text-zinc-500 block mb-1">
                           Personal Notes & Reflections
                         </span>
@@ -996,6 +1012,69 @@ export default function NotesPage() {
           </div>
         )}
       </div>
+
+      {/* =====================================================================
+          MODAL: DELETE CONFIRMATION POPUP
+          ===================================================================== */}
+      {pendingDelete && (
+        <div
+          onClick={() => setPendingDelete(null)}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className={`w-full max-w-md rounded-2xl border p-6 shadow-2xl space-y-4 ${
+              isLight
+                ? 'bg-white border-stone-200 text-stone-900'
+                : 'bg-[#181818] border-zinc-800 text-zinc-100'
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <h2 className="text-base font-bold text-stone-900 dark:text-zinc-100">
+                Confirm Deletion
+              </h2>
+              <button
+                onClick={() => setPendingDelete(null)}
+                className="rounded-lg p-1 text-stone-400 hover:text-stone-700 dark:text-zinc-400 dark:hover:text-zinc-200"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="space-y-2 text-xs sm:text-sm">
+              <p className="text-stone-600 dark:text-zinc-300">
+                Are you sure you want to permanently delete this item?
+              </p>
+              <p
+                className={`font-bold px-3 py-2 rounded-xl border ${
+                  isLight
+                    ? 'bg-stone-50 border-stone-200 text-stone-900'
+                    : 'bg-[#121212] border-zinc-800 text-zinc-100'
+                }`}
+              >
+                {pendingDelete.label}
+              </p>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2 text-xs">
+              <button
+                type="button"
+                onClick={() => setPendingDelete(null)}
+                className="rounded-xl border px-4 py-2 font-semibold text-stone-600 hover:text-stone-900 dark:text-zinc-300 dark:hover:text-white border-stone-200 dark:border-zinc-700"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmDelete}
+                className="rounded-xl px-5 py-2 font-bold bg-rose-600 hover:bg-rose-700 text-white transition"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
 
 

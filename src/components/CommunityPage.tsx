@@ -275,14 +275,14 @@ export default function CommunityPage() {
                 return (
                   <div
                     key={conn.id}
-                    className={`rounded-2xl border p-4 sm:p-5 space-y-3.5 transition ${
+                    className={`rounded-2xl border overflow-hidden transition ${
                       isLight
                         ? 'bg-white border-stone-200/90 text-stone-900 shadow-2xs'
                         : 'bg-[#161616] border-zinc-800 text-zinc-100'
                     }`}
                   >
                     {/* Top Row: References, Collection, Contributor & Actions */}
-                    <div className="flex items-center justify-between gap-3">
+                    <div className="px-4 sm:px-5 py-3.5 flex items-center justify-between gap-3">
                       <div className="flex items-center gap-2 min-w-0">
                         <span
                           className={`shrink-0 rounded-md px-2 py-0.5 text-xs font-semibold ${
@@ -351,52 +351,60 @@ export default function CommunityPage() {
                     </div>
 
                     {conn.title && (
-                      <h3 className="text-sm sm:text-base font-bold text-stone-900 dark:text-zinc-100">
-                        {conn.title}
-                      </h3>
+                      <>
+                        <div
+                          className={`h-px w-full ${
+                            isLight ? 'bg-stone-200/80' : 'bg-zinc-800'
+                          }`}
+                        />
+                        <div className="px-4 sm:px-5 py-2.5">
+                          <h3 className="text-xs sm:text-sm font-bold text-stone-900 dark:text-zinc-100">
+                            {conn.title}
+                          </h3>
+                        </div>
+                      </>
                     )}
 
-                    {/* Both Scriptures (No redundant Open buttons) */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
-                      <div
-                        className={`rounded-xl border p-3 space-y-1 ${
-                          isLight
-                            ? 'bg-[#FBF9F5] border-stone-200/80'
-                            : 'bg-[#121212] border-zinc-800'
-                        }`}
-                      >
-                        <span className={`text-xs font-bold block ${isLight ? 'text-amber-800' : 'text-amber-400'}`}>
-                          {conn.primaryRef} ({conn.translation})
-                        </span>
-                        <p className="font-serif text-xs sm:text-sm leading-relaxed text-stone-800 dark:text-zinc-200">
-                          “{conn.primaryText}”
-                        </p>
-                      </div>
+                    <div
+                      className={`h-px w-full ${
+                        isLight ? 'bg-stone-200/90' : 'bg-zinc-800'
+                      }`}
+                    />
 
-                      <div
-                        className={`rounded-xl border p-3 space-y-1 ${
-                          isLight
-                            ? 'bg-amber-50/40 border-amber-200/80'
-                            : 'bg-[#1c1a15] border-amber-500/30'
-                        }`}
-                      >
-                        <span className={`text-xs font-bold block ${isLight ? 'text-amber-800' : 'text-amber-400'}`}>
-                          {conn.connectedRef} ({conn.translation})
-                        </span>
-                        <p className="font-serif text-xs sm:text-sm leading-relaxed text-stone-800 dark:text-zinc-200">
-                          “{conn.connectedText}”
-                        </p>
-                      </div>
+                    {/* Primary Scripture */}
+                    <div className="px-4 sm:px-5 py-3.5 space-y-1">
+                      <span className={`text-xs font-bold block ${isLight ? 'text-amber-800' : 'text-amber-400'}`}>
+                        {conn.primaryRef} ({conn.translation})
+                      </span>
+                      <p className="font-serif text-xs sm:text-sm leading-relaxed text-stone-800 dark:text-zinc-200">
+                        “{conn.primaryText}”
+                      </p>
                     </div>
 
-                    {/* Contributor's Personal Notes & Reflections */}
                     <div
-                      className={`rounded-xl border p-3.5 space-y-1.5 text-xs leading-relaxed ${
-                        isLight
-                          ? 'bg-stone-50/90 border-stone-200/90 text-stone-800'
-                          : 'bg-[#121212] border-zinc-800 text-zinc-200'
+                      className={`h-px w-full ${
+                        isLight ? 'bg-stone-200/90' : 'bg-zinc-800'
                       }`}
-                    >
+                    />
+
+                    {/* Connected Scripture */}
+                    <div className="px-4 sm:px-5 py-3.5 space-y-1">
+                      <span className={`text-xs font-bold block ${isLight ? 'text-amber-800' : 'text-amber-400'}`}>
+                        {conn.connectedRef} ({conn.translation})
+                      </span>
+                      <p className="font-serif text-xs sm:text-sm leading-relaxed text-stone-800 dark:text-zinc-200">
+                        “{conn.connectedText}”
+                      </p>
+                    </div>
+
+                    <div
+                      className={`h-px w-full ${
+                        isLight ? 'bg-stone-200/90' : 'bg-zinc-800'
+                      }`}
+                    />
+
+                    {/* Contributor's Personal Notes & Reflections */}
+                    <div className="px-4 sm:px-5 py-3.5 space-y-1.5 text-xs leading-relaxed text-stone-800 dark:text-zinc-200">
                       <span
                         className={`text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 ${
                           isLight ? 'text-amber-800' : 'text-amber-400'
@@ -443,14 +451,14 @@ export default function CommunityPage() {
                 return (
                   <div
                     key={ctx.id}
-                    className={`rounded-2xl border p-4 sm:p-5 space-y-3.5 transition ${
+                    className={`rounded-2xl border overflow-hidden transition ${
                       isLight
                         ? 'bg-white border-stone-200/90 text-stone-900 shadow-2xs'
                         : 'bg-[#161616] border-zinc-800 text-zinc-100'
                     }`}
                   >
                     {/* Top Row: Reference, Theme, Contributor & Actions */}
-                    <div className="flex items-center justify-between gap-3">
+                    <div className="px-4 sm:px-5 py-3.5 flex items-center justify-between gap-3">
                       <div className="flex items-center gap-2 min-w-0">
                         <span
                           className={`shrink-0 rounded-md px-2 py-0.5 text-xs font-semibold ${
@@ -517,41 +525,39 @@ export default function CommunityPage() {
                       </div>
                     </div>
 
-                    {/* Scripture Text (No redundant Open button!) */}
                     <div
-                      className={`rounded-xl border p-3.5 font-serif text-sm leading-relaxed ${
-                        isLight
-                          ? 'bg-[#FBF9F5] border-stone-200/80 text-stone-900'
-                          : 'bg-[#121212] border-zinc-800 text-zinc-100'
+                      className={`h-px w-full ${
+                        isLight ? 'bg-stone-200/90' : 'bg-zinc-800'
                       }`}
-                    >
+                    />
+
+                    {/* Scripture Text */}
+                    <div className="px-4 sm:px-5 py-3.5 font-serif text-sm leading-relaxed text-stone-900 dark:text-zinc-100">
                       “{ctx.verseText}”
                     </div>
 
-                    {/* Breakdown Points */}
-                    <div className="space-y-2">
-                      {ctx.verseBreakdown.map((pt, i) => (
+                    {/* Breakdown Points separated by horizontal dividers */}
+                    {ctx.verseBreakdown.map((pt, i) => (
+                      <React.Fragment key={i}>
                         <div
-                          key={i}
-                          className={`rounded-xl border p-3 text-xs leading-relaxed ${
-                            isLight
-                              ? 'bg-amber-50/35 border-amber-200/70 text-stone-800'
-                              : 'bg-[#1b1914] border-amber-500/25 text-zinc-200'
+                          className={`h-px w-full ${
+                            isLight ? 'bg-stone-200/80' : 'bg-zinc-800'
                           }`}
-                        >
+                        />
+                        <div className="px-4 sm:px-5 py-3 text-xs leading-relaxed text-stone-800 dark:text-zinc-200">
                           {pt}
                         </div>
-                      ))}
-                    </div>
+                      </React.Fragment>
+                    ))}
+
+                    <div
+                      className={`h-px w-full ${
+                        isLight ? 'bg-stone-200/90' : 'bg-zinc-800'
+                      }`}
+                    />
 
                     {/* Contributor's Personal Notes & Reflections */}
-                    <div
-                      className={`rounded-xl border p-3.5 space-y-1.5 text-xs leading-relaxed ${
-                        isLight
-                          ? 'bg-stone-50/90 border-stone-200/90 text-stone-800'
-                          : 'bg-[#121212] border-zinc-800 text-zinc-200'
-                      }`}
-                    >
+                    <div className="px-4 sm:px-5 py-3.5 space-y-1.5 text-xs leading-relaxed text-stone-800 dark:text-zinc-200">
                       <span
                         className={`text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 ${
                           isLight ? 'text-amber-800' : 'text-amber-400'
@@ -598,14 +604,14 @@ export default function CommunityPage() {
                 return (
                   <div
                     key={vItem.id}
-                    className={`rounded-2xl border p-4 sm:p-5 space-y-3.5 transition ${
+                    className={`rounded-2xl border overflow-hidden transition ${
                       isLight
                         ? 'bg-white border-stone-200/90 text-stone-900 shadow-2xs'
                         : 'bg-[#161616] border-zinc-800 text-zinc-100'
                     }`}
                   >
                     {/* Top Row: Reference, Collection, Contributor & Actions */}
-                    <div className="flex items-center justify-between gap-3">
+                    <div className="px-4 sm:px-5 py-3.5 flex items-center justify-between gap-3">
                       <div className="flex items-center gap-2 min-w-0">
                         <span
                           className={`shrink-0 rounded-md px-2 py-0.5 text-xs font-semibold ${
@@ -670,25 +676,25 @@ export default function CommunityPage() {
                       </div>
                     </div>
 
-                    {/* Scripture Text (No redundant Open button!) */}
                     <div
-                      className={`rounded-xl border p-4 font-serif text-base leading-relaxed ${
-                        isLight
-                          ? 'bg-[#FBF9F5] border-stone-200/80 text-stone-900'
-                          : 'bg-[#121212] border-zinc-800 text-zinc-100'
+                      className={`h-px w-full ${
+                        isLight ? 'bg-stone-200/90' : 'bg-zinc-800'
                       }`}
-                    >
+                    />
+
+                    {/* Scripture Text */}
+                    <div className="px-4 sm:px-5 py-4 font-serif text-base leading-relaxed text-stone-900 dark:text-zinc-100">
                       “{vItem.verseText}”
                     </div>
 
-                    {/* Contributor's Personal Notes & Reflections */}
                     <div
-                      className={`rounded-xl border p-3.5 space-y-1.5 text-xs leading-relaxed ${
-                        isLight
-                          ? 'bg-stone-50/90 border-stone-200/90 text-stone-800'
-                          : 'bg-[#121212] border-zinc-800 text-zinc-200'
+                      className={`h-px w-full ${
+                        isLight ? 'bg-stone-200/90' : 'bg-zinc-800'
                       }`}
-                    >
+                    />
+
+                    {/* Contributor's Personal Notes & Reflections */}
+                    <div className="px-4 sm:px-5 py-3.5 space-y-1.5 text-xs leading-relaxed text-stone-800 dark:text-zinc-200">
                       <span
                         className={`text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 ${
                           isLight ? 'text-amber-800' : 'text-amber-400'

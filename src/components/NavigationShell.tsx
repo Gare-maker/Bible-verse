@@ -119,37 +119,60 @@ export default function NavigationShell({ children }: { children: React.ReactNod
         }`}
       >
         <div className="p-4 space-y-6 overflow-y-auto no-scrollbar">
-          {/* App Brand */}
-          <button
-            onClick={() => setActivePage('bible')}
-            className="flex items-center gap-3 px-2 py-1 text-left w-full group"
-          >
-            <div
-              className={`h-9 w-9 rounded-xl flex items-center justify-center shadow-sm transition ${
-                isLight
-                  ? 'bg-amber-700 text-white'
-                  : 'bg-amber-500 text-zinc-950'
-              }`}
+          {/* App Brand & Top Theme Switch */}
+          <div className="flex items-center justify-between gap-2 px-2 py-1">
+            <button
+              onClick={() => setActivePage('bible')}
+              className="flex items-center gap-3 text-left min-w-0 flex-1 group"
             >
-              <BookOpen className="h-4 w-4" />
-            </div>
-            <div>
-              <span
-                className={`font-serif text-base font-bold tracking-tight block leading-none ${
-                  isLight ? 'text-stone-900' : 'text-white'
+              <div
+                className={`h-9 w-9 rounded-xl flex items-center justify-center shadow-sm transition shrink-0 ${
+                  isLight
+                    ? 'bg-amber-700 text-white'
+                    : 'bg-amber-500 text-zinc-950'
                 }`}
               >
-                Bible Verse
-              </span>
-              <span
-                className={`text-[11px] font-medium block mt-1 ${
-                  isLight ? 'text-stone-500' : 'text-zinc-400'
-                }`}
-              >
-                Scripture & Context Research
-              </span>
-            </div>
-          </button>
+                <BookOpen className="h-4 w-4" />
+              </div>
+              <div className="min-w-0">
+                <span
+                  className={`font-serif text-base font-bold tracking-tight block leading-none truncate ${
+                    isLight ? 'text-stone-900' : 'text-white'
+                  }`}
+                >
+                  Bible Verse
+                </span>
+                <span
+                  className={`text-[11px] font-medium block mt-1 truncate ${
+                    isLight ? 'text-stone-500' : 'text-zinc-400'
+                  }`}
+                >
+                  Scripture & Context Research
+                </span>
+              </div>
+            </button>
+
+            <button
+              onClick={() =>
+                updatePreferences({
+                  theme: preferences.theme === 'light' ? 'dark' : 'light',
+                })
+              }
+              className={`rounded-lg p-2 border transition shrink-0 ${
+                isLight
+                  ? 'bg-white border-stone-200 text-stone-700 hover:bg-stone-100'
+                  : 'bg-zinc-800 border-zinc-700 text-amber-400 hover:bg-zinc-700'
+              }`}
+              title={`Switch to ${preferences.theme === 'light' ? 'Dark' : 'Light'} Mode`}
+              aria-label="Toggle Theme"
+            >
+              {preferences.theme === 'light' ? (
+                <Moon className="h-4 w-4" />
+              ) : (
+                <Sun className="h-4 w-4" />
+              )}
+            </button>
+          </div>
 
           {/* Primary Navigation — 3 Main Destinations: Bible, Saved, Community */}
           <div className="space-y-1">
@@ -347,7 +370,7 @@ export default function NavigationShell({ children }: { children: React.ReactNod
           </div>
         </div>
 
-        {/* Bottom Sidebar Account & Theme Bar */}
+        {/* Bottom Sidebar Account Bar */}
         <div
           className={`p-3 flex items-center justify-between gap-2 ${
             isLight ? 'bg-[#EFECE4]/60' : 'bg-[#111111]'
@@ -375,26 +398,6 @@ export default function NavigationShell({ children }: { children: React.ReactNod
                 {sbStatus.isConnected ? 'Supabase Synced' : 'Local Workspace'}
               </p>
             </div>
-          </button>
-
-          <button
-            onClick={() =>
-              updatePreferences({
-                theme: preferences.theme === 'light' ? 'dark' : 'light',
-              })
-            }
-            className={`rounded-lg p-2 border transition ${
-              isLight
-                ? 'bg-white border-stone-200 text-stone-700 hover:bg-stone-100'
-                : 'bg-zinc-800 border-zinc-700 text-amber-400 hover:bg-zinc-700'
-            }`}
-            title={`Switch to ${preferences.theme === 'light' ? 'Dark' : 'Light'} Mode`}
-          >
-            {preferences.theme === 'light' ? (
-              <Moon className="h-4 w-4" />
-            ) : (
-              <Sun className="h-4 w-4" />
-            )}
           </button>
         </div>
       </aside>
@@ -617,48 +620,21 @@ export default function NavigationShell({ children }: { children: React.ReactNod
               </button>
             </div>
 
-            {/* Profile Name */}
-            <div className="grid grid-cols-2 gap-3 text-xs">
-              <div>
-                <label className="text-stone-500 font-medium block mb-1">Scholar Name</label>
-                <input
-                  type="text"
-                  value={preferences.userName}
-                  onChange={(e) => updatePreferences({ userName: e.target.value })}
-                  className={`w-full rounded-xl border px-3 py-2 ${
-                    isLight
-                      ? 'bg-stone-50 border-stone-300 text-stone-900'
-                      : 'bg-zinc-900 border-zinc-700 text-white'
-                  }`}
-                />
-              </div>
-              <div>
-                <label className="text-stone-500 font-medium block mb-1">Appearance</label>
-                <button
-                  onClick={() =>
-                    updatePreferences({
-                      theme: preferences.theme === 'light' ? 'dark' : 'light',
-                    })
-                  }
-                  className={`w-full rounded-xl border px-3 py-2 font-semibold flex items-center justify-center gap-2 ${
-                    isLight
-                      ? 'bg-stone-100 border-stone-300 text-stone-800'
-                      : 'bg-zinc-900 border-zinc-700 text-amber-300'
-                  }`}
-                >
-                  {preferences.theme === 'light' ? (
-                    <>
-                      <Sun className="h-3.5 w-3.5 text-amber-600" />
-                      <span>Light Mode (Active)</span>
-                    </>
-                  ) : (
-                    <>
-                      <Moon className="h-3.5 w-3.5 text-amber-400" />
-                      <span>Dark Mode (Active)</span>
-                    </>
-                  )}
-                </button>
-              </div>
+            {/* Profile Name (Appearance removed per specification — only one top theme switch) */}
+            <div className="text-xs">
+              <label className="text-stone-500 dark:text-zinc-400 font-medium block mb-1">
+                Scholar Name
+              </label>
+              <input
+                type="text"
+                value={preferences.userName}
+                onChange={(e) => updatePreferences({ userName: e.target.value })}
+                className={`w-full rounded-xl border px-3 py-2 ${
+                  isLight
+                    ? 'bg-stone-50 border-stone-300 text-stone-900'
+                    : 'bg-zinc-900 border-zinc-700 text-white'
+                }`}
+              />
             </div>
 
             {/* Live Supabase Connection Box */}

@@ -1,17 +1,20 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   ArrowDownAZ,
   ArrowLeft,
+  BookOpen,
   Clock,
   Search,
   Volume2,
   X,
 } from 'lucide-react';
 import { BIBLE_BOOKS, parseScriptureReference } from '@/data/bibleBooks';
+import { getVerseText, searchLocalScriptures } from '@/data/scriptureDatabase';
+import { resolveScriptureVerse } from '@/services/bibleService';
 import { usePlatform } from '@/context/PlatformContext';
-import { Testament } from '@/types/bible';
+import { Testament, VerseData } from '@/types/bible';
 
 interface BookChapterSelectorModalProps {
   isOpen: boolean;
@@ -25,6 +28,7 @@ export default function BookChapterSelectorModal({
   const {
     currentBook,
     currentChapter,
+    translation,
     navigateToPassage,
     navigateToReferenceString,
     readingHistory,
@@ -38,6 +42,67 @@ export default function BookChapterSelectorModal({
   const [sortAlphabetical, setSortAlphabetical] = useState(false);
   const [testamentFilter, setTestamentFilter] = useState<'ALL' | Testament>('ALL');
   const [showHistory, setShowHistory] = useState(false);
+  const [resolvedDirectVerse, setResolvedDirectVerse] = useState<VerseData | null>(null);
+
+  const parsedDirectRef = useMemo(
+    () => parseScriptureReference(searchQuery),
+    [searchQuery]
+  );
+
+  // Dynamically resolve direct verse reference if user typed e.g. "Matthew 3:5", "John 3:16", "Romans 8:28"
+  useEffect(() => {
+    let active = true;
+    if (parsedDirectRef && parsedDirectRef.verse) {
+      const refStr = `${parsedDirectRef.book} ${parsedDirectRef.chapter}:${parsedDirectRef.verse}`;
+      resolveScriptureVerse(refStr, translation).then((res) => {
+        if (!active) return;
+        if (res?.verseData) {
+          setResolvedDirectVerse(res.verseData);
+        } else if (res?.text) {
+          setResolvedDirectVerse({
+            book: parsedDirectRef.book,
+            chapter: parsedDirectRef.chapter,
+            verse: parsedDirectRef.verse!,
+            canonicalRef: refStr,
+            translations: {
+              NIV: res.text,
+              KJV: res.text,
+              ESV: res.text,
+              NKJV: res.text,
+              NLT: res.text,
+              ASV: res.text,
+            },
+          });
+        } else {
+          setResolvedDirectVerse(null);
+        }
+      });
+    } else {
+      setResolvedDirectVerse(null);
+    }
+    return () => {
+      active = false;
+    };
+  }, [parsedDirectRef, translation]);
+
+  // Matching scripture verses by reference or phrase/text search
+  const matchingVerses = useMemo(() => {
+    const q = searchQuery.trim();
+    if (q.length < 2) return [];
+    const localMatches = searchLocalScriptures(q, translation);
+    const list: VerseData[] = [...localMatches];
+    if (
+      resolvedDirectVerse &&
+      !list.some(
+        (v) =>
+          v.canonicalRef.toLowerCase() ===
+          resolvedDirectVerse.canonicalRef.toLowerCase()
+      )
+    ) {
+      list.unshift(resolvedDirectVerse);
+    }
+    return list.slice(0, 10);
+  }, [searchQuery, translation, resolvedDirectVerse]);
 
   const filteredBooks = useMemo(() => {
     let list = [...BIBLE_BOOKS];
@@ -46,9 +111,10 @@ export default function BookChapterSelectorModal({
     }
     if (searchQuery.trim()) {
       const q = searchQuery.trim().toLowerCase();
-      const parsed = parseScriptureReference(searchQuery);
-      if (parsed) {
-        list = list.filter((b) => b.name.toLowerCase() === parsed.book.toLowerCase());
+      if (parsedDirectRef) {
+        list = list.filter(
+          (b) => b.name.toLowerCase() === parsedDirectRef.book.toLowerCase()
+        );
       } else {
         list = list.filter(
           (b) =>
@@ -62,15 +128,22 @@ export default function BookChapterSelectorModal({
       list.sort((a, b) => a.name.localeCompare(b.name));
     }
     return list;
-  }, [searchQuery, sortAlphabetical, testamentFilter]);
+  }, [searchQuery, sortAlphabetical, testamentFilter, parsedDirectRef]);
 
   if (!isOpen) return null;
 
   const handleDirectReferenceSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const parsed = parseScriptureReference(searchQuery);
-    if (parsed) {
-      navigateToReferenceString(searchQuery, false);
+    if (parsedDirectRef) {
+      navigateToPassage(
+        parsedDirectRef.book,
+        parsedDirectRef.chapter,
+        parsedDirectRef.verse
+      );
+      onClose();
+    } else if (matchingVerses.length > 0) {
+      const first = matchingVerses[0];
+      navigateToPassage(first.book, first.chapter, first.verse);
       onClose();
     }
   };
@@ -167,7 +240,7 @@ export default function BookChapterSelectorModal({
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Jump to book or verse (e.g. Matthew 1:23, Deuteronomy 32)..."
+              placeholder="Search book, reference (John 3:16), or verse text ('For God so loved')..."
               className={`w-full rounded-xl pl-10 pr-9 py-2 text-xs sm:text-sm border focus:outline-none ${
                 isLight
                   ? 'bg-white border-stone-200/90 text-stone-900 placeholder-stone-400 focus:border-amber-700'
@@ -252,7 +325,88 @@ export default function BookChapterSelectorModal({
             ))}
           </div>
         ) : (
-          <div className="flex-1 overflow-y-auto px-5 py-2 space-y-1">
+          <div className="flex-1 overflow-y-auto px-5 py-2 space-y-2">
+            {/* Direct Reference Jump or Matching Scripture Verses */}
+            {searchQuery.trim().length >= 2 && (parsedDirectRef || matchingVerses.length > 0) && (
+              <div className="pt-1 pb-2 space-y-2">
+                {parsedDirectRef && !parsedDirectRef.verse && (
+                  <button
+                    onClick={() => {
+                      navigateToPassage(parsedDirectRef.book, parsedDirectRef.chapter);
+                      onClose();
+                    }}
+                    className={`w-full flex items-center justify-between rounded-xl px-3.5 py-2.5 text-left border transition ${
+                      isLight
+                        ? 'bg-amber-50/70 hover:bg-amber-50 border-amber-200 text-stone-900'
+                        : 'bg-amber-500/10 hover:bg-amber-500/15 border-amber-500/30 text-zinc-100'
+                    }`}
+                  >
+                    <div>
+                      <span className={`text-[10px] font-bold uppercase tracking-wider ${isLight ? 'text-amber-800' : 'text-amber-400'}`}>
+                        Open Chapter
+                      </span>
+                      <p className="text-sm font-bold">
+                        {parsedDirectRef.book} {parsedDirectRef.chapter}
+                      </p>
+                    </div>
+                    <span className={`text-xs font-bold ${isLight ? 'text-amber-800' : 'text-amber-300'}`}>
+                      Go →
+                    </span>
+                  </button>
+                )}
+
+                {matchingVerses.length > 0 && (
+                  <div
+                    className={`rounded-2xl border overflow-hidden ${
+                      isLight
+                        ? 'bg-white border-stone-200/90 text-stone-900'
+                        : 'bg-[#1a1a1a] border-zinc-800 text-zinc-100'
+                    }`}
+                  >
+                    <div
+                      className={`px-3.5 py-2 flex items-center justify-between text-[11px] font-bold uppercase tracking-wider ${
+                        isLight ? 'bg-stone-50 text-stone-500' : 'bg-[#202020] text-zinc-400'
+                      }`}
+                    >
+                      <span className="flex items-center gap-1.5">
+                        <BookOpen className="h-3.5 w-3.5 text-amber-600" />
+                        Matching Scriptures
+                      </span>
+                      <span>{translation}</span>
+                    </div>
+                    {matchingVerses.map((v, idx) => (
+                      <React.Fragment key={v.canonicalRef}>
+                        {idx > 0 && (
+                          <div className={`h-px w-full ${isLight ? 'bg-stone-200/80' : 'bg-zinc-800'}`} />
+                        )}
+                        <button
+                          onClick={() => {
+                            navigateToPassage(v.book, v.chapter, v.verse);
+                            onClose();
+                          }}
+                          className={`w-full px-3.5 py-3 text-left transition ${
+                            isLight ? 'hover:bg-stone-50' : 'hover:bg-[#242424]'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between gap-2 mb-1">
+                            <span className={`text-xs font-bold ${isLight ? 'text-amber-800' : 'text-amber-400'}`}>
+                              {v.book} {v.chapter}:{v.verse}
+                            </span>
+                            <span className={`text-[11px] font-semibold ${isLight ? 'text-stone-400' : 'text-zinc-500'}`}>
+                              Open passage →
+                            </span>
+                          </div>
+                          <p className={`text-xs font-serif leading-relaxed line-clamp-2 ${isLight ? 'text-stone-700' : 'text-zinc-300'}`}>
+                            {v.translations[translation] || v.translations.NIV}
+                          </p>
+                        </button>
+                      </React.Fragment>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
             {filteredBooks.map((book) => {
               const isExpanded =
                 expandedBook.toLowerCase() === book.name.toLowerCase() ||

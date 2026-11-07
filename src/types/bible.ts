@@ -68,6 +68,27 @@ export interface ResolvedCrossReference {
   verificationStatus: 'verified' | 'ai_suggested' | 'user_created';
 }
 
+export interface BiblicalTypeShadow {
+  id: string;
+  title: string;
+  otTypeRef: string;
+  ntAntitypeRef: string;
+  typeName: string;
+  fulfilmentName: string;
+  explanation: string;
+  historicalSource: string;
+}
+
+export interface BiblicalInference {
+  id: string;
+  verseRef: string;
+  title: string;
+  explicitStatement: string;
+  inferredConclusion: string;
+  reasoningExplanation: string;
+  supportingRefs: string[];
+}
+
 export interface VerseContextData {
   targetRef: string;
   book: string;
