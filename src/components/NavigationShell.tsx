@@ -105,7 +105,9 @@ export default function NavigationShell({ children }: { children: React.ReactNod
   return (
     <div
       className={`min-h-screen flex flex-col lg:flex-row transition-colors ${
-        isLight ? 'bg-[#FBF9F5] text-stone-900' : 'bg-[#0F0F0F] text-zinc-100'
+        isLight
+          ? 'bg-[#FBF9F5] text-stone-900'
+          : 'dark bg-[#0F0F0F] text-zinc-100'
       }`}
     >
       {/* =====================================================================

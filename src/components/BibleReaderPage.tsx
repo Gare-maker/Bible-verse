@@ -32,6 +32,8 @@ import {
   findBookByName,
 } from '@/data/bibleBooks';
 import {
+  CANONICAL_INFERENCES,
+  CANONICAL_TYPES_AND_SHADOWS,
   getCrossReferencesForVerse,
   getInferencesForVerse,
   getTypesAndShadowsForVerse,
@@ -57,6 +59,7 @@ import {
   stopHumanSpeech,
   VoiceOption,
 } from '@/utils/naturalSpeech';
+import BibleLineDrawing, { getIllustrationForVerse } from './BibleLineDrawing';
 import BookChapterSelectorModal from './BookChapterSelectorModal';
 import GlobalSearchModal from './GlobalSearchModal';
 
@@ -312,17 +315,14 @@ export default function BibleReaderPage() {
     const infs = getInferencesForVerse(v.canonicalRef);
     const tShadows = getTypesAndShadowsForVerse(v.canonicalRef);
 
-    // Choose default tab from available non-empty categories
+    // If user explicitly clicked 'reference', 'inference', or 'types', open that exact view;
+    // otherwise choose default tab from available non-empty categories
     let targetTab: ReferenceSectionTab = preferredTab || 'reference';
-    if (targetTab === 'reference' && refs.length === 0) {
-      if (infs.length > 0) targetTab = 'inference';
-      else if (tShadows.length > 0) targetTab = 'types';
-    } else if (targetTab === 'inference' && infs.length === 0) {
-      if (refs.length > 0) targetTab = 'reference';
-      else if (tShadows.length > 0) targetTab = 'types';
-    } else if (targetTab === 'types' && tShadows.length === 0) {
-      if (refs.length > 0) targetTab = 'reference';
-      else if (infs.length > 0) targetTab = 'inference';
+    if (!preferredTab) {
+      if (refs.length === 0) {
+        if (infs.length > 0) targetTab = 'inference';
+        else if (tShadows.length > 0) targetTab = 'types';
+      }
     }
 
     setSelectedVerse(v.verse);
@@ -976,26 +976,30 @@ export default function BibleReaderPage() {
                 const refs = getCrossReferencesForVerse(v.canonicalRef);
                 const inferences = getInferencesForVerse(v.canonicalRef);
                 const typeShadows = getTypesAndShadowsForVerse(v.canonicalRef);
+                const verseIllustration = getIllustrationForVerse(
+                  currentBook,
+                  currentChapter,
+                  v.verse
+                );
                 const availableIntelTabs: {
                   id: ReferenceSectionTab;
                   label: string;
                 }[] = [
-                  ...(refs.length > 0
-                    ? [
-                        {
-                          id: 'reference' as const,
-                          label: refs.length > 1 ? 'References' : 'Reference',
-                        },
-                      ]
-                    : []),
-                  ...(inferences.length > 0
-                    ? [{ id: 'inference' as const, label: 'Inference' }]
-                    : []),
-                  ...(typeShadows.length > 0
-                    ? [{ id: 'types' as const, label: 'Types & Shadows' }]
-                    : []),
+                  {
+                    id: 'reference' as const,
+                    label: refs.length > 1 ? 'References' : 'Reference',
+                  },
+                  {
+                    id: 'inference' as const,
+                    label: 'Reference Inference',
+                  },
+                  {
+                    id: 'types' as const,
+                    label: 'Types & Shadows',
+                  },
                 ];
-                const hasAnyIntel = availableIntelTabs.length > 0;
+                const hasAnyIntel =
+                  refs.length > 0 || inferences.length > 0 || typeShadows.length > 0;
 
                 const isSelected = selectedVerse === v.verse;
                 const isReferenceOpen = isSelected && openPanelMode === 'reference';
@@ -1041,6 +1045,14 @@ export default function BibleReaderPage() {
                       >
                         {v.heading}
                       </h3>
+                    )}
+
+                    {/* Traditional Monochrome Bible Line Illustration (exclusively on the Bible reading page) */}
+                    {verseIllustration && (
+                      <BibleLineDrawing
+                        illustration={verseIllustration}
+                        isLight={isLight}
+                      />
                     )}
 
                     {/* Clean Verse Block */}
@@ -1103,45 +1115,100 @@ export default function BibleReaderPage() {
                         </sup>
                         <span>{v.translations[translation] || v.translations.NIV}</span>
 
-                        {/* Unified Scripture Intelligence Badge (Reference / Inference / Types & Shadows) */}
+                        {/* Distinct Inline Indicators for Scripture References, Reference Inference & Types & Shadows */}
                         {hasAnyIntel && preferences.showReferenceBadges && (
-                          <span className="inline-flex items-center ml-2 align-middle">
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                if (isReferenceOpen) {
-                                  setSelectedVerse(null);
-                                  setOpenPanelMode('none');
-                                } else {
-                                  // Opening Reference closes Action and scrolls verse to top
-                                  openScriptureIntelligenceForVerse(v);
-                                }
-                              }}
-                              className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 font-sans text-[11px] font-semibold transition border ${
-                                isReferenceOpen
-                                  ? isLight
-                                    ? 'bg-amber-700 text-white border-amber-700 shadow-xs'
-                                    : 'bg-amber-500 text-zinc-950 border-amber-500 shadow-xs font-bold'
-                                  : isLight
-                                  ? 'bg-amber-50 hover:bg-amber-100 text-amber-900 border-amber-200/90'
-                                  : 'bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border-amber-500/30'
-                              }`}
-                              title={
-                                isReferenceOpen
-                                  ? `Close Scripture references for ${v.canonicalRef}`
-                                  : `Open Scripture references, inference & types for ${v.canonicalRef}`
-                              }
-                            >
-                              <Link2 className="h-3 w-3" />
-                              <span>
-                                {refs.length > 1
-                                  ? 'References'
-                                  : refs.length === 1
-                                  ? 'Reference'
-                                  : availableIntelTabs[0]?.label || 'Reference'}
-                              </span>
-                            </button>
+                          <span className="inline-flex flex-wrap items-center gap-1.5 ml-2 align-middle">
+                            {refs.length > 0 && (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (
+                                    isReferenceOpen &&
+                                    activeRefSection === 'reference'
+                                  ) {
+                                    setSelectedVerse(null);
+                                    setOpenPanelMode('none');
+                                  } else {
+                                    openScriptureIntelligenceForVerse(v, 'reference');
+                                  }
+                                }}
+                                className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 font-sans text-[11px] font-semibold transition border ${
+                                  isReferenceOpen && activeRefSection === 'reference'
+                                    ? isLight
+                                      ? 'bg-amber-700 text-white border-amber-700 shadow-xs'
+                                      : 'bg-amber-500 text-zinc-950 border-amber-500 shadow-xs font-bold'
+                                    : isLight
+                                    ? 'bg-amber-50 hover:bg-amber-100 text-amber-900 border-amber-200/90'
+                                    : 'bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border-amber-500/30'
+                                }`}
+                                title={`Open Scripture References for ${v.canonicalRef}`}
+                              >
+                                <Link2 className="h-3 w-3" />
+                                <span>
+                                  {refs.length > 1 ? 'References' : 'Reference'}
+                                </span>
+                              </button>
+                            )}
+
+                            {inferences.length > 0 && (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (
+                                    isReferenceOpen &&
+                                    activeRefSection === 'inference'
+                                  ) {
+                                    setSelectedVerse(null);
+                                    setOpenPanelMode('none');
+                                  } else {
+                                    openScriptureIntelligenceForVerse(v, 'inference');
+                                  }
+                                }}
+                                className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 font-sans text-[11px] font-semibold transition border ${
+                                  isReferenceOpen && activeRefSection === 'inference'
+                                    ? isLight
+                                      ? 'bg-sky-700 text-white border-sky-700 shadow-xs'
+                                      : 'bg-sky-500 text-zinc-950 border-sky-500 shadow-xs font-bold'
+                                    : isLight
+                                    ? 'bg-sky-50 hover:bg-sky-100 text-sky-900 border-sky-200/90'
+                                    : 'bg-sky-500/15 hover:bg-sky-500/25 text-sky-300 border-sky-500/30'
+                                }`}
+                                title={`Open Reference Inference for ${v.canonicalRef}`}
+                              >
+                                <Compass className="h-3 w-3" />
+                                <span>Reference Inference</span>
+                              </button>
+                            )}
+
+                            {typeShadows.length > 0 && (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (isReferenceOpen && activeRefSection === 'types') {
+                                    setSelectedVerse(null);
+                                    setOpenPanelMode('none');
+                                  } else {
+                                    openScriptureIntelligenceForVerse(v, 'types');
+                                  }
+                                }}
+                                className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 font-sans text-[11px] font-semibold transition border ${
+                                  isReferenceOpen && activeRefSection === 'types'
+                                    ? isLight
+                                      ? 'bg-emerald-700 text-white border-emerald-700 shadow-xs'
+                                      : 'bg-emerald-500 text-zinc-950 border-emerald-500 shadow-xs font-bold'
+                                    : isLight
+                                    ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border-emerald-200/90'
+                                    : 'bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border-emerald-500/30'
+                                }`}
+                                title={`Open Types & Shadows for ${v.canonicalRef}`}
+                              >
+                                <BookOpen className="h-3 w-3" />
+                                <span>Types & Shadows</span>
+                              </button>
+                            )}
                           </span>
                         )}
 
@@ -1543,17 +1610,38 @@ export default function BibleReaderPage() {
                           </div>
                         )}
 
-                        {/* SECTION 2: INFERENCE (Biblical Interpretations & Connections — Interpretive) */}
-                        {activeRefSection === 'inference' && inferences.length > 0 && (
+                        {/* SECTION 2: REFERENCE INFERENCE (Dedicated Reference Inference View) */}
+                        {activeRefSection === 'inference' && (
                           <div>
-                            {inferences.map((inf, idx) => {
-                              const primaryVerseText =
-                                v.translations[translation] || v.translations.NIV;
+                            {inferences.length === 0 && (
+                              <div
+                                className={`px-4 sm:px-5 py-3 text-xs border-b ${
+                                  isLight
+                                    ? 'bg-stone-50 border-stone-200/80 text-stone-600'
+                                    : 'bg-zinc-900/60 border-zinc-800 text-zinc-400'
+                                }`}
+                              >
+                                No direct inference specific to {v.canonicalRef}. Below are key verified{' '}
+                                <strong className={isLight ? 'text-stone-900' : 'text-zinc-200'}>
+                                  Reference Inferences
+                                </strong>{' '}
+                                across Scripture—click any passage to navigate directly.
+                              </div>
+                            )}
+                            {(inferences.length > 0
+                              ? inferences
+                              : CANONICAL_INFERENCES.slice(0, 6)
+                            ).map((inf, idx) => {
+                              const origText =
+                                resolvedRefTexts[inf.verseRef] ||
+                                getVerseText(inf.verseRef, translation) ||
+                                v.translations[translation] ||
+                                v.translations.NIV;
                               const firstSupportRef = inf.supportingRefs[0] || v.canonicalRef;
                               const firstSupportText =
                                 resolvedRefTexts[firstSupportRef] ||
                                 getVerseText(firstSupportRef, translation) ||
-                                primaryVerseText;
+                                origText;
                               return (
                                 <React.Fragment key={inf.id}>
                                   {idx > 0 && (
@@ -1574,7 +1662,7 @@ export default function BibleReaderPage() {
                                               : 'bg-zinc-800 text-zinc-200 border border-zinc-700'
                                           }`}
                                         >
-                                          Interpretive (Not Direct Quotation)
+                                          Reference Inference • Interpretive
                                         </span>
                                         <span
                                           className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
@@ -1610,7 +1698,7 @@ export default function BibleReaderPage() {
                                             title: inf.title,
                                             primaryRef: inf.verseRef,
                                             connectedRef: firstSupportRef,
-                                            primaryText: primaryVerseText,
+                                            primaryText: origText,
                                             connectedText: firstSupportText,
                                             translation,
                                             category: 'Thematic connection',
@@ -1639,6 +1727,41 @@ export default function BibleReaderPage() {
                                     <span className="text-xs sm:text-sm font-bold text-stone-900 dark:text-zinc-100 block">
                                       {inf.title}
                                     </span>
+
+                                    {/* Original Scripture (Clearly Distinguished From Supporting Scriptures) */}
+                                    <div
+                                      className={`rounded-xl border p-3 space-y-1 ${
+                                        isLight
+                                          ? 'bg-amber-50/50 border-amber-200/80'
+                                          : 'bg-amber-500/10 border-amber-500/25'
+                                      }`}
+                                    >
+                                      <div className="flex items-center justify-between gap-2 flex-wrap">
+                                        <span
+                                          className={`text-[10px] font-bold uppercase tracking-wider ${
+                                            isLight ? 'text-amber-900' : 'text-amber-300'
+                                          }`}
+                                        >
+                                          Original Selected Scripture — {inf.verseRef} (
+                                          {translation})
+                                        </span>
+                                        <button
+                                          type="button"
+                                          onClick={() =>
+                                            navigateToReferenceString(inf.verseRef)
+                                          }
+                                          className={`text-[11px] font-semibold hover:underline inline-flex items-center gap-1 ${
+                                            isLight ? 'text-amber-900' : 'text-amber-400'
+                                          }`}
+                                        >
+                                          <span>Go to {inf.verseRef}</span>
+                                          <ExternalLink className="h-3 w-3 opacity-75" />
+                                        </button>
+                                      </div>
+                                      <p className="font-serif text-xs sm:text-sm leading-relaxed text-stone-900 dark:text-zinc-100">
+                                        “{origText}”
+                                      </p>
+                                    </div>
 
                                     <div className="pt-1">
                                       <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400 dark:text-zinc-500 block">
@@ -1673,7 +1796,7 @@ export default function BibleReaderPage() {
 
                                     <div>
                                       <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400 dark:text-zinc-500 block">
-                                        Reasoning & How the Conclusion Follows
+                                        Reasoning & Relationship Between the Passages
                                       </span>
                                       <p className="text-xs leading-relaxed mt-0.5 text-stone-600 dark:text-zinc-300">
                                         {inf.reasoningExplanation}
@@ -1704,10 +1827,10 @@ export default function BibleReaderPage() {
                                     }`}
                                   />
 
-                                  {/* Supporting Scriptures (Expand Inline Directly Beneath When Clicked) */}
+                                  {/* Supporting Scriptures (Clearly Distinguished from Original Scripture) */}
                                   <div className="px-4 sm:px-5 py-3.5 space-y-2.5">
                                     <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400 dark:text-zinc-500 block">
-                                      Supporting Scriptures (Click to expand or collapse inline)
+                                      Supporting Scriptures (Click to expand inline or open passage)
                                     </span>
                                     <div className="flex flex-wrap gap-1.5">
                                       {inf.supportingRefs.map((supRef) => {
@@ -1768,7 +1891,7 @@ export default function BibleReaderPage() {
                                                   isLight ? 'text-amber-900' : 'text-amber-400'
                                                 }`}
                                               >
-                                                {supRef} ({translation})
+                                                Supporting Scripture: {supRef} ({translation})
                                               </span>
                                               <button
                                                 type="button"
@@ -1777,7 +1900,7 @@ export default function BibleReaderPage() {
                                                 }
                                                 className="text-[11px] font-semibold hover:underline inline-flex items-center gap-1 text-stone-500 dark:text-zinc-400"
                                               >
-                                                <span>Open chapter</span>
+                                                <span>Go to {supRef}</span>
                                                 <ExternalLink className="h-3 w-3 opacity-75" />
                                               </button>
                                             </div>
@@ -1796,9 +1919,27 @@ export default function BibleReaderPage() {
                         )}
 
                         {/* SECTION 3: TYPES & SHADOWS (Biblical Typology) */}
-                        {activeRefSection === 'types' && typeShadows.length > 0 && (
+                        {activeRefSection === 'types' && (
                           <div>
-                            {typeShadows.map((ts, idx) => {
+                            {typeShadows.length === 0 && (
+                              <div
+                                className={`px-4 sm:px-5 py-3 text-xs border-b ${
+                                  isLight
+                                    ? 'bg-stone-50 border-stone-200/80 text-stone-600'
+                                    : 'bg-zinc-900/60 border-zinc-800 text-zinc-400'
+                                }`}
+                              >
+                                No direct type or shadow specific to {v.canonicalRef}. Below are verified{' '}
+                                <strong className={isLight ? 'text-stone-900' : 'text-zinc-200'}>
+                                  Biblical Types & Shadows
+                                </strong>{' '}
+                                connecting Old Testament figures and events to their New Testament fulfilment.
+                              </div>
+                            )}
+                            {(typeShadows.length > 0
+                              ? typeShadows
+                              : CANONICAL_TYPES_AND_SHADOWS.slice(0, 6)
+                            ).map((ts, idx) => {
                               const otText =
                                 resolvedRefTexts[ts.otTypeRef] ||
                                 getVerseText(ts.otTypeRef, translation);
@@ -1826,7 +1967,7 @@ export default function BibleReaderPage() {
                                               : 'bg-amber-500/20 text-amber-300'
                                           }`}
                                         >
-                                          Typological Connection
+                                          Types & Shadows
                                         </span>
                                         <span
                                           className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
@@ -1907,7 +2048,7 @@ export default function BibleReaderPage() {
                                           isLight ? 'text-amber-900' : 'text-amber-400'
                                         }`}
                                       >
-                                        <span>Open chapter</span>
+                                        <span>Go to {ts.otTypeRef}</span>
                                         <ExternalLink className="h-3 w-3 opacity-75" />
                                       </button>
                                     </div>
@@ -1955,7 +2096,7 @@ export default function BibleReaderPage() {
                                           isLight ? 'text-amber-900' : 'text-amber-400'
                                         }`}
                                       >
-                                        <span>Open chapter</span>
+                                        <span>Go to {ts.ntAntitypeRef}</span>
                                         <ExternalLink className="h-3 w-3 opacity-75" />
                                       </button>
                                     </div>
@@ -1970,26 +2111,33 @@ export default function BibleReaderPage() {
                                     }`}
                                   />
 
-                                  {/* Explanation of What the Type Represents, Biblical Context & Supporting Scripture */}
-                                  <div className="px-4 sm:px-5 py-3.5 space-y-2">
-                                    <div className="flex flex-wrap items-center gap-2 text-xs">
-                                      <span className="font-bold text-stone-500 dark:text-zinc-400">
-                                        Shadow / Type:
-                                      </span>
-                                      <span className="font-semibold text-stone-900 dark:text-zinc-100">
-                                        {ts.typeName}
-                                      </span>
-                                      <span className="text-stone-400">→</span>
-                                      <span className="font-bold text-stone-500 dark:text-zinc-400">
-                                        Substance / Fulfilment:
-                                      </span>
-                                      <span className="font-semibold text-stone-900 dark:text-zinc-100">
-                                        {ts.fulfilmentName}
-                                      </span>
+                                  {/* Explanation of What the Type Represents, Corresponding Fulfilment & Supporting Scripture */}
+                                  <div className="px-4 sm:px-5 py-3.5 space-y-2.5">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                                      <div>
+                                        <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400 dark:text-zinc-500 block">
+                                          What the Original Type Represented
+                                        </span>
+                                        <span className="font-semibold text-stone-900 dark:text-zinc-100">
+                                          {ts.typeName}
+                                        </span>
+                                      </div>
+                                      <div>
+                                        <span
+                                          className={`text-[10px] font-bold uppercase tracking-wider block ${
+                                            isLight ? 'text-emerald-800' : 'text-emerald-400'
+                                          }`}
+                                        >
+                                          Corresponding New Testament Fulfilment
+                                        </span>
+                                        <span className="font-semibold text-stone-900 dark:text-zinc-100">
+                                          {ts.fulfilmentName}
+                                        </span>
+                                      </div>
                                     </div>
                                     <div>
                                       <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400 dark:text-zinc-500 block">
-                                        Explanation of the Typological Relationship
+                                        Explanation of Fulfilment & Significance
                                       </span>
                                       <p className="text-xs leading-relaxed mt-0.5 text-stone-700 dark:text-zinc-300">
                                         {ts.explanation}
@@ -2238,7 +2386,7 @@ export default function BibleReaderPage() {
                             />
 
                             {/* SECOND SECTION: Available actions */}
-                            {/* Only show Reference / Inference / Types & Shadows categories with supported findings, or Reference when clicked */}
+                            {/* Three distinguishable Bible study features: Reference, Reference Inference, Types & Shadows */}
                             <div className="px-4 sm:px-5 py-3 flex flex-wrap items-center gap-1.5 sm:gap-2">
                               <button
                                 onClick={() =>
@@ -2253,35 +2401,31 @@ export default function BibleReaderPage() {
                                 Reference
                               </button>
 
-                              {inferences.length > 0 && (
-                                <button
-                                  onClick={() =>
-                                    openScriptureIntelligenceForVerse(v, 'inference')
-                                  }
-                                  className={`rounded-lg px-2.5 py-1.5 text-xs font-medium border transition shrink-0 whitespace-nowrap ${
-                                    isLight
-                                      ? 'bg-stone-100 hover:bg-stone-200/80 border-stone-200 text-stone-700'
-                                      : 'bg-zinc-800 hover:bg-zinc-700 border-zinc-700 text-zinc-200'
-                                  }`}
-                                >
-                                  Inference
-                                </button>
-                              )}
+                              <button
+                                onClick={() =>
+                                  openScriptureIntelligenceForVerse(v, 'inference')
+                                }
+                                className={`rounded-lg px-2.5 py-1.5 text-xs font-medium border transition shrink-0 whitespace-nowrap ${
+                                  isLight
+                                    ? 'bg-stone-100 hover:bg-stone-200/80 border-stone-200 text-stone-700'
+                                    : 'bg-zinc-800 hover:bg-zinc-700 border-zinc-700 text-zinc-200'
+                                }`}
+                              >
+                                Reference Inference
+                              </button>
 
-                              {typeShadows.length > 0 && (
-                                <button
-                                  onClick={() =>
-                                    openScriptureIntelligenceForVerse(v, 'types')
-                                  }
-                                  className={`rounded-lg px-2.5 py-1.5 text-xs font-medium border transition shrink-0 whitespace-nowrap ${
-                                    isLight
-                                      ? 'bg-stone-100 hover:bg-stone-200/80 border-stone-200 text-stone-700'
-                                      : 'bg-zinc-800 hover:bg-zinc-700 border-zinc-700 text-zinc-200'
-                                  }`}
-                                >
-                                  Types & Shadows
-                                </button>
-                              )}
+                              <button
+                                onClick={() =>
+                                  openScriptureIntelligenceForVerse(v, 'types')
+                                }
+                                className={`rounded-lg px-2.5 py-1.5 text-xs font-medium border transition shrink-0 whitespace-nowrap ${
+                                  isLight
+                                    ? 'bg-stone-100 hover:bg-stone-200/80 border-stone-200 text-stone-700'
+                                    : 'bg-zinc-800 hover:bg-zinc-700 border-zinc-700 text-zinc-200'
+                                }`}
+                              >
+                                Types & Shadows
+                              </button>
 
                               <button
                                 onClick={() => setActiveActionView('context')}

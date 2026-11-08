@@ -16,8 +16,17 @@ html,
 body {
   background-color: #fbf9f5;
   color: #1c1917;
+  color-scheme: light;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+html.dark,
+html.dark body,
+body.dark {
+  background-color: #0f0f0f;
+  color: #f4f4f5;
+  color-scheme: dark;
 }
 
 /* Custom subtle scrollbars for desktop app feel */

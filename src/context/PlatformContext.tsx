@@ -606,6 +606,17 @@ export function PlatformProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  // Sync active theme ('light' | 'dark') to <html> and <body> so all Tailwind dark: classes work globally
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    const isDark = preferences.theme === 'dark';
+    document.documentElement.classList.toggle('dark', isDark);
+    document.documentElement.style.colorScheme = isDark ? 'dark' : 'light';
+    if (document.body) {
+      document.body.classList.toggle('dark', isDark);
+    }
+  }, [preferences.theme]);
+
   // Persist changes to localStorage
   useEffect(() => {
     if (!hydrated) return;
