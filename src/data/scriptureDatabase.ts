@@ -1538,6 +1538,270 @@ export const CORE_SCRIPTURE_VERSES: VerseData[] = [
       ASV: 'And she said unto her husband, Behold now, I perceive that this is a holy man of God, that passeth by us continually.',
     }
   ),
+  v(
+    'Matthew',
+    22,
+    37,
+    {
+      NIV: 'Jesus replied: “‘Love the Lord your God with all your heart and with all your soul and with all your mind.’',
+      KJV: 'Jesus said unto him, Thou shalt love the Lord thy God with all thy heart, and with all thy soul, and with all thy mind.',
+      ESV: 'And he said to him, “You shall love the Lord your God with all your heart and with all your soul and with all your mind.',
+      NKJV: 'Jesus said to him, “‘You shall love the LORD your God with all your heart, with all your soul, and with all your mind.’',
+      NLT: 'Jesus replied, “‘You must love the LORD your God with all your heart, all your soul, and all your mind.’',
+      ASV: 'And he said unto him, Thou shalt love the Lord thy God with all thy heart, and with all thy soul, and with all thy mind.',
+    },
+    { isRedLetter: true }
+  ),
+  v(
+    'Deuteronomy',
+    6,
+    5,
+    {
+      NIV: 'Love the LORD your God with all your heart and with all your soul and with all your strength.',
+      KJV: 'And thou shalt love the LORD thy God with all thine heart, and with all thy soul, and with all thy might.',
+      ESV: 'You shall love the LORD your God with all your heart and with all your soul and with all your might.',
+      NKJV: 'You shall love the LORD your God with all your heart, with all your soul, and with all your strength.',
+      NLT: 'And you must love the LORD your God with all your heart, all your soul, and all your strength.',
+      ASV: 'And thou shalt love Jehovah thy God with all thy heart, and with all thy soul, and with all thy might.',
+    }
+  ),
+  v(
+    'Matthew',
+    21,
+    13,
+    {
+      NIV: '“It is written,” he said to them, “‘My house will be called a house of prayer,’ but you are making it ‘a den of robbers.’”',
+      KJV: 'And said unto them, It is written, My house shall be called the house of prayer; but ye have made it a den of thieves.',
+      ESV: 'He said to them, “It is written, ‘My house shall be called a house of prayer,’ but you make it a ‘den of robbers.’”',
+      NKJV: 'And He said to them, “It is written, ‘My house shall be called a house of prayer,’ but you have made it a ‘den of thieves.’”',
+      NLT: 'He said to them, “The Scriptures declare, ‘My Temple will be called a house of prayer,’ but you have turned it into a den of thieves!”',
+      ASV: 'and he saith unto them, It is written, My house shall be called a house of prayer: but ye make it a den of robbers.',
+    },
+    { isRedLetter: true }
+  ),
+  v(
+    'Isaiah',
+    56,
+    7,
+    {
+      NIV: 'these I will bring to my holy mountain and give them joy in my house of prayer. Their burnt offerings and sacrifices will be accepted on my altar; for my house will be called a house of prayer for all nations.”',
+      KJV: 'Even them will I bring to my holy mountain, and make them joyful in my house of prayer: their burnt offerings and their sacrifices shall be accepted upon mine altar; for mine house shall be called an house of prayer for all people.',
+      ESV: 'these I will bring to my holy mountain, and make them joyful in my house of prayer; their burnt offerings and their sacrifices will be accepted on my altar; for my house shall be called a house of prayer for all peoples.”',
+      NKJV: 'Even them I will bring to My holy mountain, and make them joyful in My house of prayer. Their burnt offerings and their sacrifices will be accepted on My altar; for My house shall be called a house of prayer for all nations.”',
+      NLT: 'I will bring them to my holy mountain of Jerusalem and will fill them with joy in my house of prayer. I will accept their burnt offerings and sacrifices, because my Temple will be called a house of prayer for all nations.”',
+      ASV: 'even them will I bring to my holy mountain, and make them joyful in my house of prayer: their burnt-offerings and their sacrifices shall be accepted upon mine altar; for mine house shall be called a house of prayer for all peoples.',
+    }
+  ),
+  v(
+    'Jeremiah',
+    7,
+    11,
+    {
+      NIV: 'Has this house, which bears my Name, become a den of robbers to you? But I have been watching! declares the LORD.',
+      KJV: 'Is this house, which is called by my name, become a den of robbers in your eyes? Behold, even I have seen it, saith the LORD.',
+      ESV: 'Has this house, which is called by my name, become a den of robbers in your eyes? Behold, I myself have seen it, declares the LORD.',
+      NKJV: 'Has this house, which is called by My name, become a den of thieves in your eyes? Behold, I, even I, have seen it,” says the LORD.',
+      NLT: 'Don’t you yourselves admit that this Temple, which bears my name, has become a den of thieves? Surely I see all the evil going on there. I, the LORD, have spoken!',
+      ASV: 'Is this house, which is called by my name, become a den of robbers in your eyes? Behold, I, even I, have seen it, saith Jehovah.',
+    }
+  ),
+  v(
+    'Acts',
+    2,
+    16,
+    {
+      NIV: 'No, this is what was spoken by the prophet Joel:',
+      KJV: 'But this is that which was spoken by the prophet Joel;',
+      ESV: 'But this is what was uttered through the prophet Joel:',
+      NKJV: 'But this is what was spoken by the prophet Joel:',
+      NLT: 'No, what you see was predicted long ago by the prophet Joel:',
+      ASV: 'but this is that which hath been spoken through the prophet Joel:',
+    }
+  ),
+  v(
+    'Acts',
+    2,
+    17,
+    {
+      NIV: '“‘In the last days, God says, I will pour out my Spirit on all people. Your sons and daughters will prophesy, your young men will see visions, your old men will dream dreams.',
+      KJV: 'And it shall come to pass in the last days, saith God, I will pour out of my Spirit upon all flesh: and your sons and your daughters shall prophesy, and your young men shall see visions, and your old men shall dream dreams:',
+      ESV: '“‘And in the last days it shall be, God declares, that I will pour out my Spirit on all flesh, and your sons and your daughters shall prophesy, and your young men shall see visions, and your old men shall dream dreams;',
+      NKJV: '‘And it shall come to pass in the last days, says God, That I will pour out of My Spirit on all flesh; Your sons and your daughters shall prophesy, Your young men shall see visions, Your old men shall dream dreams.',
+      NLT: '‘In the last days,’ God says, ‘I will pour out my Spirit upon all people. Your sons and daughters will prophesy. Your young men will see visions, and your old men will dream dreams.',
+      ASV: 'And it shall be in the last days, saith God, I will pour forth of my Spirit upon all flesh: And your sons and your daughters shall prophesy, And your young men shall see visions, And your old men shall dream dreams:',
+    }
+  ),
+  v(
+    'Joel',
+    2,
+    28,
+    {
+      NIV: '“And afterward, I will pour out my Spirit on all people. Your sons and daughters will prophesy, your old men will dream dreams, your young men will see visions.',
+      KJV: 'And it shall come to pass afterward, that I will pour out my spirit upon all flesh; and your sons and your daughters shall prophesy, your old men shall dream dreams, your young men shall see visions:',
+      ESV: '“And it shall come to pass afterward, that I will pour out my Spirit on all flesh; your sons and your daughters shall prophesy, your old men shall dream dreams, and your young men shall see visions.',
+      NKJV: '“And it shall come to pass afterward That I will pour out My Spirit on all flesh; Your sons and your daughters shall prophesy, Your old men shall dream dreams, Your young men shall see visions.',
+      NLT: '“Then, after doing all those things, I will pour out my Spirit upon all people. Your sons and daughters will prophesy. Your old men will dream dreams, and your young men will see visions.',
+      ASV: 'And it shall come to pass afterward, that I will pour out my Spirit upon all flesh; and your sons and your daughters shall prophesy, your old men shall dream dreams, your young men shall see visions:',
+    }
+  ),
+  v(
+    'Hebrews',
+    1,
+    5,
+    {
+      NIV: 'For to which of the angels did God ever say, “You are my Son; today I have become your Father”? Or again, “I will be his Father, and he will be my Son”?',
+      KJV: 'For unto which of the angels said he at any time, Thou art my Son, this day have I begotten thee? And again, I will be to him a Father, and he shall be to me a Son?',
+      ESV: 'For to which of the angels did God ever say, “You are my Son, today I have begotten you”? Or again, “I will be to him a father, and he shall be to me a son”?',
+      NKJV: 'For to which of the angels did He ever say: “You are My Son, Today I have begotten You”? And again: “I will be to Him a Father, And He shall be to Me a Son”?',
+      NLT: 'For God never said to any angel what he said to Jesus: “You are my Son. Today I have become your Father.” God also said, “I will be his Father, and he will be my Son.”',
+      ASV: 'For unto which of the angels said he at any time, Thou art my Son, This day have I begotten thee? and again, I will be to him a Father, And he shall be to me a Son?',
+    }
+  ),
+  v(
+    'Psalms',
+    2,
+    7,
+    {
+      NIV: 'I will proclaim the LORD’s decree: He said to me, “You are my son; today I have become your father.',
+      KJV: 'I will declare the decree: the LORD hath said unto me, Thou art my Son; this day have I begotten thee.',
+      ESV: 'I will tell of the decree: The LORD said to me, “You are my Son; today I have begotten you.',
+      NKJV: '“I will declare the decree: The LORD has said to Me, ‘You are My Son, Today I have begotten You.',
+      NLT: 'The king proclaims the LORD’s decree: “The LORD said to me, ‘You are my son. Today I have become your Father.',
+      ASV: 'I will tell of the decree: Jehovah said unto me, Thou art my son; This day have I begotten thee.',
+    }
+  ),
+  v(
+    '2 Samuel',
+    7,
+    14,
+    {
+      NIV: 'I will be his father, and he will be my son. When he does wrong, I will punish him with a rod wielded by men, with floggings inflicted by human hands.',
+      KJV: 'I will be his father, and he shall be my son. If he commit iniquity, I will chasten him with the rod of men, and with the stripes of the children of men:',
+      ESV: 'I will be to him a father, and he shall be to me a son. When he commits iniquity, I will discipline him with the rod of men, with the stripes of the sons of men,',
+      NKJV: 'I will be his Father, and he shall be My son. If he commits iniquity, I will chasten him with the rod of men and with the blows of the sons of men.',
+      NLT: 'I will be his father, and he will be my son. If he sins, I will correct and discipline him with the rod, like any father would do.',
+      ASV: 'I will be his father, and he shall be my son: if he commit iniquity, I will chasten him with the rod of men, and with the stripes of the children of men;',
+    }
+  ),
+  v(
+    'John',
+    3,
+    15,
+    {
+      NIV: 'that everyone who believes may have eternal life in him.”',
+      KJV: 'That whosoever believeth in him should not perish, but have eternal life.',
+      ESV: 'that whoever believes in him may have eternal life.',
+      NKJV: 'that whoever believes in Him should not perish but have eternal life.',
+      NLT: 'so that everyone who believes in him will have eternal life.',
+      ASV: 'that whosoever believeth may in him have eternal life.',
+    },
+    { isRedLetter: true }
+  ),
+  v(
+    'Numbers',
+    21,
+    8,
+    {
+      NIV: 'The LORD said to Moses, “Make a snake and put it up on a pole; anyone who is bitten can look at it and live.”',
+      KJV: 'And the LORD said unto Moses, Make thee a fiery serpent, and set it upon a pole: and it shall come to pass, that every one that is bitten, when he looketh upon it, shall live.',
+      ESV: 'And the LORD said to Moses, “Make a fiery serpent and set it on a pole, and everyone who is bitten, when he sees it, shall live.”',
+      NKJV: 'Then the LORD said to Moses, “Make a fiery serpent, and set it on a pole; and it shall be that everyone who is bitten, when he looks at it, shall live.”',
+      NLT: 'Then the LORD told him, “Make a replica of a poisonous snake and attach it to a pole. All who are bitten will live if they simply look at it!”',
+      ASV: 'And Jehovah said unto Moses, Make thee a fiery serpent, and set it upon a standard: and it shall come to pass, that every one that is bitten, when he seeth it, shall live.',
+    }
+  ),
+  v(
+    'Romans',
+    5,
+    12,
+    {
+      NIV: 'Therefore, just as sin entered the world through one man, and death through sin, and in this way death came to all people, because all sinned—',
+      KJV: 'Wherefore, as by one man sin entered into the world, and death by sin; and so death passed upon all men, for that all have sinned:',
+      ESV: 'Therefore, just as sin came into the world through one man, and death through sin, and so death spread to all men because all sinned—',
+      NKJV: 'Therefore, just as through one man sin entered the world, and death through sin, and thus death spread to all men, because all sinned—',
+      NLT: 'When Adam sinned, sin entered the world. Adam’s sin brought death, so death spread to everyone, for everyone sinned.',
+      ASV: 'Therefore, as through one man sin entered into the world, and death through sin; and so death passed unto all men, for that all sinned:—',
+    }
+  ),
+  v(
+    'Romans',
+    5,
+    19,
+    {
+      NIV: 'For just as through the disobedience of the one man the many were made sinners, so also through the obedience of the one man the many will be made righteous.',
+      KJV: 'For as by one man’s disobedience many were made sinners, so by the obedience of one shall many be made righteous.',
+      ESV: 'For as by the one man’s disobedience the many were made sinners, so by the one man’s obedience the many will be made righteous.',
+      NKJV: 'For as by one man’s disobedience many were made sinners, so also by one Man’s obedience many will be made righteous.',
+      NLT: 'Because one person disobeyed God, many became sinners. But because one other person obeyed God, many will be made righteous.',
+      ASV: 'For as through the one man’s disobedience the many were made sinners, even so through the obedience of the one shall the many be made righteous.',
+    }
+  ),
+  v(
+    'Genesis',
+    3,
+    6,
+    {
+      NIV: 'When the woman saw that the fruit of the tree was good for food and pleasing to the eye, and also desirable for gaining wisdom, she took some and ate it. She also gave some to her husband, who was with her, and he ate it.',
+      KJV: 'And when the woman saw that the tree was good for food, and that it was pleasant to the eyes, and a tree to be desired to make one wise, she took of the fruit thereof, and did eat, and gave also unto her husband with her; and he did eat.',
+      ESV: 'So when the woman saw that the tree was good for food, and that it was a delight to the eyes, and that the tree was to be desired to make one wise, she took of its fruit and ate, and she also gave some to her husband who was with her, and he ate.',
+      NKJV: 'So when the woman saw that the tree was good for food, that it was pleasant to the eyes, and a tree desirable to make one wise, she took of its fruit and ate. She also gave to her husband with her, and he ate.',
+      NLT: 'The woman was convinced. She saw that the tree was beautiful and its fruit looked delicious, and she wanted the wisdom it would give her. So she took some of the fruit and ate it. Then she gave some to her husband, who was with her, and he ate it, too.',
+      ASV: 'And when the woman saw that the tree was good for food, and that it was a delight to the eyes, and that the tree was to be desired to make one wise, she took of the fruit thereof, and did eat; and she gave also unto her husband with her, and he did eat.',
+    }
+  ),
+  v(
+    '1 Corinthians',
+    15,
+    45,
+    {
+      NIV: 'So it is written: “The first man Adam became a living being”; the last Adam, a life-giving spirit.',
+      KJV: 'And so it is written, The first man Adam was made a living soul; the last Adam was made a quickening spirit.',
+      ESV: 'Thus it is written, “The first man Adam became a living being”; the last Adam became a life-giving spirit.',
+      NKJV: 'And so it is written, “The first man Adam became a living being.” The last Adam became a life-giving spirit.',
+      NLT: 'The Scriptures tell us, “The first man, Adam, became a living person.” But the last Adam—that is, Christ—is a life-giving Spirit.',
+      ASV: 'So also it is written, The first man Adam became a living soul. The last Adam became a life-giving spirit.',
+    }
+  ),
+  v(
+    'Genesis',
+    2,
+    7,
+    {
+      NIV: 'Then the LORD God formed a man from the dust of the ground and breathed into his nostrils the breath of life, and the man became a living being.',
+      KJV: 'And the LORD God formed man of the dust of the ground, and breathed into his nostrils the breath of life; and man became a living soul.',
+      ESV: 'then the LORD God formed the man of dust from the ground and breathed into his nostrils the breath of life, and the man became a living creature.',
+      NKJV: 'And the LORD God formed man of the dust of the ground, and breathed into his nostrils the breath of life; and man became a living being.',
+      NLT: 'Then the LORD God formed the man from the dust of the ground. He breathed the breath of life into the man’s nostrils, and the man became a living person.',
+      ASV: 'And Jehovah God formed man of the dust of the ground, and breathed into his nostrils the breath of life; and man became a living soul.',
+    }
+  ),
+  v(
+    'Jonah',
+    1,
+    17,
+    {
+      NIV: 'Now the LORD provided a huge fish to swallow Jonah, and Jonah was in the belly of the fish three days and three nights.',
+      KJV: 'Now the LORD had prepared a great fish to swallow up Jonah. And Jonah was in the belly of the fish three days and three nights.',
+      ESV: 'And the LORD appointed a great fish to swallow up Jonah. And Jonah was in the belly of the fish three days and three nights.',
+      NKJV: 'Now the LORD had prepared a great fish to swallow Jonah. And Jonah was in the belly of the fish three days and three nights.',
+      NLT: 'Now the LORD had arranged for a great fish to swallow Jonah. And Jonah was inside the fish for three days and three nights.',
+      ASV: 'And Jehovah prepared a great fish to swallow up Jonah; and Jonah was in the belly of the fish three days and three nights.',
+    }
+  ),
+  v(
+    'Matthew',
+    12,
+    40,
+    {
+      NIV: 'For as Jonah was three days and three nights in the belly of a huge fish, so the Son of Man will be three days and three nights in the heart of the earth.',
+      KJV: 'For as Jonas was three days and three nights in the whale’s belly; so shall the Son of man be three days and three nights in the heart of the earth.',
+      ESV: 'For just as Jonah was three days and three nights in the belly of the great fish, so will the Son of Man be three days and three nights in the heart of the earth.',
+      NKJV: 'For as Jonah was three days and three nights in the belly of the great fish, so will the Son of Man be three days and three nights in the heart of the earth.',
+      NLT: 'For as Jonah was in the belly of the great fish for three days and three nights, so will the Son of Man be in the heart of the earth for three days and three nights.',
+      ASV: 'for as Jonah was three days and three nights in the belly of the whale; so shall the Son of man be three days and three nights in the heart of the earth.',
+    },
+    { isRedLetter: true }
+  ),
 ];
 
 // Fast index by canonical reference and by book+chapter

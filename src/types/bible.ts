@@ -32,6 +32,13 @@ export type ReferenceCategory =
   | 'Parallel passage'
   | 'Historical connection';
 
+export type BiblicalSpeakerCategory =
+  | 'Words spoken by Jesus'
+  | 'Words spoken by prophets'
+  | 'Words spoken by apostles'
+  | 'Historical narration'
+  | 'Words spoken by other biblical characters';
+
 export interface VerseData {
   book: string;
   chapter: number;
@@ -52,6 +59,12 @@ export interface CrossReferenceRecord {
   targetToSourceCategory: ReferenceCategory;
   title: string;
   connectionSummary: string;
+  explanation?: string;
+  biblicalContext?: string;
+  sourceSpeaker?: BiblicalSpeakerCategory;
+  targetSpeaker?: BiblicalSpeakerCategory;
+  supportingRefs?: string[];
+  disputedNote?: string;
   dataSource: string;
   verificationStatus: 'verified' | 'ai_suggested' | 'user_created';
 }
@@ -64,6 +77,12 @@ export interface ResolvedCrossReference {
   connectionLabel: string;
   directionLabel: string;
   title: string;
+  explanation?: string;
+  biblicalContext?: string;
+  primarySpeaker?: BiblicalSpeakerCategory;
+  connectedSpeaker?: BiblicalSpeakerCategory;
+  supportingRefs?: string[];
+  disputedNote?: string;
   dataSource: string;
   verificationStatus: 'verified' | 'ai_suggested' | 'user_created';
 }
@@ -76,6 +95,15 @@ export interface BiblicalTypeShadow {
   typeName: string;
   fulfilmentName: string;
   explanation: string;
+  biblicalContext?: string;
+  typologyBasis?:
+    | 'Explicitly Identified by Jesus'
+    | 'Explicitly Established by Scripture'
+    | 'Strongly Supported Scriptural Typology';
+  otSpeaker?: BiblicalSpeakerCategory;
+  ntSpeaker?: BiblicalSpeakerCategory;
+  supportingRefs?: string[];
+  disputedNote?: string;
   historicalSource: string;
 }
 
@@ -86,6 +114,10 @@ export interface BiblicalInference {
   explicitStatement: string;
   inferredConclusion: string;
   reasoningExplanation: string;
+  biblicalContext?: string;
+  inferenceStrength?: 'Strong Scriptural Inference' | 'Possible Interpretation';
+  speakerAttribution?: BiblicalSpeakerCategory;
+  disputedNote?: string;
   supportingRefs: string[];
 }
 
