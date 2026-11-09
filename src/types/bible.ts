@@ -243,6 +243,32 @@ export interface SavedVerseItem {
   updatedAt: string;
 }
 
+export interface SavedTypeShadowItem {
+  id: string;
+  title: string;
+  selectedVerseRef: string;
+  otTypeRef: string;
+  ntAntitypeRef: string;
+  otTypeText: string;
+  ntAntitypeText: string;
+  translation: TranslationId;
+  typeName: string;
+  fulfilmentName: string;
+  explanation: string;
+  biblicalContext?: string;
+  typologyBasis?:
+    | 'Explicitly Identified by Jesus'
+    | 'Explicitly Established by Scripture'
+    | 'Strongly Supported Scriptural Typology';
+  personalNotes: string;
+  collectionId?: string;
+  sharedToCommunity?: boolean;
+  authorName?: string;
+  likesCount?: number;
+  dateSaved: string;
+  updatedAt: string;
+}
+
 export interface PersonalNote {
   id: string;
   title: string;

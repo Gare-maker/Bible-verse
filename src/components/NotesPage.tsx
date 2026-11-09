@@ -4,8 +4,10 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ArrowLeft,
   Bookmark,
+  BookOpen,
   Compass,
   Edit3,
+  Filter,
   Folder,
   FolderPlus,
   Globe,
@@ -19,12 +21,18 @@ import {
   NotebookCollection,
   SavedConnection,
   SavedContextItem,
+  SavedTypeShadowItem,
   SavedVerseItem,
 } from '@/types/bible';
 import { usePlatform } from '@/context/PlatformContext';
 
-type SavedContentFilter = 'all' | 'connections' | 'context' | 'verses';
-type SavedSearchCategory = 'collections' | 'connections' | 'context' | 'verses';
+type SavedContentFilter = 'all' | 'connections' | 'context' | 'verses' | 'type_shadow';
+type SavedSearchCategory =
+  | 'collections'
+  | 'connections'
+  | 'context'
+  | 'verses'
+  | 'type_shadow';
 
 export default function NotesPage() {
   const {
@@ -37,6 +45,9 @@ export default function NotesPage() {
     savedVerses,
     updateSavedVerse,
     deleteSavedVerse,
+    savedTypeShadows,
+    updateSavedTypeShadow,
+    deleteSavedTypeShadow,
     collections,
     createCollection,
     preferences,
@@ -82,7 +93,7 @@ export default function NotesPage() {
   // Delete Confirmation Modal State
   const [pendingDelete, setPendingDelete] = useState<{
     id: string;
-    type: 'connection' | 'context' | 'verse';
+    type: 'connection' | 'context' | 'verse' | 'type_shadow';
     label: string;
   } | null>(null);
 
@@ -94,6 +105,8 @@ export default function NotesPage() {
       deleteSavedContext(pendingDelete.id);
     } else if (pendingDelete.type === 'verse') {
       deleteSavedVerse(pendingDelete.id);
+    } else if (pendingDelete.type === 'type_shadow') {
+      deleteSavedTypeShadow(pendingDelete.id);
     }
     setPendingDelete(null);
   };
@@ -103,33 +116,79 @@ export default function NotesPage() {
     return collections.find((c) => c.id === colId)?.name || 'General Collection';
   };
 
-  // Main page filtered items (by selectedCollectionId)
+  // Main page filtered items (by selectedCollectionId & active searchQuery)
   const filteredConnections = useMemo(() => {
+    const q = isSearchViewOpen ? searchQuery.trim().toLowerCase() : '';
     return savedConnections.filter((c) => {
       if (selectedCollectionId !== 'ALL' && c.collectionId !== selectedCollectionId) {
         return false;
       }
-      return true;
+      if (!q) return true;
+      return (
+        c.primaryRef.toLowerCase().includes(q) ||
+        c.connectedRef.toLowerCase().includes(q) ||
+        c.title.toLowerCase().includes(q) ||
+        c.primaryText.toLowerCase().includes(q) ||
+        c.connectedText.toLowerCase().includes(q) ||
+        c.personalObservation.toLowerCase().includes(q) ||
+        getCollectionName(c.collectionId).toLowerCase().includes(q)
+      );
     });
-  }, [savedConnections, selectedCollectionId]);
+  }, [savedConnections, selectedCollectionId, isSearchViewOpen, searchQuery, collections]);
 
   const filteredContexts = useMemo(() => {
+    const q = isSearchViewOpen ? searchQuery.trim().toLowerCase() : '';
     return savedContexts.filter((c) => {
       if (selectedCollectionId !== 'ALL' && c.collectionId !== selectedCollectionId) {
         return false;
       }
-      return true;
+      if (!q) return true;
+      return (
+        c.verseRef.toLowerCase().includes(q) ||
+        c.verseText.toLowerCase().includes(q) ||
+        c.mainTheme.toLowerCase().includes(q) ||
+        c.contextSummary.toLowerCase().includes(q) ||
+        c.personalNotes.toLowerCase().includes(q) ||
+        getCollectionName(c.collectionId).toLowerCase().includes(q)
+      );
     });
-  }, [savedContexts, selectedCollectionId]);
+  }, [savedContexts, selectedCollectionId, isSearchViewOpen, searchQuery, collections]);
 
   const filteredVerses = useMemo(() => {
+    const q = isSearchViewOpen ? searchQuery.trim().toLowerCase() : '';
     return savedVerses.filter((v) => {
       if (selectedCollectionId !== 'ALL' && v.collectionId !== selectedCollectionId) {
         return false;
       }
-      return true;
+      if (!q) return true;
+      return (
+        v.verseRef.toLowerCase().includes(q) ||
+        v.verseText.toLowerCase().includes(q) ||
+        v.personalNotes.toLowerCase().includes(q) ||
+        getCollectionName(v.collectionId).toLowerCase().includes(q)
+      );
     });
-  }, [savedVerses, selectedCollectionId]);
+  }, [savedVerses, selectedCollectionId, isSearchViewOpen, searchQuery, collections]);
+
+  const filteredTypeShadows = useMemo(() => {
+    const q = isSearchViewOpen ? searchQuery.trim().toLowerCase() : '';
+    return savedTypeShadows.filter((ts) => {
+      if (selectedCollectionId !== 'ALL' && ts.collectionId !== selectedCollectionId) {
+        return false;
+      }
+      if (!q) return true;
+      return (
+        ts.title.toLowerCase().includes(q) ||
+        ts.otTypeRef.toLowerCase().includes(q) ||
+        ts.ntAntitypeRef.toLowerCase().includes(q) ||
+        ts.otTypeText.toLowerCase().includes(q) ||
+        ts.ntAntitypeText.toLowerCase().includes(q) ||
+        ts.explanation.toLowerCase().includes(q) ||
+        ts.personalNotes.toLowerCase().includes(q) ||
+        getCollectionName(ts.collectionId).toLowerCase().includes(q)
+      );
+    });
+  }, [savedTypeShadows, selectedCollectionId, isSearchViewOpen, searchQuery, collections]);
 
   // Dedicated Search View results (by searchCategory and searchQuery)
   const searchedCollections = useMemo(() => {
@@ -186,6 +245,23 @@ export default function NotesPage() {
       );
     });
   }, [savedVerses, searchQuery, collections]);
+
+  const searchedTypeShadows = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    return savedTypeShadows.filter((ts) => {
+      if (!q) return true;
+      return (
+        ts.title.toLowerCase().includes(q) ||
+        ts.otTypeRef.toLowerCase().includes(q) ||
+        ts.ntAntitypeRef.toLowerCase().includes(q) ||
+        ts.otTypeText.toLowerCase().includes(q) ||
+        ts.ntAntitypeText.toLowerCase().includes(q) ||
+        ts.explanation.toLowerCase().includes(q) ||
+        ts.personalNotes.toLowerCase().includes(q) ||
+        getCollectionName(ts.collectionId).toLowerCase().includes(q)
+      );
+    });
+  }, [savedTypeShadows, searchQuery, collections]);
 
   const handleStartEdit = (
     id: string,
@@ -601,32 +677,30 @@ export default function NotesPage() {
           }`}
         />
 
-        {/* Verse Text */}
+        {/* Unified Explanation in One Continuous Location (No Multiple Dividers) */}
         <div
-          className={`px-4 sm:px-5 py-3.5 font-serif text-sm leading-relaxed ${
-            isLight ? 'text-stone-900' : 'text-zinc-100'
+          className={`px-4 sm:px-5 py-3.5 space-y-2 text-xs leading-relaxed ${
+            isLight ? 'text-stone-700' : 'text-zinc-200'
           }`}
         >
-          “{ctx.verseText}”
+          <p
+            className={`font-serif text-sm leading-relaxed ${
+              isLight ? 'text-stone-900' : 'text-zinc-100'
+            }`}
+          >
+            “{ctx.verseText}”
+          </p>
+          <p>
+            {ctx.verseBreakdown
+              .map((pt) =>
+                pt.replace(
+                  /^(What Is Being Discussed|How Preceding Verses Lead Here|How It Ties Into the Whole Passage):\s*/i,
+                  ''
+                )
+              )
+              .join(' ')}
+          </p>
         </div>
-
-        {/* Context Breakdown separated by clean horizontal lines */}
-        {ctx.verseBreakdown.map((pt, i) => (
-          <React.Fragment key={i}>
-            <div
-              className={`h-px w-full ${
-                isLight ? 'bg-stone-200/80' : 'bg-zinc-800'
-              }`}
-            />
-            <div
-              className={`px-4 sm:px-5 py-3 text-xs leading-relaxed ${
-                isLight ? 'text-stone-700' : 'text-zinc-200'
-              }`}
-            >
-              {pt}
-            </div>
-          </React.Fragment>
-        ))}
 
         <div
           className={`h-px w-full ${
@@ -1003,356 +1077,201 @@ export default function NotesPage() {
     );
   };
 
-  return (
-    <div className="flex-1 min-w-0 pb-28 lg:pb-16">
-      <div className="mx-auto w-full max-w-4xl px-5 sm:px-8 pt-8 sm:pt-10 space-y-6">
-        {isSearchViewOpen ? (
-          /* =================================================================
-             DEDICATED WHATSAPP-STYLE SEARCH VIEW FOR SAVED
-             ================================================================= */
-          <div className="space-y-5 animate-in fade-in duration-150">
-            {/* Search Top Bar: Back Button + Auto-Focused Search Input + Clear/Close */}
-            <div
-              className={`rounded-2xl border px-3.5 py-2.5 flex items-center gap-2.5 shadow-xs ${
+  const renderTypeShadowCard = (tsItem: SavedTypeShadowItem) => {
+    const isEditing = editingItemId === tsItem.id;
+    const colLabel = getCollectionName(tsItem.collectionId);
+    const fullRefLabel = `${tsItem.otTypeRef} ↔ ${tsItem.ntAntitypeRef}`;
+    return (
+      <div
+        key={tsItem.id}
+        className={`rounded-2xl border overflow-hidden transition ${
+          isLight
+            ? 'bg-white border-stone-200/90 text-stone-900 shadow-2xs'
+            : 'bg-[#161616] border-zinc-800 text-zinc-100'
+        }`}
+      >
+        {/* Top Row: Type & Shadow tag, OT ↔ NT reference, collection, and actions */}
+        <div className="px-4 sm:px-5 py-3.5 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 min-w-0 flex-1">
+            <span
+              className={`shrink-0 rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
                 isLight
-                  ? 'bg-white border-stone-200/90 text-stone-900'
-                  : 'bg-[#161616] border-zinc-800 text-zinc-100'
+                  ? 'bg-emerald-100 text-emerald-900'
+                  : 'bg-emerald-500/20 text-emerald-300'
               }`}
             >
-              <button
-                type="button"
-                onClick={() => {
-                  setIsSearchViewOpen(false);
-                  setSearchQuery('');
-                }}
-                className={`rounded-xl p-1.5 transition shrink-0 ${
-                  isLight
-                    ? 'text-stone-600 hover:bg-stone-100 hover:text-stone-900'
-                    : 'text-zinc-300 hover:bg-zinc-800 hover:text-white'
+              Type & Shadow
+            </span>
+            <span
+              title={fullRefLabel}
+              className={`text-xs sm:text-sm font-bold tracking-tight truncate ${
+                isLight ? 'text-stone-900' : 'text-zinc-100'
+              }`}
+            >
+              {fullRefLabel}
+            </span>
+            <span
+              title={colLabel}
+              className={`text-[11px] font-medium truncate hidden sm:inline ${
+                isLight ? 'text-stone-500' : 'text-zinc-400'
+              }`}
+            >
+              • {colLabel}
+            </span>
+            {tsItem.sharedToCommunity && (
+              <span
+                title="Shared to Community"
+                className={`shrink-0 ${
+                  isLight ? 'text-emerald-600' : 'text-emerald-400'
                 }`}
-                title="Back to Saved"
-                aria-label="Close Search"
               >
-                <ArrowLeft className="h-4 w-4" />
-              </button>
-
-              <Search
-                className={`h-4 w-4 shrink-0 ${
-                  isLight ? 'text-stone-400' : 'text-zinc-400'
-                }`}
-              />
-
-              <input
-                ref={searchInputRef}
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={`Search Saved ${
-                  searchCategory === 'collections'
-                    ? 'collections'
-                    : searchCategory === 'connections'
-                    ? 'connections'
-                    : searchCategory === 'context'
-                    ? 'contexts'
-                    : 'Bible verses'
-                }...`}
-                className={`w-full bg-transparent text-xs sm:text-sm focus:outline-none ${
-                  isLight
-                    ? 'text-stone-900 placeholder-stone-400'
-                    : 'text-zinc-100 placeholder-zinc-500'
-                }`}
-              />
-
-              {searchQuery ? (
-                <button
-                  type="button"
-                  onClick={() => setSearchQuery('')}
-                  className={`rounded-lg p-1 shrink-0 ${
-                    isLight
-                      ? 'text-stone-400 hover:text-stone-700'
-                      : 'text-zinc-400 hover:text-zinc-200'
-                  }`}
-                  title="Clear search"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => setIsSearchViewOpen(false)}
-                  className={`rounded-lg px-2 py-1 text-xs font-semibold shrink-0 ${
-                    isLight
-                      ? 'text-stone-500 hover:text-stone-900'
-                      : 'text-zinc-400 hover:text-white'
-                  }`}
-                >
-                  Close
-                </button>
-              )}
-            </div>
-
-            {/* 4 Search Categories as Tabs: Collections | Connections | Contexts | Bible Verses */}
-            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-              {(
-                [
-                  { id: 'collections', label: 'Collections', icon: Folder },
-                  { id: 'connections', label: 'Connections', icon: Link2 },
-                  { id: 'context', label: 'Contexts', icon: Compass },
-                  { id: 'verses', label: 'Bible Verses', icon: Bookmark },
-                ] as const
-              ).map((tab) => {
-                const Icon = tab.icon;
-                const isActive = searchCategory === tab.id;
-                return (
-                  <button
-                    key={tab.id}
-                    type="button"
-                    onClick={() => setSearchCategory(tab.id)}
-                    className={`rounded-xl px-3.5 py-2 text-xs font-bold flex items-center gap-1.5 border transition whitespace-nowrap ${
-                      isActive
-                        ? isLight
-                          ? 'bg-amber-700 text-white border-amber-700 shadow-2xs'
-                          : 'bg-amber-500 text-zinc-950 border-amber-500 shadow-2xs'
-                        : isLight
-                        ? 'bg-white hover:bg-stone-100 text-stone-700 border-stone-200/90'
-                        : 'bg-[#161616] hover:bg-zinc-800 text-zinc-200 border-zinc-800'
-                    }`}
-                  >
-                    <Icon className="h-3.5 w-3.5" />
-                    <span>{tab.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Dedicated Search Results */}
-            <div className="space-y-4">
-              {searchCategory === 'collections' && (
-                <>
-                  {searchedCollections.length === 0 ? (
-                    <div
-                      className={`rounded-2xl border p-8 text-center space-y-2 ${
-                        isLight
-                          ? 'bg-white border-stone-200 text-stone-600'
-                          : 'bg-[#161616] border-zinc-800 text-zinc-300'
-                      }`}
-                    >
-                      <p className="text-sm font-semibold">
-                        No matching collections found.
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      {searchedCollections.map((col: NotebookCollection) => (
-                        <button
-                          key={col.id}
-                          type="button"
-                          onClick={() => {
-                            setSelectedCollectionId(col.id);
-                            setIsSearchViewOpen(false);
-                          }}
-                          className={`rounded-2xl border p-4 text-left transition flex items-start gap-3 ${
-                            isLight
-                              ? 'bg-white hover:bg-stone-50 border-stone-200/90 text-stone-900'
-                              : 'bg-[#161616] hover:bg-zinc-900 border-zinc-800 text-zinc-100'
-                          }`}
-                        >
-                          <div
-                            className={`h-9 w-9 rounded-xl flex items-center justify-center shrink-0 ${
-                              isLight
-                                ? 'bg-amber-100 text-amber-900'
-                                : 'bg-amber-500/20 text-amber-300'
-                            }`}
-                          >
-                            <Folder className="h-4 w-4" />
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <p
-                              className={`text-sm font-bold truncate ${
-                                isLight ? 'text-stone-900' : 'text-zinc-100'
-                              }`}
-                            >
-                              {col.name}
-                            </p>
-                            <p
-                              className={`text-xs mt-1 line-clamp-2 ${
-                                isLight ? 'text-stone-500' : 'text-zinc-400'
-                              }`}
-                            >
-                              {col.description || 'Saved study collection'}
-                            </p>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </>
-              )}
-
-              {searchCategory === 'connections' && (
-                <>
-                  {searchedConnections.length === 0 ? (
-                    <div
-                      className={`rounded-2xl border p-8 text-center space-y-2 ${
-                        isLight
-                          ? 'bg-white border-stone-200 text-stone-600'
-                          : 'bg-[#161616] border-zinc-800 text-zinc-300'
-                      }`}
-                    >
-                      <p className="text-sm font-semibold">
-                        No matching saved connections found.
-                      </p>
-                    </div>
-                  ) : (
-                    searchedConnections.map((conn) => renderConnectionCard(conn))
-                  )}
-                </>
-              )}
-
-              {searchCategory === 'context' && (
-                <>
-                  {searchedContexts.length === 0 ? (
-                    <div
-                      className={`rounded-2xl border p-8 text-center space-y-2 ${
-                        isLight
-                          ? 'bg-white border-stone-200 text-stone-600'
-                          : 'bg-[#161616] border-zinc-800 text-zinc-300'
-                      }`}
-                    >
-                      <p className="text-sm font-semibold">
-                        No matching saved contexts found.
-                      </p>
-                    </div>
-                  ) : (
-                    searchedContexts.map((ctx) => renderContextCard(ctx))
-                  )}
-                </>
-              )}
-
-              {searchCategory === 'verses' && (
-                <>
-                  {searchedVerses.length === 0 ? (
-                    <div
-                      className={`rounded-2xl border p-8 text-center space-y-2 ${
-                        isLight
-                          ? 'bg-white border-stone-200 text-stone-600'
-                          : 'bg-[#161616] border-zinc-800 text-zinc-300'
-                      }`}
-                    >
-                      <p className="text-sm font-semibold">
-                        No matching saved Bible verses found.
-                      </p>
-                    </div>
-                  ) : (
-                    searchedVerses.map((vItem) => renderVerseCard(vItem))
-                  )}
-                </>
-              )}
-            </div>
+                <Globe className="h-3.5 w-3.5" />
+              </span>
+            )}
           </div>
-        ) : (
-          /* =================================================================
-             STANDARD SAVED PAGE VIEW
-             ================================================================= */
+
+          <div className="flex items-center gap-1 shrink-0">
+            <button
+              onClick={() =>
+                updateSavedTypeShadow(tsItem.id, {
+                  sharedToCommunity: !tsItem.sharedToCommunity,
+                })
+              }
+              className={`rounded-lg p-1.5 border transition ${
+                tsItem.sharedToCommunity
+                  ? 'bg-emerald-600 border-emerald-600 text-white'
+                  : isLight
+                  ? 'bg-stone-50 hover:bg-stone-100 border-stone-200 text-stone-600'
+                  : 'bg-zinc-800 hover:bg-zinc-700 border-zinc-700 text-zinc-200'
+              }`}
+              title={
+                tsItem.sharedToCommunity
+                  ? 'Shared to Community'
+                  : 'Share to Community'
+              }
+              aria-label="Toggle Share to Community"
+            >
+              <Share2 className="h-3.5 w-3.5" />
+            </button>
+
+            <button
+              onClick={() =>
+                handleStartEdit(
+                  tsItem.id,
+                  tsItem.personalNotes,
+                  tsItem.collectionId
+                )
+              }
+              className={`rounded-lg p-1.5 border transition ${
+                isLight
+                  ? 'bg-stone-50 hover:bg-stone-100 border-stone-200 text-stone-600'
+                  : 'bg-zinc-800 hover:bg-zinc-700 border-zinc-700 text-zinc-200'
+              }`}
+              title="Edit Personal Notes & Collection"
+              aria-label="Edit Notes"
+            >
+              <Edit3 className="h-3.5 w-3.5" />
+            </button>
+
+            <button
+              onClick={() =>
+                setPendingDelete({
+                  id: tsItem.id,
+                  type: 'type_shadow',
+                  label: `Saved Type & Shadow: ${tsItem.otTypeRef} ↔ ${tsItem.ntAntitypeRef}`,
+                })
+              }
+              className={`rounded-lg p-1.5 border transition ${
+                isLight
+                  ? 'bg-stone-50 hover:bg-rose-50 border-stone-200 text-stone-500 hover:text-rose-600'
+                  : 'bg-zinc-800 hover:bg-zinc-700 border-zinc-700 text-zinc-300 hover:text-rose-400'
+              }`}
+              title="Delete"
+              aria-label="Delete"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        </div>
+
+        <div
+          className={`h-px w-full ${
+            isLight ? 'bg-stone-200/90' : 'bg-zinc-800'
+          }`}
+        />
+
+        {/* Old Testament Type, New Testament Fulfilment, and Concise Explanation */}
+        <div className="px-4 sm:px-5 py-3.5 space-y-3">
+          <div className="space-y-1">
+            <span
+              className={`text-xs font-bold block ${
+                isLight ? 'text-amber-800' : 'text-amber-400'
+              }`}
+            >
+              Old Testament Type — {tsItem.otTypeRef} ({tsItem.translation})
+            </span>
+            <p
+              className={`font-serif text-xs sm:text-sm leading-relaxed ${
+                isLight ? 'text-stone-800' : 'text-zinc-100'
+              }`}
+            >
+              “{tsItem.otTypeText}”
+            </p>
+          </div>
+
+          <div className="space-y-1">
+            <span
+              className={`text-xs font-bold block ${
+                isLight ? 'text-emerald-800' : 'text-emerald-400'
+              }`}
+            >
+              New Testament Fulfilment — {tsItem.ntAntitypeRef} ({tsItem.translation})
+            </span>
+            <p
+              className={`font-serif text-xs sm:text-sm leading-relaxed ${
+                isLight ? 'text-stone-800' : 'text-zinc-100'
+              }`}
+            >
+              “{tsItem.ntAntitypeText}”
+            </p>
+          </div>
+
+          {tsItem.explanation && (
+            <p
+              className={`text-xs leading-relaxed pt-0.5 ${
+                isLight ? 'text-stone-700' : 'text-zinc-300'
+              }`}
+            >
+              {tsItem.explanation}
+            </p>
+          )}
+        </div>
+
+        {isEditing && (
           <>
-            {/* 1A. Heading on the Left + Prominent Search Icon on the Far Right */}
-            <div className="flex items-center justify-between gap-4">
-              <div className="min-w-0">
-                <h1
-                  className={`text-3xl sm:text-4xl font-serif font-bold tracking-tight ${
-                    isLight ? 'text-stone-900' : 'text-white'
-                  }`}
-                >
-                  Saved
-                </h1>
-                <p
-                  className={`text-xs sm:text-sm mt-1 ${
+            <div
+              className={`h-px w-full ${
+                isLight ? 'bg-stone-200/90' : 'bg-zinc-800'
+              }`}
+            />
+            <div className="px-4 sm:px-5 py-3.5 space-y-3">
+              <div>
+                <label
+                  className={`text-[11px] font-bold block mb-1 ${
                     isLight ? 'text-stone-500' : 'text-zinc-400'
                   }`}
                 >
-                  Your saved scripture connections, verse contexts, Bible verses, and personal insights.
-                </p>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setIsSearchViewOpen(true)}
-                className={`rounded-2xl border p-3 transition shrink-0 shadow-2xs ${
-                  isLight
-                    ? 'bg-white hover:bg-stone-100 border-stone-200/90 text-stone-800'
-                    : 'bg-[#161616] hover:bg-zinc-800 border-zinc-800 text-zinc-100'
-                }`}
-                title="Search Saved items"
-                aria-label="Open Saved Search"
-              >
-                <Search className="h-5 w-5" />
-              </button>
-            </div>
-
-            {/* 1C. Horizontal Filter Row:
-                All | Connections | Contexts | Bible Verses | Collection filter | Add Collection
-                (Old tab navigation and its bottom divider removed) */}
-            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-              {(
-                [
-                  { id: 'all', label: 'All' },
-                  { id: 'connections', label: 'Connections' },
-                  { id: 'context', label: 'Contexts' },
-                  { id: 'verses', label: 'Bible Verses' },
-                ] as const
-              ).map((filter) => {
-                const isActive = contentFilter === filter.id;
-                return (
-                  <button
-                    key={filter.id}
-                    type="button"
-                    onClick={() => setContentFilter(filter.id)}
-                    className={`rounded-xl px-3.5 py-2 text-xs font-bold whitespace-nowrap border transition ${
-                      isActive
-                        ? isLight
-                          ? 'bg-amber-700 text-white border-amber-700 shadow-2xs'
-                          : 'bg-amber-500 text-zinc-950 border-amber-500 shadow-2xs'
-                        : isLight
-                        ? 'bg-white hover:bg-stone-100 text-stone-700 border-stone-200/90'
-                        : 'bg-[#161616] hover:bg-zinc-800 text-zinc-200 border-zinc-800'
-                    }`}
-                  >
-                    {filter.label}
-                  </button>
-                );
-              })}
-
-              {/* Collection Category Filter */}
-              <div
-                className={`rounded-xl border px-3 py-1.5 flex items-center gap-1.5 ${
-                  isLight
-                    ? 'bg-white border-stone-200/90 text-stone-800'
-                    : 'bg-[#161616] border-zinc-800 text-zinc-100'
-                }`}
-              >
-                <Folder
-                  className={`h-3.5 w-3.5 shrink-0 ${
-                    isLight ? 'text-amber-700' : 'text-amber-400'
-                  }`}
-                />
+                  Collection
+                </label>
                 <select
-                  value={selectedCollectionId}
-                  onChange={(e) => setSelectedCollectionId(e.target.value)}
-                  aria-label="Filter by Collection"
-                  className={`bg-transparent text-xs font-semibold focus:outline-none max-w-[135px] sm:max-w-[180px] truncate ${
-                    isLight ? 'text-stone-800' : 'text-zinc-100'
+                  value={editCollectionDraft}
+                  onChange={(e) => setEditCollectionDraft(e.target.value)}
+                  className={`w-full rounded-xl border px-3 py-1.5 text-xs ${
+                    isLight
+                      ? 'bg-white border-stone-300 text-stone-900'
+                      : 'bg-zinc-900 border-zinc-700 text-zinc-100'
                   }`}
                 >
-                  <option
-                    value="ALL"
-                    className={
-                      isLight
-                        ? 'bg-white text-stone-900'
-                        : 'bg-[#161616] text-zinc-100'
-                    }
-                  >
-                    All Collections
-                  </option>
                   {collections.map((col) => (
                     <option
                       key={col.id}
@@ -1360,7 +1279,7 @@ export default function NotesPage() {
                       className={
                         isLight
                           ? 'bg-white text-stone-900'
-                          : 'bg-[#161616] text-zinc-100'
+                          : 'bg-zinc-900 text-zinc-100'
                       }
                     >
                       {col.name}
@@ -1369,150 +1288,431 @@ export default function NotesPage() {
                 </select>
               </div>
 
-              {/* Add Collection Action */}
-              <button
-                type="button"
-                onClick={() => setIsNewCollectionOpen(true)}
-                className={`rounded-xl border px-3 py-2 text-xs font-bold inline-flex items-center gap-1.5 transition shrink-0 ${
-                  isLight
-                    ? 'bg-white hover:bg-stone-100 border-stone-200/90 text-stone-800'
-                    : 'bg-[#161616] hover:bg-zinc-800 border-zinc-800 text-zinc-100'
-                }`}
-                title="Add Collection"
-                aria-label="Add Collection"
-              >
-                <FolderPlus className="h-3.5 w-3.5" />
-                <span>Add Collection</span>
-              </button>
-            </div>
+              <div>
+                <label
+                  className={`text-[11px] font-bold block mb-1 ${
+                    isLight ? 'text-stone-500' : 'text-zinc-400'
+                  }`}
+                >
+                  Personal Notes & Reflections
+                </label>
+                <textarea
+                  rows={3}
+                  value={editNotesDraft}
+                  onChange={(e) => setEditNotesDraft(e.target.value)}
+                  className={`w-full rounded-xl border p-2.5 text-xs ${
+                    isLight
+                      ? 'bg-white border-stone-300 text-stone-900 placeholder-stone-400'
+                      : 'bg-zinc-900 border-zinc-700 text-zinc-100 placeholder-zinc-500'
+                  }`}
+                />
+              </div>
 
-            {/* Saved Content Display */}
-            <div className="space-y-4">
-              {contentFilter === 'all' &&
-                filteredConnections.length === 0 &&
-                filteredContexts.length === 0 &&
-                filteredVerses.length === 0 && (
-                  <div
-                    className={`rounded-2xl border p-8 text-center space-y-2 ${
-                      isLight
-                        ? 'bg-white border-stone-200 text-stone-600'
-                        : 'bg-[#161616] border-zinc-800 text-zinc-300'
-                    }`}
-                  >
-                    <p
-                      className={`text-sm font-semibold ${
-                        isLight ? 'text-stone-800' : 'text-zinc-100'
-                      }`}
-                    >
-                      No saved items found in this collection.
-                    </p>
-                    <p
-                      className={`text-xs ${
-                        isLight ? 'text-stone-500' : 'text-zinc-400'
-                      }`}
-                    >
-                      Tap any verse on the Bible page to save scripture connections, verse contexts, or Bible verses.
-                    </p>
-                  </div>
-                )}
-
-              {(contentFilter === 'all' || contentFilter === 'connections') && (
-                <>
-                  {contentFilter === 'connections' &&
-                  filteredConnections.length === 0 ? (
-                    <div
-                      className={`rounded-2xl border p-8 text-center space-y-2 ${
-                        isLight
-                          ? 'bg-white border-stone-200 text-stone-600'
-                          : 'bg-[#161616] border-zinc-800 text-zinc-300'
-                      }`}
-                    >
-                      <p
-                        className={`text-sm font-semibold ${
-                          isLight ? 'text-stone-800' : 'text-zinc-100'
-                        }`}
-                      >
-                        No saved connections found.
-                      </p>
-                      <p
-                        className={`text-xs ${
-                          isLight ? 'text-stone-500' : 'text-zinc-400'
-                        }`}
-                      >
-                        Tap any verse on the Bible page to save a scripture connection with your reflections.
-                      </p>
-                    </div>
-                  ) : (
-                    filteredConnections.map((conn) => renderConnectionCard(conn))
-                  )}
-                </>
-              )}
-
-              {(contentFilter === 'all' || contentFilter === 'context') && (
-                <>
-                  {contentFilter === 'context' &&
-                  filteredContexts.length === 0 ? (
-                    <div
-                      className={`rounded-2xl border p-8 text-center space-y-2 ${
-                        isLight
-                          ? 'bg-white border-stone-200 text-stone-600'
-                          : 'bg-[#161616] border-zinc-800 text-zinc-300'
-                      }`}
-                    >
-                      <p
-                        className={`text-sm font-semibold ${
-                          isLight ? 'text-stone-800' : 'text-zinc-100'
-                        }`}
-                      >
-                        No saved verse contexts found.
-                      </p>
-                      <p
-                        className={`text-xs ${
-                          isLight ? 'text-stone-500' : 'text-zinc-400'
-                        }`}
-                      >
-                        Tap any verse on the Bible page and save its Context breakdown with your personal notes.
-                      </p>
-                    </div>
-                  ) : (
-                    filteredContexts.map((ctx) => renderContextCard(ctx))
-                  )}
-                </>
-              )}
-
-              {(contentFilter === 'all' || contentFilter === 'verses') && (
-                <>
-                  {contentFilter === 'verses' && filteredVerses.length === 0 ? (
-                    <div
-                      className={`rounded-2xl border p-8 text-center space-y-2 ${
-                        isLight
-                          ? 'bg-white border-stone-200 text-stone-600'
-                          : 'bg-[#161616] border-zinc-800 text-zinc-300'
-                      }`}
-                    >
-                      <p
-                        className={`text-sm font-semibold ${
-                          isLight ? 'text-stone-800' : 'text-zinc-100'
-                        }`}
-                      >
-                        No saved Bible verses found.
-                      </p>
-                      <p
-                        className={`text-xs ${
-                          isLight ? 'text-stone-500' : 'text-zinc-400'
-                        }`}
-                      >
-                        Tap any verse on the Bible page and save it with your personal notes.
-                      </p>
-                    </div>
-                  ) : (
-                    filteredVerses.map((vItem) => renderVerseCard(vItem))
-                  )}
-                </>
-              )}
+              <div className="flex justify-end gap-2">
+                <button
+                  onClick={() => setEditingItemId(null)}
+                  className={`rounded-xl border px-3 py-1.5 text-xs font-semibold ${
+                    isLight
+                      ? 'text-stone-600 hover:text-stone-900 border-stone-200'
+                      : 'text-zinc-300 hover:text-white border-zinc-700'
+                  }`}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    updateSavedTypeShadow(tsItem.id, {
+                      personalNotes: editNotesDraft.trim(),
+                      collectionId: editCollectionDraft,
+                    });
+                    setEditingItemId(null);
+                  }}
+                  className={`rounded-xl px-4 py-1.5 text-xs font-bold ${
+                    isLight
+                      ? 'bg-amber-700 text-white'
+                      : 'bg-amber-500 text-zinc-950'
+                  }`}
+                >
+                  Save Notes
+                </button>
+              </div>
             </div>
           </>
         )}
+      </div>
+    );
+  };
+
+  return (
+    <div className="flex-1 min-w-0 pb-28 lg:pb-16">
+      <div className="mx-auto w-full max-w-4xl px-4 sm:px-8 pt-6 sm:pt-8 space-y-4">
+        {/* 1. Saved Header Row: Saved Heading on Left, Search Icon at Top-Right on the Same Horizontal Line */}
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div
+              className={`h-9 w-9 rounded-xl flex items-center justify-center shrink-0 border ${
+                isLight
+                  ? 'bg-amber-50 border-amber-200/80 text-amber-800'
+                  : 'bg-amber-500/15 border-amber-500/30 text-amber-400'
+              }`}
+            >
+              <Bookmark className="h-4 w-4" />
+            </div>
+            <h1
+              className={`text-2xl sm:text-3xl font-serif font-bold tracking-tight truncate ${
+                isLight ? 'text-stone-900' : 'text-white'
+              }`}
+            >
+              Saved
+            </h1>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => {
+              setIsSearchViewOpen((prev) => {
+                if (prev) setSearchQuery('');
+                return !prev;
+              });
+            }}
+            className={`rounded-xl border p-2.5 transition shrink-0 shadow-2xs ${
+              isSearchViewOpen
+                ? isLight
+                  ? 'bg-amber-700 border-amber-700 text-white'
+                  : 'bg-amber-500 border-amber-500 text-zinc-950'
+                : isLight
+                ? 'bg-white hover:bg-stone-100 border-stone-200/90 text-stone-800'
+                : 'bg-[#161616] hover:bg-zinc-800 border-zinc-800 text-zinc-100'
+            }`}
+            title="Search Saved items"
+            aria-label="Toggle Saved Search"
+          >
+            <Search className="h-4 w-4" />
+          </button>
+        </div>
+
+        {/* Clean & Minimal Expandable Search Input */}
+        {isSearchViewOpen && (
+          <div
+            className={`rounded-xl border px-3.5 py-2 flex items-center gap-2.5 shadow-2xs transition ${
+              isLight
+                ? 'bg-white border-stone-200/90 text-stone-900'
+                : 'bg-[#161616] border-zinc-800 text-zinc-100'
+            }`}
+          >
+            <Search
+              className={`h-4 w-4 shrink-0 ${
+                isLight ? 'text-stone-400' : 'text-zinc-400'
+              }`}
+            />
+            <input
+              ref={searchInputRef}
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search saved verses, content, types & shadows, or references..."
+              className={`w-full bg-transparent text-xs sm:text-sm focus:outline-none ${
+                isLight
+                  ? 'text-stone-900 placeholder-stone-400'
+                  : 'text-zinc-100 placeholder-zinc-500'
+              }`}
+            />
+            <button
+              type="button"
+              onClick={() => {
+                if (searchQuery) {
+                  setSearchQuery('');
+                } else {
+                  setIsSearchViewOpen(false);
+                }
+              }}
+              className={`rounded-lg p-1 shrink-0 ${
+                isLight
+                  ? 'text-stone-400 hover:text-stone-700'
+                  : 'text-zinc-400 hover:text-zinc-200'
+              }`}
+              title="Close search"
+              aria-label="Close search"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        )}
+
+        {/* 2. Two Dropdowns Row (Fits Neatly Within the Same Horizontal Row on Mobile & Desktop) */}
+        <div className="grid grid-cols-2 gap-2 sm:gap-3 w-full">
+          {/* First Dropdown: Category Filter (All, Bible Verse, Content, Type and Shadow, References) */}
+          <div
+            className={`min-w-0 rounded-xl border px-2.5 sm:px-3 py-2 flex items-center gap-1.5 ${
+              isLight
+                ? 'bg-white border-stone-200/90 text-stone-800 shadow-2xs'
+                : 'bg-[#161616] border-zinc-800 text-zinc-100'
+            }`}
+          >
+            <Filter
+              className={`h-3.5 w-3.5 shrink-0 ${
+                isLight ? 'text-amber-700' : 'text-amber-400'
+              }`}
+            />
+            <select
+              value={contentFilter}
+              onChange={(e) =>
+                setContentFilter(e.target.value as SavedContentFilter)
+              }
+              aria-label="Filter by Content Category"
+              className={`w-full min-w-0 bg-transparent text-xs font-semibold truncate focus:outline-none ${
+                isLight ? 'text-stone-800' : 'text-zinc-100'
+              }`}
+            >
+              <option
+                value="all"
+                className={
+                  isLight
+                    ? 'bg-white text-stone-900'
+                    : 'bg-[#161616] text-zinc-100'
+                }
+              >
+                All
+              </option>
+              <option
+                value="verses"
+                className={
+                  isLight
+                    ? 'bg-white text-stone-900'
+                    : 'bg-[#161616] text-zinc-100'
+                }
+              >
+                Bible Verse
+              </option>
+              <option
+                value="context"
+                className={
+                  isLight
+                    ? 'bg-white text-stone-900'
+                    : 'bg-[#161616] text-zinc-100'
+                }
+              >
+                Content
+              </option>
+              <option
+                value="type_shadow"
+                className={
+                  isLight
+                    ? 'bg-white text-stone-900'
+                    : 'bg-[#161616] text-zinc-100'
+                }
+              >
+                Type and Shadow
+              </option>
+              <option
+                value="connections"
+                className={
+                  isLight
+                    ? 'bg-white text-stone-900'
+                    : 'bg-[#161616] text-zinc-100'
+                }
+              >
+                References
+              </option>
+            </select>
+          </div>
+
+          {/* Second Dropdown: Collection Filter + Create Collection Icon Inside the Field */}
+          <div
+            className={`min-w-0 rounded-xl border px-2.5 sm:px-3 py-2 flex items-center justify-between gap-1.5 ${
+              isLight
+                ? 'bg-white border-stone-200/90 text-stone-800 shadow-2xs'
+                : 'bg-[#161616] border-zinc-800 text-zinc-100'
+            }`}
+          >
+            <div className="flex items-center gap-1.5 min-w-0 flex-1">
+              <Folder
+                className={`h-3.5 w-3.5 shrink-0 ${
+                  isLight ? 'text-amber-700' : 'text-amber-400'
+                }`}
+              />
+              <select
+                value={selectedCollectionId}
+                onChange={(e) => setSelectedCollectionId(e.target.value)}
+                aria-label="Filter by Collection"
+                className={`w-full min-w-0 bg-transparent text-xs font-semibold truncate focus:outline-none ${
+                  isLight ? 'text-stone-800' : 'text-zinc-100'
+                }`}
+              >
+                <option
+                  value="ALL"
+                  className={
+                    isLight
+                      ? 'bg-white text-stone-900'
+                      : 'bg-[#161616] text-zinc-100'
+                  }
+                >
+                  All Collections
+                </option>
+                {collections.map((col) => (
+                  <option
+                    key={col.id}
+                    value={col.id}
+                    className={
+                      isLight
+                        ? 'bg-white text-stone-900'
+                        : 'bg-[#161616] text-zinc-100'
+                    }
+                  >
+                    {col.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setIsNewCollectionOpen(true)}
+              className={`pl-2 border-l shrink-0 transition ${
+                isLight
+                  ? 'border-stone-200 text-amber-800 hover:text-amber-950'
+                  : 'border-zinc-700 text-amber-400 hover:text-amber-300'
+              }`}
+              title="Create new collection"
+              aria-label="Create new collection"
+            >
+              <FolderPlus className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        </div>
+
+        {/* Saved Content Display */}
+        <div className="space-y-4">
+          {contentFilter === 'all' &&
+            filteredConnections.length === 0 &&
+            filteredContexts.length === 0 &&
+            filteredVerses.length === 0 &&
+            filteredTypeShadows.length === 0 && (
+              <div
+                className={`rounded-2xl border p-8 text-center space-y-2 ${
+                  isLight
+                    ? 'bg-white border-stone-200 text-stone-600'
+                    : 'bg-[#161616] border-zinc-800 text-zinc-300'
+                }`}
+              >
+                <p
+                  className={`text-sm font-semibold ${
+                    isLight ? 'text-stone-800' : 'text-zinc-100'
+                  }`}
+                >
+                  No saved items found.
+                </p>
+                <p
+                  className={`text-xs ${
+                    isLight ? 'text-stone-500' : 'text-zinc-400'
+                  }`}
+                >
+                  Tap any verse on the Bible page to save Bible verses, content, types and shadows, or references.
+                </p>
+              </div>
+            )}
+
+          {(contentFilter === 'all' || contentFilter === 'verses') && (
+            <>
+              {contentFilter === 'verses' && filteredVerses.length === 0 ? (
+                <div
+                  className={`rounded-2xl border p-8 text-center space-y-2 ${
+                    isLight
+                      ? 'bg-white border-stone-200 text-stone-600'
+                      : 'bg-[#161616] border-zinc-800 text-zinc-300'
+                  }`}
+                >
+                  <p
+                    className={`text-sm font-semibold ${
+                      isLight ? 'text-stone-800' : 'text-zinc-100'
+                    }`}
+                  >
+                    No saved Bible verses found.
+                  </p>
+                </div>
+              ) : (
+                filteredVerses.map((vItem) => renderVerseCard(vItem))
+              )}
+            </>
+          )}
+
+          {(contentFilter === 'all' || contentFilter === 'context') && (
+            <>
+              {contentFilter === 'context' &&
+              filteredContexts.length === 0 ? (
+                <div
+                  className={`rounded-2xl border p-8 text-center space-y-2 ${
+                    isLight
+                      ? 'bg-white border-stone-200 text-stone-600'
+                      : 'bg-[#161616] border-zinc-800 text-zinc-300'
+                  }`}
+                >
+                  <p
+                    className={`text-sm font-semibold ${
+                      isLight ? 'text-stone-800' : 'text-zinc-100'
+                    }`}
+                  >
+                    No saved content items found.
+                  </p>
+                </div>
+              ) : (
+                filteredContexts.map((ctx) => renderContextCard(ctx))
+              )}
+            </>
+          )}
+
+          {(contentFilter === 'all' || contentFilter === 'type_shadow') && (
+            <>
+              {contentFilter === 'type_shadow' &&
+              filteredTypeShadows.length === 0 ? (
+                <div
+                  className={`rounded-2xl border p-8 text-center space-y-2 ${
+                    isLight
+                      ? 'bg-white border-stone-200 text-stone-600'
+                      : 'bg-[#161616] border-zinc-800 text-zinc-300'
+                  }`}
+                >
+                  <p
+                    className={`text-sm font-semibold ${
+                      isLight ? 'text-stone-800' : 'text-zinc-100'
+                    }`}
+                  >
+                    No saved Type and Shadow items found.
+                  </p>
+                </div>
+              ) : (
+                filteredTypeShadows.map((tsItem) =>
+                  renderTypeShadowCard(tsItem)
+                )
+              )}
+            </>
+          )}
+
+          {(contentFilter === 'all' || contentFilter === 'connections') && (
+            <>
+              {contentFilter === 'connections' &&
+              filteredConnections.length === 0 ? (
+                <div
+                  className={`rounded-2xl border p-8 text-center space-y-2 ${
+                    isLight
+                      ? 'bg-white border-stone-200 text-stone-600'
+                      : 'bg-[#161616] border-zinc-800 text-zinc-300'
+                  }`}
+                >
+                  <p
+                    className={`text-sm font-semibold ${
+                      isLight ? 'text-stone-800' : 'text-zinc-100'
+                    }`}
+                  >
+                    No saved references found.
+                  </p>
+                </div>
+              ) : (
+                filteredConnections.map((conn) => renderConnectionCard(conn))
+              )}
+            </>
+          )}
+        </div>
       </div>
 
       {/* =====================================================================

@@ -2,253 +2,242 @@
 
 import React from 'react';
 
+export type SceneType =
+  | 'joseph_angel_dream'
+  | 'nativity_immanuel'
+  | 'temple_presentation'
+  | 'baptism_jordan'
+  | 'wilderness_scroll'
+  | 'calling_fishermen'
+  | 'healing_multitudes'
+  | 'jesus_teaching'
+  | 'jesus_crowd_reconciliation'
+  | 'triumphal_entry'
+  | 'crucifixion_calvary'
+  | 'empty_tomb_resurrection'
+  | 'moses_song_witness'
+  | 'moses_exodus_passover'
+  | 'red_sea_parting'
+  | 'bronze_serpent'
+  | 'creation_light'
+  | 'eden_garden_tree'
+  | 'noah_ark_flood'
+  | 'abraham_covenant_altar'
+  | 'melchizedek_abraham'
+  | 'isaiah_prophecy'
+  | 'lamb_of_god'
+  | 'nicodemus_night'
+  | 'david_harp_psalm'
+  | 'pentecost_spirit'
+  | 'apostolic_scroll'
+  | 'throne_new_jerusalem';
+
 export interface BiblicalLineIllustration {
   id: string;
   book: string;
   chapter: number;
   verse: number;
-  title: string;
-  caption: string;
-  scriptureRef: string;
-  sceneType:
-    | 'jesus_teaching'
-    | 'jesus_crowd_reconciliation'
-    | 'nativity_immanuel'
-    | 'baptism_jordan'
-    | 'wilderness_scroll'
-    | 'moses_song_witness'
-    | 'moses_exodus_passover'
-    | 'bronze_serpent'
-    | 'crucifixion_calvary'
-    | 'creation_light'
-    | 'melchizedek_abraham'
-    | 'isaiah_prophecy'
-    | 'lamb_of_god'
-    | 'nicodemus_night';
-  attribution: string;
+  sceneType: SceneType;
 }
 
 export const BIBLICAL_LINE_ILLUSTRATIONS: BiblicalLineIllustration[] = [
+  // Matthew 1 — Joseph Accepts Jesus as His Son & The Birth of Jesus
   {
-    id: 'ill-matt-1-23',
+    id: 'ill-matt-1-20',
     book: 'Matthew',
     chapter: 1,
-    verse: 23,
-    title: 'The Birth of Immanuel — “God With Us”',
-    caption:
-      'Mary and Joseph beside the manger in Bethlehem beneath the star of David’s house (Matthew 1:18–25).',
-    scriptureRef: 'Matthew 1:23',
+    verse: 20,
+    sceneType: 'joseph_angel_dream',
+  },
+  {
+    id: 'ill-matt-1-24',
+    book: 'Matthew',
+    chapter: 1,
+    verse: 24,
     sceneType: 'nativity_immanuel',
-    attribution:
-      'Traditional Biblical Line Engraving (Public Domain / Classical Printed Bible Style)',
+  },
+  // Matthew 3 — John the Baptist & The Baptism of Jesus
+  {
+    id: 'ill-matt-3-6',
+    book: 'Matthew',
+    chapter: 3,
+    verse: 6,
+    sceneType: 'baptism_jordan',
   },
   {
     id: 'ill-matt-3-16',
     book: 'Matthew',
     chapter: 3,
     verse: 16,
-    title: 'The Baptism of Jesus in the River Jordan',
-    caption:
-      'John the Baptist on the bank of the Jordan as the heavens open and the Spirit of God descends like a dove (Matthew 3:13–17).',
-    scriptureRef: 'Matthew 3:16',
     sceneType: 'baptism_jordan',
-    attribution:
-      'Traditional Biblical Line Engraving (Public Domain / Classical Printed Bible Style)',
   },
+  // Matthew 4 — Temptation in the Wilderness, Calling Disciples, Healing the Sick
   {
     id: 'ill-matt-4-4',
     book: 'Matthew',
     chapter: 4,
     verse: 4,
-    title: 'Christ in the Judean Wilderness — “It Is Written”',
-    caption:
-      'Jesus answering temptation in the desert with the written word of Moses from Deuteronomy 8:3 (Matthew 4:1–4).',
-    scriptureRef: 'Matthew 4:4',
     sceneType: 'wilderness_scroll',
-    attribution:
-      'Traditional Biblical Line Engraving (Public Domain / Classical Printed Bible Style)',
   },
+  {
+    id: 'ill-matt-4-19',
+    book: 'Matthew',
+    chapter: 4,
+    verse: 19,
+    sceneType: 'calling_fishermen',
+  },
+  {
+    id: 'ill-matt-4-23',
+    book: 'Matthew',
+    chapter: 4,
+    verse: 23,
+    sceneType: 'healing_multitudes',
+  },
+  // Matthew 5 — Sermon on the Mount
   {
     id: 'ill-matt-5-1',
     book: 'Matthew',
     chapter: 5,
     verse: 1,
-    title: 'Jesus Teaching His Disciples on the Mount',
-    caption:
-      'Seeing the crowds, Jesus went up on the mountainside and sat down, and His disciples came to Him as He began to teach them (Matthew 5:1–2).',
-    scriptureRef: 'Matthew 5:1',
     sceneType: 'jesus_teaching',
-    attribution:
-      'Traditional Biblical Line Engraving (Public Domain / Classical Printed Bible Style)',
+  },
+  // Matthew 12 — Sign of Jonah / Teaching
+  {
+    id: 'ill-matt-12-40',
+    book: 'Matthew',
+    chapter: 12,
+    verse: 40,
+    sceneType: 'jesus_teaching',
+  },
+  // Matthew 18 — Restoring a Brother
+  {
+    id: 'ill-matt-18-2',
+    book: 'Matthew',
+    chapter: 18,
+    verse: 2,
+    sceneType: 'jesus_teaching',
   },
   {
     id: 'ill-matt-18-15',
     book: 'Matthew',
     chapter: 18,
     verse: 15,
-    title: 'Jesus Teaching on Restoring a Brother',
-    caption:
-      'Jesus instructing His disciples on reconciliation, humility, and winning back a brother in truth and mercy (Matthew 18:15–20).',
-    scriptureRef: 'Matthew 18:15',
     sceneType: 'jesus_crowd_reconciliation',
-    attribution:
-      'Traditional Biblical Line Engraving (Public Domain / Classical Printed Bible Style)',
   },
+  // Matthew 21 — Triumphal Entry & Temple
+  {
+    id: 'ill-matt-21-9',
+    book: 'Matthew',
+    chapter: 21,
+    verse: 9,
+    sceneType: 'triumphal_entry',
+  },
+  // Matthew 22 — Greatest Commandment
   {
     id: 'ill-matt-22-37',
     book: 'Matthew',
     chapter: 22,
     verse: 37,
-    title: 'Jesus Teaching in the Temple Courts — The Greatest Commandment',
-    caption:
-      'Jesus proclaiming the Shema of Deuteronomy 6:5 before the gathered listeners in Jerusalem (Matthew 22:37–40).',
-    scriptureRef: 'Matthew 22:37',
     sceneType: 'jesus_teaching',
-    attribution:
-      'Traditional Biblical Line Engraving (Public Domain / Classical Printed Bible Style)',
   },
+  // Matthew 27 — Crucifixion
   {
     id: 'ill-matt-27-35',
     book: 'Matthew',
     chapter: 27,
     verse: 35,
-    title: 'Golgotha — The Crucifixion of Christ',
-    caption:
-      'The hill of Calvary outside Jerusalem, fulfilling the prophetic witness of Psalm 22 and Isaiah 53.',
-    scriptureRef: 'Matthew 27:35',
     sceneType: 'crucifixion_calvary',
-    attribution:
-      'Traditional Biblical Line Engraving (Public Domain / Classical Printed Bible Style)',
   },
+  // Luke 2 — Birth & Presentation at the Temple
+  {
+    id: 'ill-luke-2-7',
+    book: 'Luke',
+    chapter: 2,
+    verse: 7,
+    sceneType: 'nativity_immanuel',
+  },
+  {
+    id: 'ill-luke-2-22',
+    book: 'Luke',
+    chapter: 2,
+    verse: 22,
+    sceneType: 'temple_presentation',
+  },
+  // Deuteronomy 32 — Song of Moses
   {
     id: 'ill-deut-32-1',
     book: 'Deuteronomy',
     chapter: 32,
     verse: 1,
-    title: 'Moses Reciting the Song of Witness Before All Israel',
-    caption:
-      'Moses standing before the assembled tribes on the plains of Moab with the Law of the Covenant prior to ascending Mount Nebo (Deuteronomy 32:1–6).',
-    scriptureRef: 'Deuteronomy 32:1',
     sceneType: 'moses_song_witness',
-    attribution:
-      'Traditional Biblical Line Engraving (Public Domain / Classical Printed Bible Style)',
   },
+  // Exodus 12 — Passover & Exodus
   {
     id: 'ill-exod-12-13',
     book: 'Exodus',
     chapter: 12,
     verse: 13,
-    title: 'Moses and the Israelites — The Passover & Exodus from Egypt',
-    caption:
-      'The blood of the Passover lamb upon the doorposts and Moses leading the children of Israel out of bondage (Exodus 12:13).',
-    scriptureRef: 'Exodus 12:13',
     sceneType: 'moses_exodus_passover',
-    attribution:
-      'Traditional Biblical Line Engraving (Public Domain / Classical Printed Bible Style)',
   },
+  // Numbers 21 — Bronze Serpent
   {
     id: 'ill-num-21-9',
     book: 'Numbers',
     chapter: 21,
     verse: 9,
-    title: 'Moses Lifting Up the Bronze Serpent in the Wilderness',
-    caption:
-      'Moses raising the bronze serpent upon the pole so that any who looked upon it lived—foreshadowing Christ lifted up (Numbers 21:8–9; John 3:14–15).',
-    scriptureRef: 'Numbers 21:9',
     sceneType: 'bronze_serpent',
-    attribution:
-      'Traditional Biblical Line Engraving (Public Domain / Classical Printed Bible Style)',
   },
+  // Genesis 1, 2, 14, 22
   {
     id: 'ill-gen-1-1',
     book: 'Genesis',
     chapter: 1,
     verse: 1,
-    title: 'The Creation — “Let There Be Light”',
-    caption:
-      'In the beginning God created the heavens and the earth, and the Spirit of God hovered over the face of the waters (Genesis 1:1–3).',
-    scriptureRef: 'Genesis 1:1',
     sceneType: 'creation_light',
-    attribution:
-      'Traditional Biblical Line Engraving (Public Domain / Classical Printed Bible Style)',
   },
   {
     id: 'ill-gen-14-18',
     book: 'Genesis',
     chapter: 14,
     verse: 18,
-    title: 'Melchizedek King of Salem Blessing Abraham',
-    caption:
-      'Melchizedek, priest of God Most High, bringing forth bread and wine to bless Abram in the Valley of Shaveh (Genesis 14:18–20).',
-    scriptureRef: 'Genesis 14:18',
     sceneType: 'melchizedek_abraham',
-    attribution:
-      'Traditional Biblical Line Engraving (Public Domain / Classical Printed Bible Style)',
   },
+  // Isaiah 7 & 53
   {
     id: 'ill-isa-7-14',
     book: 'Isaiah',
     chapter: 7,
     verse: 14,
-    title: 'The Prophet Isaiah Proclaiming the Sign of Immanuel',
-    caption:
-      'Isaiah declaring to the House of David that the virgin shall conceive and bear a Son called Immanuel (Isaiah 7:14).',
-    scriptureRef: 'Isaiah 7:14',
     sceneType: 'isaiah_prophecy',
-    attribution:
-      'Traditional Biblical Line Engraving (Public Domain / Classical Printed Bible Style)',
   },
   {
     id: 'ill-isa-53-7',
     book: 'Isaiah',
     chapter: 53,
     verse: 7,
-    title: 'The Suffering Servant — “Led Like a Lamb to the Slaughter”',
-    caption:
-      'Isaiah’s prophetic portrait of the Servant who bore the iniquities of many in silence and humility (Isaiah 53:5–7).',
-    scriptureRef: 'Isaiah 53:7',
     sceneType: 'lamb_of_god',
-    attribution:
-      'Traditional Biblical Line Engraving (Public Domain / Classical Printed Bible Style)',
   },
+  // John 1 & 3
   {
     id: 'ill-john-1-1',
     book: 'John',
     chapter: 1,
     verse: 1,
-    title: 'The Eternal Word & Light Shining in the Darkness',
-    caption:
-      'In the beginning was the Word, and in Him was life, and that life was the light of all mankind (John 1:1–5).',
-    scriptureRef: 'John 1:1',
     sceneType: 'creation_light',
-    attribution:
-      'Traditional Biblical Line Engraving (Public Domain / Classical Printed Bible Style)',
   },
   {
     id: 'ill-john-1-29',
     book: 'John',
     chapter: 1,
     verse: 29,
-    title: 'John the Baptist Witnessing to Jesus — “Behold, the Lamb of God”',
-    caption:
-      'John pointing his disciples to Jesus walking by the Jordan River as the Lamb of God who takes away the sin of the world (John 1:29).',
-    scriptureRef: 'John 1:29',
     sceneType: 'lamb_of_god',
-    attribution:
-      'Traditional Biblical Line Engraving (Public Domain / Classical Printed Bible Style)',
   },
   {
     id: 'ill-john-3-14',
     book: 'John',
     chapter: 3,
     verse: 14,
-    title: 'Jesus Teaching Nicodemus by Night',
-    caption:
-      'Jesus explaining to the Pharisee Nicodemus how the Son of Man must be lifted up just as Moses lifted up the serpent in the wilderness (John 3:14–15).',
-    scriptureRef: 'John 3:14',
     sceneType: 'nicodemus_night',
-    attribution:
-      'Traditional Biblical Line Engraving (Public Domain / Classical Printed Bible Style)',
   },
 ];
 
@@ -266,445 +255,1074 @@ export function getIllustrationForVerse(
 }
 
 /**
- * Renders an authentic monochrome engraved line-art SVG illustration
- * in the style of 19th-century printed Bibles (fine ink strokes, hatching,
- * classical figures, no modern cartoon fills or photographic effects).
+ * Determines the primary visual storytelling scene for a chapter.
+ * Returns null when a chapter is a direct continuation of the previous chapter's
+ * ongoing event/discourse (e.g., Genesis 2 after Genesis 1 creation, Matthew 6–7
+ * continuing the Sermon on the Mount begun in Matthew 5, etc.) or when consecutive
+ * chapters would repeat the same scene.
+ */
+function resolveRawChapterScene(book: string, chapter: number): SceneType | null {
+  if (chapter <= 0) return null;
+  const b = book.trim().toLowerCase();
+
+  // Explicit continuous-discourse chapters that should not repeat the preceding chapter's illustration
+  if (
+    (b === 'genesis' && (chapter === 2 || chapter === 5 || chapter === 10 || chapter === 36)) ||
+    (b === 'matthew' && (chapter === 6 || chapter === 7 || chapter === 10 || chapter === 24 || chapter === 25)) ||
+    (b === 'john' && (chapter === 15 || chapter === 16 || chapter === 17)) ||
+    (b === 'exodus' && (chapter >= 26 && chapter <= 31)) ||
+    (b === 'exodus' && (chapter >= 36 && chapter <= 39)) ||
+    (b === 'leviticus' && chapter % 2 === 0) ||
+    (b === 'numbers' && (chapter === 2 || chapter === 4 || chapter === 7 || chapter === 26 || chapter === 29)) ||
+    (b === 'deuteronomy' && (chapter >= 13 && chapter <= 26 && chapter % 2 === 0)) ||
+    (b === '1 chronicles' && chapter <= 9)
+  ) {
+    return null;
+  }
+
+  // Exact chapter matches from curated list
+  const explicit = BIBLICAL_LINE_ILLUSTRATIONS.find(
+    (item) => item.book.toLowerCase() === b && item.chapter === chapter
+  );
+  if (explicit) {
+    return explicit.sceneType;
+  }
+
+  // Book-specific narrative arc mapping
+  if (b === 'genesis') {
+    if (chapter === 1) return 'creation_light';
+    if (chapter === 3 || chapter === 4) return 'eden_garden_tree';
+    if (chapter >= 6 && chapter <= 9) return chapter === 6 || chapter === 8 ? 'noah_ark_flood' : null;
+    if (chapter === 12 || chapter === 15 || chapter === 17 || chapter === 22) return 'abraham_covenant_altar';
+    if (chapter === 14) return 'melchizedek_abraham';
+    if (chapter === 28 || chapter === 32) return 'joseph_angel_dream';
+    return chapter % 2 === 1 ? 'abraham_covenant_altar' : null;
+  }
+
+  if (b === 'exodus') {
+    if (chapter === 3 || chapter === 19 || chapter === 20 || chapter === 24 || chapter === 34) return 'moses_song_witness';
+    if (chapter === 12) return 'moses_exodus_passover';
+    if (chapter === 14 || chapter === 15) return chapter === 14 ? 'red_sea_parting' : null;
+    if (chapter === 25 || chapter === 40) return 'temple_presentation';
+    return chapter % 3 === 1 ? 'moses_exodus_passover' : null;
+  }
+
+  if (b === 'leviticus') {
+    if (chapter === 1 || chapter === 16) return 'lamb_of_god';
+    if (chapter === 8 || chapter === 9) return chapter === 8 ? 'temple_presentation' : null;
+    if (chapter === 19 || chapter === 23) return 'moses_song_witness';
+    return null;
+  }
+
+  if (b === 'numbers') {
+    if (chapter === 21) return 'bronze_serpent';
+    if (chapter === 6 || chapter === 11 || chapter === 20 || chapter === 24) return 'moses_song_witness';
+    if (chapter === 9) return 'moses_exodus_passover';
+    return chapter % 4 === 1 ? 'wilderness_scroll' : null;
+  }
+
+  if (b === 'deuteronomy') {
+    if (chapter === 1 || chapter === 5 || chapter === 6 || chapter === 28 || chapter === 31 || chapter === 32)
+      return 'moses_song_witness';
+    if (chapter === 8) return 'wilderness_scroll';
+    if (chapter === 16) return 'moses_exodus_passover';
+    if (chapter === 18) return 'isaiah_prophecy';
+    return null;
+  }
+
+  if (b === 'joshua' || b === 'judges' || b === 'ruth') {
+    if (b === 'joshua' && (chapter === 1 || chapter === 24)) return 'moses_song_witness';
+    if (b === 'joshua' && chapter === 3) return 'red_sea_parting';
+    if (b === 'ruth' && chapter === 2) return 'jesus_crowd_reconciliation';
+    return chapter % 3 === 1 ? 'abraham_covenant_altar' : null;
+  }
+
+  if (
+    b === '1 samuel' ||
+    b === '2 samuel' ||
+    b === '1 kings' ||
+    b === '2 kings' ||
+    b === '1 chronicles' ||
+    b === '2 chronicles' ||
+    b === 'ezra' ||
+    b === 'nehemiah' ||
+    b === 'esther'
+  ) {
+    if ((b === '1 samuel' && chapter === 16) || (b === '2 samuel' && chapter === 7)) return 'david_harp_psalm';
+    if (b === '1 kings' && (chapter === 6 || chapter === 8)) return chapter === 8 ? 'temple_presentation' : null;
+    return chapter % 3 === 1 ? 'isaiah_prophecy' : null;
+  }
+
+  if (b === 'job' || b === 'psalms' || b === 'proverbs' || b === 'ecclesiastes' || b === 'song of solomon') {
+    if (b === 'psalms') {
+      if (chapter === 22) return 'crucifixion_calvary';
+      if (chapter === 23) return 'lamb_of_god';
+      if (chapter === 2 || chapter === 110) return 'david_harp_psalm';
+      if (chapter === 119 || chapter === 19 || chapter === 1) return 'wilderness_scroll';
+      return chapter % 3 === 1 ? 'david_harp_psalm' : null;
+    }
+    return chapter % 2 === 1 ? 'david_harp_psalm' : null;
+  }
+
+  // Major & Minor Prophets
+  if (
+    b === 'isaiah' ||
+    b === 'jeremiah' ||
+    b === 'lamentations' ||
+    b === 'ezekiel' ||
+    b === 'daniel' ||
+    b === 'hosea' ||
+    b === 'joel' ||
+    b === 'amos' ||
+    b === 'obadiah' ||
+    b === 'jonah' ||
+    b === 'micah' ||
+    b === 'nahum' ||
+    b === 'habakkuk' ||
+    b === 'zephaniah' ||
+    b === 'haggai' ||
+    b === 'zechariah' ||
+    b === 'malachi'
+  ) {
+    if (b === 'isaiah' && chapter === 6) return 'throne_new_jerusalem';
+    if (b === 'isaiah' && (chapter === 7 || chapter === 9)) return 'nativity_immanuel';
+    if (b === 'isaiah' && chapter === 53) return 'lamb_of_god';
+    if (b === 'micah' && chapter === 5) return 'nativity_immanuel';
+    if (b === 'joel' && chapter === 2) return 'pentecost_spirit';
+    if (b === 'zechariah' && chapter === 9) return 'triumphal_entry';
+    return chapter % 2 === 1 ? 'isaiah_prophecy' : null;
+  }
+
+  // Gospels
+  if (b === 'matthew' || b === 'mark' || b === 'luke' || b === 'john') {
+    if (b === 'matthew') {
+      if (chapter === 1) return 'joseph_angel_dream';
+      if (chapter === 2) return 'nativity_immanuel';
+      if (chapter === 3) return 'baptism_jordan';
+      if (chapter === 4) return 'wilderness_scroll';
+      if (chapter === 5) return 'jesus_teaching';
+      if (chapter === 8 || chapter === 9) return chapter === 8 ? 'healing_multitudes' : null;
+      if (chapter === 13) return 'calling_fishermen';
+      if (chapter === 14) return 'healing_multitudes';
+      if (chapter === 18) return 'jesus_crowd_reconciliation';
+      if (chapter === 21) return 'triumphal_entry';
+      if (chapter === 22) return 'jesus_teaching';
+      if (chapter === 26) return 'nicodemus_night';
+      if (chapter === 27) return 'crucifixion_calvary';
+      if (chapter === 28) return 'empty_tomb_resurrection';
+      return chapter % 2 === 1 ? 'jesus_teaching' : null;
+    }
+    if (b === 'mark') {
+      if (chapter === 1) return 'baptism_jordan';
+      if (chapter === 2 || chapter === 5) return 'healing_multitudes';
+      if (chapter === 4) return 'calling_fishermen';
+      if (chapter === 11) return 'triumphal_entry';
+      if (chapter === 15) return 'crucifixion_calvary';
+      if (chapter === 16) return 'empty_tomb_resurrection';
+      return chapter % 2 === 1 ? 'jesus_teaching' : null;
+    }
+    if (b === 'luke') {
+      if (chapter === 1) return 'joseph_angel_dream';
+      if (chapter === 2) return 'nativity_immanuel';
+      if (chapter === 3) return 'baptism_jordan';
+      if (chapter === 4) return 'wilderness_scroll';
+      if (chapter === 5) return 'calling_fishermen';
+      if (chapter === 15) return 'jesus_crowd_reconciliation';
+      if (chapter === 19) return 'triumphal_entry';
+      if (chapter === 23) return 'crucifixion_calvary';
+      if (chapter === 24) return 'empty_tomb_resurrection';
+      return chapter % 2 === 1 ? 'jesus_teaching' : null;
+    }
+    if (b === 'john') {
+      if (chapter === 1) return 'creation_light';
+      if (chapter === 2) return 'temple_presentation';
+      if (chapter === 3) return 'nicodemus_night';
+      if (chapter === 6 || chapter === 9 || chapter === 11) return 'healing_multitudes';
+      if (chapter === 10) return 'lamb_of_god';
+      if (chapter === 12) return 'triumphal_entry';
+      if (chapter === 14) return 'jesus_teaching';
+      if (chapter === 19) return 'crucifixion_calvary';
+      if (chapter === 20) return 'empty_tomb_resurrection';
+      if (chapter === 21) return 'calling_fishermen';
+      return chapter % 2 === 1 ? 'jesus_teaching' : null;
+    }
+  }
+
+  if (b === 'acts') {
+    if (chapter === 1) return 'jesus_teaching';
+    if (chapter === 2) return 'pentecost_spirit';
+    if (chapter === 3) return 'healing_multitudes';
+    if (chapter === 9) return 'joseph_angel_dream';
+    return chapter % 2 === 1 ? 'apostolic_scroll' : null;
+  }
+
+  if (b === 'revelation') {
+    if (chapter === 1 || chapter === 4 || chapter === 21 || chapter === 22)
+      return chapter === 22 ? null : 'throne_new_jerusalem';
+    if (chapter === 5) return 'lamb_of_god';
+    if (chapter === 12) return 'nativity_immanuel';
+    return chapter % 2 === 1 ? 'throne_new_jerusalem' : null;
+  }
+
+  // Epistles (Romans through Jude)
+  if (b === 'romans') {
+    if (chapter === 1 || chapter === 8) return 'apostolic_scroll';
+    if (chapter === 3 || chapter === 5) return 'crucifixion_calvary';
+    if (chapter === 4) return 'abraham_covenant_altar';
+    if (chapter === 6) return 'empty_tomb_resurrection';
+    if (chapter === 12) return 'jesus_crowd_reconciliation';
+    return null;
+  }
+  if (b === '1 corinthians') {
+    if (chapter === 1) return 'apostolic_scroll';
+    if (chapter === 5 || chapter === 11) return 'moses_exodus_passover';
+    if (chapter === 10) return 'moses_song_witness';
+    if (chapter === 13) return 'jesus_crowd_reconciliation';
+    if (chapter === 15) return 'empty_tomb_resurrection';
+    return null;
+  }
+  if (b === 'hebrews') {
+    if (chapter === 1) return 'creation_light';
+    if (chapter === 3 || chapter === 4) return chapter === 3 ? 'moses_song_witness' : null;
+    if (chapter === 7) return 'melchizedek_abraham';
+    if (chapter === 8 || chapter === 9 || chapter === 10) return chapter === 9 ? 'temple_presentation' : null;
+    if (chapter === 11) return 'abraham_covenant_altar';
+    if (chapter === 12) return 'crucifixion_calvary';
+    return null;
+  }
+
+  // Remaining epistles: show on opening chapter and non-consecutive key chapters
+  if (chapter === 1) return 'apostolic_scroll';
+  if (chapter === 3) return 'jesus_crowd_reconciliation';
+  if (chapter === 5) return 'pentecost_spirit';
+  return null;
+}
+
+export function getIllustrationForChapter(
+  book: string,
+  chapter: number
+): BiblicalLineIllustration | null {
+  const scene = resolveRawChapterScene(book, chapter);
+  if (!scene) return null;
+
+  // Never repeat the exact same illustration on two consecutive chapters
+  if (chapter > 1) {
+    const prevScene = resolveRawChapterScene(book, chapter - 1);
+    if (prevScene && prevScene === scene) {
+      return null;
+    }
+  }
+
+  return {
+    id: `ill-chap-${book.toLowerCase()}-${chapter}`,
+    book,
+    chapter,
+    verse: 1,
+    sceneType: scene,
+  };
+}
+
+/**
+ * Pure monochrome engraved line-art SVG illustration.
+ * Displays ONLY the drawing itself without any card, heading, scripture reference, or caption.
  */
 function EngravedSceneArtwork({
   sceneType,
 }: {
   sceneType: BiblicalLineIllustration['sceneType'];
 }) {
+  const svgClass = 'w-full h-auto max-h-56 sm:max-h-64 block mx-auto';
+
   switch (sceneType) {
-    case 'jesus_teaching':
+    case 'joseph_angel_dream':
       return (
         <svg
-          viewBox="0 0 360 155"
-          className="w-full h-auto max-h-40"
+          viewBox="0 0 400 175"
+          className={svgClass}
           fill="none"
           stroke="currentColor"
           strokeLinecap="round"
           strokeLinejoin="round"
-          role="img"
-          aria-label="Traditional line drawing of Jesus teaching His disciples"
+          aria-hidden="true"
+        >
+          {/* Engraved celestial rays */}
+          <path d="M135 16 L80 68 M135 16 L195 68 M135 16 L135 58" strokeWidth="0.8" strokeDasharray="3 3" opacity="0.65" />
+          <path d="M24 152 L376 152" strokeWidth="1.3" />
+          {/* Angel of the Lord appearing with outstretched wings and hand */}
+          <circle cx="135" cy="48" r="8" strokeWidth="1.35" />
+          <path d="M123 58 C92 36, 68 58, 86 92 C98 82, 112 76, 122 72" strokeWidth="1.2" />
+          <path d="M147 58 C178 36, 202 58, 184 92 C172 82, 158 76, 148 72" strokeWidth="1.2" />
+          <path d="M122 58 Q114 102 110 148 L158 148 Q154 102 146 58 Z" strokeWidth="1.35" />
+          <path d="M146 68 L186 54" strokeWidth="1.35" />
+          <path d="M118 88 L148 110 M116 108 L146 130" strokeWidth="0.85" opacity="0.7" />
+          {/* Joseph resting on low couch on right */}
+          <path d="M214 132 L348 132 L354 152 L208 152 Z" strokeWidth="1.25" />
+          <circle cx="244" cy="108" r="7.5" strokeWidth="1.3" />
+          <path d="M254 114 Q292 108 334 124 L334 132 L248 132 Z" strokeWidth="1.3" />
+          {/* Carpenter's square & scroll in background */}
+          <path d="M52 152 L52 94 L82 94" strokeWidth="1.1" opacity="0.65" />
+        </svg>
+      );
+
+    case 'temple_presentation':
+      return (
+        <svg
+          viewBox="0 0 400 175"
+          className={svgClass}
+          fill="none"
+          stroke="currentColor"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          {/* Jerusalem Temple columns & lintel */}
+          <path d="M24 152 L376 152" strokeWidth="1.3" />
+          <path d="M58 24 L58 152 M82 24 L82 152 M318 24 L318 152 M342 24 L342 152" strokeWidth="1.2" opacity="0.75" />
+          <path d="M44 24 L356 24" strokeWidth="1.3" opacity="0.8" />
+          {/* Simeon holding the infant Christ in the Temple */}
+          <circle cx="174" cy="54" r="7.8" strokeWidth="1.35" />
+          <path d="M170 61 Q174 74 179 61" strokeWidth="1.1" />
+          <path d="M160 64 Q152 108 148 152 L198 152 Q194 108 188 64 Z" strokeWidth="1.35" />
+          {/* Infant in swaddling cloths */}
+          <circle cx="196" cy="78" r="4.8" strokeWidth="1.2" />
+          <circle cx="196" cy="78" r="9" strokeWidth="0.7" strokeDasharray="2 2" />
+          <path d="M180 82 Q196 92 210 80" strokeWidth="1.35" />
+          {/* Mary & Joseph with pair of turtledoves */}
+          <circle cx="248" cy="60" r="7.2" strokeWidth="1.3" />
+          <path d="M236 70 Q230 110 228 152 L268 152 Q264 110 258 70 Z" strokeWidth="1.3" />
+          <circle cx="288" cy="56" r="7.2" strokeWidth="1.3" />
+          <path d="M276 66 Q272 108 270 152 L306 152 Q304 108 298 66 Z" strokeWidth="1.3" />
+        </svg>
+      );
+
+    case 'calling_fishermen':
+      return (
+        <svg
+          viewBox="0 0 400 175"
+          className={svgClass}
+          fill="none"
+          stroke="currentColor"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          {/* Sea of Galilee shoreline & hills */}
+          <path d="M16 106 Q110 78 210 98 T384 90" strokeWidth="0.95" opacity="0.6" />
+          <path d="M18 134 Q90 128 160 134 T300 134 T384 134" strokeWidth="1.15" />
+          <path d="M36 146 Q120 140 205 146 T368 146" strokeWidth="0.95" opacity="0.75" />
+          {/* Jesus standing on the shore beckoning */}
+          <circle cx="96" cy="50" r="14" strokeWidth="0.7" strokeDasharray="2 2" opacity="0.7" />
+          <circle cx="96" cy="50" r="7.5" strokeWidth="1.35" />
+          <path d="M84 60 Q76 98 72 136 L116 136 Q112 98 106 60 Z" strokeWidth="1.35" />
+          <path d="M106 68 L146 56" strokeWidth="1.4" />
+          {/* Galilean fishing boat & nets with Simon Peter and Andrew */}
+          <path d="M178 122 L336 122 L316 142 L198 142 Z" strokeWidth="1.4" />
+          <path d="M254 44 L254 122 M254 48 L306 106 L254 106" strokeWidth="1.15" />
+          {/* Net cross-hatching */}
+          <path d="M168 122 Q182 146 214 144 M176 126 L204 142 M188 124 L212 138" strokeWidth="0.9" />
+          <circle cx="222" cy="82" r="6.8" strokeWidth="1.3" />
+          <path d="M212 90 L206 122 L236 122 L230 90 Z" strokeWidth="1.3" />
+          <path d="M212 96 L182 84" strokeWidth="1.25" />
+          <circle cx="282" cy="86" r="6.8" strokeWidth="1.3" />
+          <path d="M272 94 L268 122 L296 122 L290 94 Z" strokeWidth="1.3" />
+        </svg>
+      );
+
+    case 'healing_multitudes':
+      return (
+        <svg
+          viewBox="0 0 400 175"
+          className={svgClass}
+          fill="none"
+          stroke="currentColor"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M20 150 L380 150" strokeWidth="1.3" />
+          <path d="M36 150 L36 68 A44 38 0 0 1 124 68 L124 150" strokeWidth="0.9" opacity="0.5" />
+          {/* Jesus extending hand in compassion to heal */}
+          <circle cx="164" cy="48" r="14" strokeWidth="0.7" strokeDasharray="2 2" opacity="0.7" />
+          <circle cx="164" cy="48" r="7.5" strokeWidth="1.35" />
+          <path d="M150 58 Q142 102 138 150 L186 150 Q182 102 176 58 Z" strokeWidth="1.35" />
+          <path d="M176 68 L216 82" strokeWidth="1.4" />
+          {/* Kneeling person being healed */}
+          <circle cx="234" cy="86" r="7" strokeWidth="1.3" />
+          <path d="M224 94 Q216 122 212 150 L256 150 Q250 122 244 94 Z" strokeWidth="1.3" />
+          <path d="M224 102 L198 88" strokeWidth="1.25" />
+          {/* Onlooking crowd */}
+          <circle cx="292" cy="60" r="6.8" strokeWidth="1.25" />
+          <path d="M282 68 L276 150 L308 150 L302 68 Z" strokeWidth="1.25" />
+          <circle cx="332" cy="64" r="6.5" strokeWidth="1.2" />
+          <path d="M322 72 L318 150 L346 150 L342 72 Z" strokeWidth="1.2" />
+        </svg>
+      );
+
+    case 'triumphal_entry':
+      return (
+        <svg
+          viewBox="0 0 400 175"
+          className={svgClass}
+          fill="none"
+          stroke="currentColor"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M20 150 L380 150" strokeWidth="1.3" />
+          {/* Jerusalem city gate on right */}
+          <path d="M308 150 L308 46 L372 46 L372 150" strokeWidth="1.25" />
+          <path d="M324 150 L324 88 A16 16 0 0 1 356 88 L356 150" strokeWidth="1.15" />
+          {/* Christ riding the colt toward Jerusalem */}
+          <circle cx="172" cy="48" r="13" strokeWidth="0.7" strokeDasharray="2 2" opacity="0.7" />
+          <circle cx="172" cy="48" r="7.2" strokeWidth="1.35" />
+          <path d="M160 56 L154 108 L188 108 L182 56 Z" strokeWidth="1.3" />
+          {/* Donkey / Colt */}
+          <path d="M138 98 L206 98 L218 80 L230 86 L216 112 L142 112 Z" strokeWidth="1.3" />
+          <path d="M148 112 L146 150 M162 112 L162 150 M194 112 L194 150 M208 112 L210 150" strokeWidth="1.3" />
+          {/* Crowd waving palm branches */}
+          <circle cx="268" cy="64" r="6.8" strokeWidth="1.25" />
+          <path d="M258 72 L252 150 L284 150 L278 72 Z" strokeWidth="1.25" />
+          <path d="M256 76 L232 48 M236 52 L246 46 M242 58 L252 52" strokeWidth="1.2" />
+        </svg>
+      );
+
+    case 'jesus_teaching':
+      return (
+        <svg
+          viewBox="0 0 400 175"
+          className={svgClass}
+          fill="none"
+          stroke="currentColor"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
         >
           {/* Distant Galilean hills & sky hatching */}
-          <path d="M12 118 Q85 92 160 112 T348 106" strokeWidth="0.9" opacity="0.55" />
-          <path d="M10 138 L350 138" strokeWidth="1.1" />
-          <path d="M35 24 L95 24 M50 29 L82 29 M255 22 L320 22" strokeWidth="0.6" opacity="0.4" />
+          <path d="M14 128 Q95 98 180 120 T386 114" strokeWidth="1" opacity="0.6" />
+          <path d="M12 150 L388 150" strokeWidth="1.3" />
+          <path d="M40 26 L108 26 M58 32 L94 32 M280 24 L352 24" strokeWidth="0.75" opacity="0.45" />
 
           {/* Seated figure of Jesus on the mount (left-center) */}
-          {/* Subtle halo rays in classic engraved style */}
-          <circle cx="118" cy="48" r="14" strokeWidth="0.65" strokeDasharray="2 2" opacity="0.7" />
-          {/* Head, hair & beard */}
-          <circle cx="118" cy="48" r="7.5" strokeWidth="1.2" />
-          <path d="M111 46 Q110 56 113 60 M125 46 Q126 56 123 60" strokeWidth="1" />
-          <path d="M114 53 Q118 58 122 53" strokeWidth="0.9" />
+          <circle cx="132" cy="52" r="15" strokeWidth="0.75" strokeDasharray="2 2" opacity="0.75" />
+          <circle cx="132" cy="52" r="8" strokeWidth="1.35" />
+          <path d="M124 50 Q123 61 126 65 M140 50 Q141 61 138 65" strokeWidth="1.1" />
+          <path d="M127 57 Q132 63 137 57" strokeWidth="1" />
           {/* Raised right arm in teaching gesture */}
-          <path d="M124 62 L145 47 L151 43" strokeWidth="1.25" />
-          <path d="M122 68 L143 53" strokeWidth="1.1" />
+          <path d="M139 67 L162 50 L169 46" strokeWidth="1.4" />
+          <path d="M136 74 L159 57" strokeWidth="1.2" />
           {/* Robe & drapery folds with engraved hatching */}
-          <path d="M106 58 Q96 86 92 126 L142 126 Q138 92 128 60 Z" strokeWidth="1.25" />
-          <path d="M102 74 L124 88 M100 90 L128 108 M98 108 L124 122" strokeWidth="0.75" opacity="0.7" />
+          <path d="M118 63 Q107 94 102 138 L158 138 Q154 100 143 65 Z" strokeWidth="1.4" />
+          <path d="M114 80 L138 96 M112 98 L142 118 M110 118 L138 133" strokeWidth="0.85" opacity="0.75" />
           {/* Stone seat on hillside */}
-          <path d="M82 126 Q85 104 102 104 M78 138 L152 138" strokeWidth="1" />
+          <path d="M92 138 Q95 114 114 114 M86 150 L170 150" strokeWidth="1.15" />
 
           {/* Listening Disciples (center & right) */}
-          {/* Disciple 1 — kneeling/leaning forward */}
-          <circle cx="196" cy="64" r="6.8" strokeWidth="1.15" />
-          <path d="M192 70 Q182 96 180 132 L214 132 Q212 96 202 71 Z" strokeWidth="1.15" />
-          <path d="M190 80 L174 74" strokeWidth="1.1" />
-          <path d="M186 94 L208 110 M184 108 L206 122" strokeWidth="0.7" opacity="0.65" />
+          <circle cx="218" cy="70" r="7.5" strokeWidth="1.3" />
+          <path d="M213 77 Q202 106 200 144 L238 144 Q235 106 225 78 Z" strokeWidth="1.3" />
+          <path d="M210 88 L192 81" strokeWidth="1.25" />
+          <path d="M206 104 L230 120 M204 118 L228 134" strokeWidth="0.8" opacity="0.7" />
 
-          {/* Disciple 2 — standing attentive */}
-          <circle cx="242" cy="54" r="6.8" strokeWidth="1.15" />
-          <path d="M234 62 Q228 96 226 134 L258 134 Q256 96 250 62 Z" strokeWidth="1.15" />
-          <path d="M232 78 L252 94 M230 96 L252 114" strokeWidth="0.7" opacity="0.65" />
+          <circle cx="270" cy="58" r="7.5" strokeWidth="1.3" />
+          <path d="M261 67 Q254 105 252 146 L288 146 Q285 105 279 67 Z" strokeWidth="1.3" />
+          <path d="M258 85 L281 102 M256 105 L281 125" strokeWidth="0.8" opacity="0.7" />
 
-          {/* Disciple 3 — seated with scroll */}
-          <circle cx="290" cy="68" r="6.5" strokeWidth="1.15" />
-          <path d="M282 76 Q274 104 272 134 L308 134 Q304 104 298 76 Z" strokeWidth="1.15" />
-          <path d="M276 92 L264 96 L264 106 L278 102" strokeWidth="0.95" />
-          {/* Olive branch / hillside detail */}
-          <path d="M38 138 L38 78 Q38 52 58 42 M38 66 Q22 56 16 48" strokeWidth="1" opacity="0.75" />
+          <circle cx="324" cy="74" r="7.2" strokeWidth="1.3" />
+          <path d="M315 83 Q306 114 304 146 L344 146 Q340 114 333 83 Z" strokeWidth="1.3" />
+          <path d="M308 100 L295 105 L295 116 L310 112" strokeWidth="1.1" />
+          {/* Olive tree on hillside */}
+          <path d="M42 150 L42 84 Q42 56 64 45 M42 72 Q24 61 18 52" strokeWidth="1.15" opacity="0.8" />
         </svg>
       );
 
     case 'jesus_crowd_reconciliation':
       return (
         <svg
-          viewBox="0 0 360 155"
-          className="w-full h-auto max-h-40"
+          viewBox="0 0 400 175"
+          className={svgClass}
           fill="none"
           stroke="currentColor"
           strokeLinecap="round"
           strokeLinejoin="round"
-          role="img"
-          aria-label="Traditional line drawing of Jesus teaching on restoring a brother"
+          aria-hidden="true"
         >
           {/* Classical Jerusalem archway in background */}
-          <path d="M30 136 L330 136" strokeWidth="1.1" />
-          <path d="M55 136 L55 52 A48 42 0 0 1 151 52 L151 136" strokeWidth="0.85" opacity="0.5" />
-          <path d="M210 136 L210 62 L310 62 L310 136" strokeWidth="0.8" opacity="0.45" />
+          <path d="M28 148 L372 148" strokeWidth="1.3" />
+          <path d="M58 148 L58 56 A54 46 0 0 1 166 56 L166 148" strokeWidth="0.95" opacity="0.55" />
+          <path d="M232 148 L232 66 L346 66 L346 148" strokeWidth="0.9" opacity="0.5" />
 
           {/* Jesus in center guiding reconciliation */}
-          <circle cx="176" cy="48" r="13" strokeWidth="0.6" strokeDasharray="2 2" opacity="0.65" />
-          <circle cx="176" cy="48" r="7.2" strokeWidth="1.2" />
-          <path d="M164 58 Q158 94 156 136 L196 136 Q194 94 188 58 Z" strokeWidth="1.2" />
-          <path d="M164 66 L140 76 M188 66 L212 76" strokeWidth="1.15" />
-          <path d="M162 84 L190 102 M160 102 L188 120" strokeWidth="0.7" opacity="0.65" />
+          <circle cx="196" cy="52" r="14" strokeWidth="0.7" strokeDasharray="2 2" opacity="0.7" />
+          <circle cx="196" cy="52" r="7.8" strokeWidth="1.35" />
+          <path d="M182 63 Q175 102 173 148 L218 148 Q216 102 209 63 Z" strokeWidth="1.35" />
+          <path d="M182 72 L156 83 M209 72 L236 83" strokeWidth="1.3" />
+          <path d="M180 92 L211 112 M178 112 L209 132" strokeWidth="0.8" opacity="0.7" />
 
           {/* Two brothers clasping hands in reconciliation */}
-          <circle cx="116" cy="58" r="6.8" strokeWidth="1.15" />
-          <path d="M106 66 Q100 98 98 136 L132 136 Q130 98 126 66 Z" strokeWidth="1.15" />
-          <path d="M126 78 L152 84" strokeWidth="1.2" />
+          <circle cx="128" cy="63" r="7.4" strokeWidth="1.3" />
+          <path d="M117 72 Q110 107 108 148 L146 148 Q144 107 139 72 Z" strokeWidth="1.3" />
+          <path d="M139 85 L168 92" strokeWidth="1.35" />
 
-          <circle cx="238" cy="58" r="6.8" strokeWidth="1.15" />
-          <path d="M228 66 Q224 98 222 136 L256 136 Q252 98 248 66 Z" strokeWidth="1.15" />
-          <path d="M228 78 L202 84" strokeWidth="1.2" />
+          <circle cx="264" cy="63" r="7.4" strokeWidth="1.3" />
+          <path d="M253 72 Q248 107 246 148 L284 148 Q280 107 275 72 Z" strokeWidth="1.3" />
+          <path d="M253 85 L224 92" strokeWidth="1.35" />
 
           {/* Witnessing disciple on right */}
-          <circle cx="286" cy="62" r="6.2" strokeWidth="1.1" />
-          <path d="M278 70 Q274 102 272 136 L300 136 Q298 102 294 70 Z" strokeWidth="1.1" />
+          <circle cx="318" cy="68" r="6.8" strokeWidth="1.25" />
+          <path d="M309 77 Q304 112 302 148 L334 148 Q332 112 327 77 Z" strokeWidth="1.25" />
         </svg>
       );
 
     case 'nativity_immanuel':
       return (
         <svg
-          viewBox="0 0 360 155"
-          className="w-full h-auto max-h-40"
+          viewBox="0 0 400 175"
+          className={svgClass}
           fill="none"
           stroke="currentColor"
           strokeLinecap="round"
           strokeLinejoin="round"
-          role="img"
-          aria-label="Traditional line drawing of the Birth of Immanuel"
+          aria-hidden="true"
         >
           {/* Star of Bethlehem & engraved light beams */}
-          <path d="M180 12 L180 34 M169 23 L191 23 M173 16 L187 30 M187 16 L173 30" strokeWidth="1.1" />
-          <path d="M180 36 L152 86 M180 36 L180 88 M180 36 L208 86" strokeWidth="0.65" strokeDasharray="3 3" opacity="0.6" />
+          <path d="M200 12 L200 38 M187 25 L213 25 M191 17 L209 33 M209 17 L191 33" strokeWidth="1.3" />
+          <path d="M200 40 L168 94 M200 40 L200 96 M200 40 L232 94" strokeWidth="0.75" strokeDasharray="3 3" opacity="0.65" />
 
           {/* Stable timber frame */}
-          <path d="M48 52 L180 22 L312 52" strokeWidth="1.1" opacity="0.75" />
-          <path d="M64 48 L64 136 M296 48 L296 136 M28 136 L332 136" strokeWidth="1.1" />
+          <path d="M52 56 L200 24 L348 56" strokeWidth="1.25" opacity="0.8" />
+          <path d="M70 52 L70 148 M330 52 L330 148 M28 148 L372 148" strokeWidth="1.3" />
 
           {/* Manger in center */}
-          <path d="M152 104 L208 104 L198 122 L162 122 Z" strokeWidth="1.2" />
-          <path d="M160 122 L148 136 M200 122 L212 136 M162 122 L174 136 M198 122 L186 136" strokeWidth="1.1" />
-          <circle cx="180" cy="98" r="5.5" strokeWidth="1.1" />
-          <circle cx="180" cy="98" r="10" strokeWidth="0.6" strokeDasharray="2 2" />
+          <path d="M168 112 L232 112 L220 132 L180 132 Z" strokeWidth="1.35" />
+          <path d="M178 132 L164 148 M222 132 L236 148 M180 132 L194 148 M220 132 L206 148" strokeWidth="1.25" />
+          <circle cx="200" cy="106" r="6" strokeWidth="1.25" />
+          <circle cx="200" cy="106" r="11" strokeWidth="0.7" strokeDasharray="2 2" />
 
           {/* Mary kneeling on left */}
-          <circle cx="122" cy="68" r="6.8" strokeWidth="1.15" />
-          <path d="M112 76 Q102 104 98 136 L140 136 Q136 104 130 76 Z" strokeWidth="1.15" />
-          <path d="M128 86 L146 94" strokeWidth="1.1" />
+          <circle cx="135" cy="74" r="7.4" strokeWidth="1.3" />
+          <path d="M124 83 Q113 114 108 148 L155 148 Q150 114 144 83 Z" strokeWidth="1.3" />
+          <path d="M142 94 L162 102" strokeWidth="1.25" />
 
           {/* Joseph standing with staff on right */}
-          <circle cx="238" cy="56" r="6.8" strokeWidth="1.15" />
-          <path d="M228 64 Q222 98 220 136 L254 136 Q252 98 248 64 Z" strokeWidth="1.15" />
-          <path d="M264 44 L264 136" strokeWidth="1.2" />
+          <circle cx="264" cy="60" r="7.4" strokeWidth="1.3" />
+          <path d="M253 70 Q246 107 244 148 L282 148 Q280 107 275 70 Z" strokeWidth="1.3" />
+          <path d="M294 48 L294 148" strokeWidth="1.35" />
         </svg>
       );
 
     case 'baptism_jordan':
       return (
         <svg
-          viewBox="0 0 360 155"
-          className="w-full h-auto max-h-40"
+          viewBox="0 0 400 175"
+          className={svgClass}
           fill="none"
           stroke="currentColor"
           strokeLinecap="round"
           strokeLinejoin="round"
-          role="img"
-          aria-label="Traditional line drawing of the Baptism of Jesus in the Jordan"
+          aria-hidden="true"
         >
           {/* Heavens opening & descending dove */}
-          <path d="M140 14 Q180 28 220 14" strokeWidth="0.9" opacity="0.65" />
-          <path d="M174 26 Q180 20 186 26 M166 22 L176 26 L180 33 L184 26 L194 22" strokeWidth="1.15" />
-          <path d="M180 34 L158 64 M180 34 L180 62 M180 34 L202 64" strokeWidth="0.65" strokeDasharray="2 3" opacity="0.65" />
+          <path d="M154 14 Q200 30 246 14" strokeWidth="1.05" opacity="0.7" />
+          <path d="M193 28 Q200 21 207 28 M184 24 L195 28 L200 36 L205 28 L216 24" strokeWidth="1.3" />
+          <path d="M200 38 L175 70 M200 38 L200 68 M200 38 L225 70" strokeWidth="0.75" strokeDasharray="2 3" opacity="0.7" />
 
           {/* River Jordan water ripples */}
-          <path d="M20 122 Q60 117 100 122 T180 122 T260 122 T340 122" strokeWidth="1.1" />
-          <path d="M35 130 Q80 126 125 130 T215 130 T315 130" strokeWidth="0.9" opacity="0.75" />
-          <path d="M50 138 Q110 134 170 138 T290 138" strokeWidth="0.8" opacity="0.55" />
+          <path d="M20 134 Q68 128 115 134 T200 134 T285 134 T380 134" strokeWidth="1.3" />
+          <path d="M36 143 Q88 138 140 143 T240 143 T355 143" strokeWidth="1.05" opacity="0.8" />
+          <path d="M54 152 Q120 147 190 152 T325 152" strokeWidth="0.9" opacity="0.6" />
 
           {/* Jesus standing in the Jordan */}
-          <circle cx="180" cy="66" r="6.8" strokeWidth="1.2" />
-          <path d="M168 75 Q164 98 162 122 L198 122 Q196 98 192 75 Z" strokeWidth="1.2" />
-          <path d="M172 86 L180 94 L188 86" strokeWidth="1.1" />
+          <circle cx="200" cy="72" r="7.5" strokeWidth="1.35" />
+          <path d="M187 82 Q182 108 180 134 L220 134 Q218 108 213 82 Z" strokeWidth="1.35" />
+          <path d="M191 94 L200 103 L209 94" strokeWidth="1.25" />
 
           {/* John the Baptist on the elevated riverbank */}
-          <path d="M22 122 Q78 118 126 122" strokeWidth="1.2" />
-          <circle cx="118" cy="52" r="6.8" strokeWidth="1.15" />
-          <path d="M108 60 Q102 90 100 120 L132 120 Q130 90 126 60 Z" strokeWidth="1.15" />
-          <path d="M126 66 L162 56" strokeWidth="1.2" />
+          <path d="M22 134 Q86 129 140 134" strokeWidth="1.35" />
+          <circle cx="130" cy="56" r="7.5" strokeWidth="1.3" />
+          <path d="M119 65 Q112 98 110 132 L146 132 Q144 98 139 65 Z" strokeWidth="1.3" />
+          <path d="M139 72 L180 61" strokeWidth="1.35" />
           {/* Reed cross staff */}
-          <path d="M94 38 L94 120 M88 46 L100 46" strokeWidth="1.05" />
+          <path d="M103 40 L103 132 M96 49 L110 49" strokeWidth="1.2" />
         </svg>
       );
 
     case 'wilderness_scroll':
       return (
         <svg
-          viewBox="0 0 360 155"
-          className="w-full h-auto max-h-40"
+          viewBox="0 0 400 175"
+          className={svgClass}
           fill="none"
           stroke="currentColor"
           strokeLinecap="round"
           strokeLinejoin="round"
-          role="img"
-          aria-label="Traditional line drawing of Christ in the Judean wilderness"
+          aria-hidden="true"
         >
           {/* Craggy Judean wilderness mountains */}
-          <path d="M15 128 L75 68 L130 106 L210 54 L285 98 L345 72" strokeWidth="0.9" opacity="0.55" />
-          <path d="M12 136 L348 136" strokeWidth="1.1" />
+          <path d="M16 140 L84 74 L145 116 L234 58 L318 108 L384 78" strokeWidth="1.05" opacity="0.6" />
+          <path d="M14 148 L386 148" strokeWidth="1.3" />
 
           {/* Christ seated on desert stone with Torah scroll */}
-          <circle cx="176" cy="52" r="13" strokeWidth="0.6" strokeDasharray="2 2" opacity="0.65" />
-          <circle cx="176" cy="52" r="7" strokeWidth="1.2" />
-          <path d="M164 60 Q156 94 152 136 L202 136 Q198 94 188 60 Z" strokeWidth="1.2" />
+          <circle cx="196" cy="56" r="14" strokeWidth="0.7" strokeDasharray="2 2" opacity="0.7" />
+          <circle cx="196" cy="56" r="7.8" strokeWidth="1.35" />
+          <path d="M182 65 Q173 102 169 148 L224 148 Q220 102 209 65 Z" strokeWidth="1.35" />
           {/* Open scroll in hands */}
-          <path d="M192 78 L218 74 L218 94 L192 98 Z" strokeWidth="1.1" />
-          <path d="M196 82 L214 80 M196 88 L214 86" strokeWidth="0.7" />
+          <path d="M214 85 L242 80 L242 102 L214 107 Z" strokeWidth="1.25" />
+          <path d="M218 90 L238 87 M218 96 L238 94" strokeWidth="0.8" />
           {/* Desert stones */}
-          <path d="M98 136 Q102 118 124 120 Q140 122 144 136" strokeWidth="1" />
-          <path d="M236 136 Q242 122 260 124 Q274 126 278 136" strokeWidth="1" />
+          <path d="M108 148 Q113 128 138 130 Q155 132 160 148" strokeWidth="1.15" />
+          <path d="M262 148 Q268 132 288 134 Q304 136 308 148" strokeWidth="1.15" />
         </svg>
       );
 
     case 'moses_song_witness':
       return (
         <svg
-          viewBox="0 0 360 155"
-          className="w-full h-auto max-h-40"
+          viewBox="0 0 400 175"
+          className={svgClass}
           fill="none"
           stroke="currentColor"
           strokeLinecap="round"
           strokeLinejoin="round"
-          role="img"
-          aria-label="Traditional line drawing of Moses reciting the Song of Witness before Israel"
+          aria-hidden="true"
         >
           {/* Mount Nebo in the distance */}
-          <path d="M220 128 L285 48 L345 128" strokeWidth="0.9" opacity="0.5" />
-          <path d="M14 136 L346 136" strokeWidth="1.15" />
+          <path d="M244 140 L316 52 L384 140" strokeWidth="1.05" opacity="0.55" />
+          <path d="M16 148 L384 148" strokeWidth="1.3" />
 
           {/* Moses standing elevated on left with long beard, staff & scroll */}
-          <circle cx="108" cy="44" r="7.2" strokeWidth="1.2" />
-          {/* Flowing beard of Moses */}
-          <path d="M104 50 Q108 66 113 50" strokeWidth="1" />
-          {/* Raised arm addressing the assembly */}
-          <path d="M116 54 L144 36" strokeWidth="1.25" />
-          {/* Staff in left hand */}
-          <path d="M86 28 L86 134" strokeWidth="1.25" />
-          <path d="M96 54 Q90 92 88 134 L128 134 Q126 92 120 54 Z" strokeWidth="1.2" />
-          <path d="M94 74 L122 92 M92 94 L120 114" strokeWidth="0.75" opacity="0.65" />
+          <circle cx="120" cy="48" r="8" strokeWidth="1.35" />
+          <path d="M115 55 Q120 72 126 55" strokeWidth="1.15" />
+          <path d="M129 59 L160 39" strokeWidth="1.4" />
+          <path d="M95 30 L95 146" strokeWidth="1.4" />
+          <path d="M106 59 Q100 100 98 146 L142 146 Q140 100 133 59 Z" strokeWidth="1.35" />
+          <path d="M104 81 L135 100 M102 103 L133 124" strokeWidth="0.85" opacity="0.7" />
 
-          {/* Ark / Tablets of the Law beside Moses */}
-          <path d="M46 96 L46 134 L72 134 L72 96 A13 10 0 0 0 46 96 Z" strokeWidth="1.05" />
-          <path d="M52 106 L66 106 M52 114 L66 114 M52 122 L66 122" strokeWidth="0.7" />
+          {/* Tablets of the Law beside Moses */}
+          <path d="M50 104 L50 146 L80 146 L80 104 A15 11 0 0 0 50 104 Z" strokeWidth="1.2" />
+          <path d="M57 115 L73 115 M57 124 L73 124 M57 133 L73 133" strokeWidth="0.8" />
 
           {/* Gathered elders & tribes of Israel listening on right */}
-          <circle cx="186" cy="64" r="6.2" strokeWidth="1.1" />
-          <path d="M178 71 L174 134 L198 134 L194 71 Z" strokeWidth="1.1" />
-          <circle cx="218" cy="66" r="6.2" strokeWidth="1.1" />
-          <path d="M210 73 L206 134 L230 134 L226 73 Z" strokeWidth="1.1" />
-          <circle cx="250" cy="68" r="6.2" strokeWidth="1.1" />
-          <path d="M242 75 L238 134 L262 134 L258 75 Z" strokeWidth="1.1" />
+          <circle cx="206" cy="70" r="6.8" strokeWidth="1.25" />
+          <path d="M197 78 L193 146 L220 146 L215 78 Z" strokeWidth="1.25" />
+          <circle cx="242" cy="72" r="6.8" strokeWidth="1.25" />
+          <path d="M233 80 L229 146 L256 146 L251 80 Z" strokeWidth="1.25" />
+          <circle cx="278" cy="74" r="6.8" strokeWidth="1.25" />
+          <path d="M269 82 L265 146 L292 146 L287 82 Z" strokeWidth="1.25" />
         </svg>
       );
 
     case 'moses_exodus_passover':
       return (
         <svg
-          viewBox="0 0 360 155"
-          className="w-full h-auto max-h-40"
+          viewBox="0 0 400 175"
+          className={svgClass}
           fill="none"
           stroke="currentColor"
           strokeLinecap="round"
           strokeLinejoin="round"
-          role="img"
-          aria-label="Traditional line drawing of Moses and the Israelites at the Passover and Exodus"
+          aria-hidden="true"
         >
-          <path d="M14 136 L346 136" strokeWidth="1.15" />
+          <path d="M16 148 L384 148" strokeWidth="1.3" />
           {/* Doorpost with lintel on left */}
-          <path d="M42 136 L42 46 L96 46 L96 136" strokeWidth="1.3" />
-          <path d="M36 46 L102 46 L102 38 L36 38 Z" strokeWidth="1.15" />
+          <path d="M46 148 L46 50 L106 50 L106 148" strokeWidth="1.45" />
+          <path d="M40 50 L112 50 L112 41 L40 41 Z" strokeWidth="1.3" />
           {/* Hyssop marks on lintel & doorposts */}
-          <path d="M52 42 L86 42 M45 58 L45 88 M93 58 L93 88" strokeWidth="1.6" />
+          <path d="M58 45 L95 45 M50 63 L50 96 M102 63 L102 96" strokeWidth="1.8" />
 
           {/* Moses with raised staff leading the people */}
-          <circle cx="168" cy="48" r="7" strokeWidth="1.2" />
-          <path d="M156 56 L150 136 L186 136 L180 56 Z" strokeWidth="1.2" />
-          <path d="M182 60 L208 38 M208 22 L208 136" strokeWidth="1.25" />
+          <circle cx="186" cy="52" r="7.8" strokeWidth="1.35" />
+          <path d="M173 61 L166 148 L206 148 L199 61 Z" strokeWidth="1.35" />
+          <path d="M202 65 L230 41 M230 24 L230 148" strokeWidth="1.4" />
 
           {/* Israelites journeying with staffs */}
-          <circle cx="246" cy="60" r="6.2" strokeWidth="1.1" />
-          <path d="M238 68 L234 136 L258 136 L254 68 Z" strokeWidth="1.1" />
-          <circle cx="284" cy="64" r="6" strokeWidth="1.1" />
-          <path d="M276 72 L272 136 L296 136 L292 72 Z" strokeWidth="1.1" />
+          <circle cx="272" cy="65" r="6.8" strokeWidth="1.25" />
+          <path d="M263 74 L259 148 L286 148 L281 74 Z" strokeWidth="1.25" />
+          <circle cx="314" cy="70" r="6.6" strokeWidth="1.25" />
+          <path d="M305 79 L301 148 L328 148 L323 79 Z" strokeWidth="1.25" />
         </svg>
       );
 
     case 'bronze_serpent':
       return (
         <svg
-          viewBox="0 0 360 155"
-          className="w-full h-auto max-h-40"
+          viewBox="0 0 400 175"
+          className={svgClass}
           fill="none"
           stroke="currentColor"
           strokeLinecap="round"
           strokeLinejoin="round"
-          role="img"
-          aria-label="Traditional line drawing of Moses lifting up the bronze serpent in the wilderness"
+          aria-hidden="true"
         >
           {/* Wilderness tents & horizon */}
-          <path d="M14 136 L346 136" strokeWidth="1.15" />
-          <path d="M28 136 L58 98 L88 136 M275 136 L305 98 L335 136" strokeWidth="0.95" opacity="0.65" />
+          <path d="M16 148 L384 148" strokeWidth="1.3" />
+          <path d="M30 148 L64 106 L98 148 M304 148 L338 106 L372 148" strokeWidth="1.1" opacity="0.7" />
 
           {/* High standard / pole with Bronze Serpent in center */}
-          <path d="M180 20 L180 136" strokeWidth="1.5" />
-          <path d="M156 38 L204 38" strokeWidth="1.4" />
-          <path d="M168 56 C158 44, 202 42, 190 30 C180 22, 166 32, 180 68" strokeWidth="1.35" />
+          <path d="M200 22 L200 148" strokeWidth="1.65" />
+          <path d="M173 41 L227 41" strokeWidth="1.55" />
+          <path d="M186 61 C175 48, 224 46, 211 32 C200 24, 184 35, 200 74" strokeWidth="1.5" />
 
           {/* Moses pointing toward the lifted standard */}
-          <circle cx="126" cy="58" r="6.8" strokeWidth="1.15" />
-          <path d="M116 66 L110 136 L142 136 L136 66 Z" strokeWidth="1.15" />
-          <path d="M136 72 L166 48" strokeWidth="1.2" />
+          <circle cx="140" cy="63" r="7.5" strokeWidth="1.3" />
+          <path d="M129 72 L122 148 L158 148 L151 72 Z" strokeWidth="1.3" />
+          <path d="M151 78 L184 52" strokeWidth="1.35" />
 
           {/* Kneeling Israelite looking up in faith */}
-          <circle cx="232" cy="78" r="6.5" strokeWidth="1.15" />
-          <path d="M224 86 L216 136 L248 136 L240 86 Z" strokeWidth="1.15" />
-          <path d="M224 92 L198 68" strokeWidth="1.15" />
+          <circle cx="258" cy="85" r="7.2" strokeWidth="1.3" />
+          <path d="M249 94 L240 148 L276 148 L267 94 Z" strokeWidth="1.3" />
+          <path d="M249 100 L220 74" strokeWidth="1.3" />
         </svg>
       );
 
     case 'crucifixion_calvary':
       return (
         <svg
-          viewBox="0 0 360 155"
-          className="w-full h-auto max-h-40"
+          viewBox="0 0 400 175"
+          className={svgClass}
           fill="none"
           stroke="currentColor"
           strokeLinecap="round"
           strokeLinejoin="round"
-          role="img"
-          aria-label="Traditional line drawing of Golgotha and the three crosses"
+          aria-hidden="true"
         >
           {/* Hill of Golgotha */}
-          <path d="M20 138 Q180 82 340 138" strokeWidth="1.25" />
+          <path d="M20 150 Q200 88 380 150" strokeWidth="1.4" />
           {/* Engraved sky rays */}
-          <path d="M180 16 L90 54 M180 16 L270 54 M180 16 L130 32 M180 16 L230 32" strokeWidth="0.65" opacity="0.55" />
+          <path d="M200 18 L100 58 M200 18 L300 58 M200 18 L144 35 M200 18 L256 35" strokeWidth="0.75" opacity="0.6" />
           {/* Central Cross */}
-          <path d="M180 20 L180 108 M154 42 L206 42" strokeWidth="1.6" />
+          <path d="M200 22 L200 118 M170 46 L230 46" strokeWidth="1.8" />
           {/* Two side crosses */}
-          <path d="M112 42 L112 116 M94 58 L130 58" strokeWidth="1.2" />
-          <path d="M248 42 L248 116 M230 58 L266 58" strokeWidth="1.2" />
+          <path d="M124 46 L124 126 M104 63 L144 63" strokeWidth="1.35" />
+          <path d="M276 46 L276 126 M256 63 L296 63" strokeWidth="1.35" />
         </svg>
       );
 
     case 'creation_light':
       return (
         <svg
-          viewBox="0 0 360 155"
-          className="w-full h-auto max-h-40"
+          viewBox="0 0 400 175"
+          className={svgClass}
           fill="none"
           stroke="currentColor"
           strokeLinecap="round"
           strokeLinejoin="round"
-          role="img"
-          aria-label="Traditional line drawing of the Creation of Light over the waters"
+          aria-hidden="true"
         >
           {/* Primordial waters below */}
-          <path d="M16 118 Q65 110 115 118 T215 118 T344 118" strokeWidth="1.15" />
-          <path d="M24 128 Q80 121 135 128 T245 128 T336 128" strokeWidth="0.95" opacity="0.75" />
-          <path d="M36 138 Q100 132 165 138 T324 138" strokeWidth="0.8" opacity="0.55" />
+          <path d="M18 128 Q72 120 128 128 T238 128 T382 128" strokeWidth="1.3" />
+          <path d="M26 139 Q88 131 150 139 T272 139 T374 139" strokeWidth="1.1" opacity="0.8" />
+          <path d="M40 150 Q110 143 182 150 T360 150" strokeWidth="0.9" opacity="0.6" />
 
-          {/* Radiant sun/light burst parting the clouds */}
-          <circle cx="180" cy="48" r="16" strokeWidth="1.2" />
-          <path d="M180 14 L180 26 M180 70 L180 108 M146 48 L110 48 M214 48 L250 48" strokeWidth="1" />
-          <path d="M156 26 L124 14 M204 26 L236 14 M156 68 L112 104 M204 68 L248 104" strokeWidth="0.85" opacity="0.75" />
-          <path d="M166 72 L144 108 M194 72 L216 108" strokeWidth="0.65" strokeDasharray="3 3" opacity="0.65" />
+          {/* Radiant light burst parting the clouds */}
+          <circle cx="200" cy="52" r="18" strokeWidth="1.35" />
+          <path d="M200 14 L200 28 M200 76 L200 118 M162 52 L122 52 M238 52 L278 52" strokeWidth="1.15" />
+          <path d="M173 28 L138 14 M227 28 L262 14 M173 74 L124 114 M227 74 L276 114" strokeWidth="0.95" opacity="0.8" />
+          <path d="M184 78 L160 118 M216 78 L240 118" strokeWidth="0.75" strokeDasharray="3 3" opacity="0.7" />
         </svg>
       );
 
     case 'melchizedek_abraham':
       return (
         <svg
-          viewBox="0 0 360 155"
-          className="w-full h-auto max-h-40"
+          viewBox="0 0 400 175"
+          className={svgClass}
           fill="none"
           stroke="currentColor"
           strokeLinecap="round"
           strokeLinejoin="round"
-          role="img"
-          aria-label="Traditional line drawing of Melchizedek blessing Abraham with bread and wine"
+          aria-hidden="true"
         >
-          <path d="M16 136 L344 136" strokeWidth="1.15" />
+          <path d="M18 148 L382 148" strokeWidth="1.3" />
           {/* Melchizedek King of Salem on left with crown & chalice */}
-          <path d="M118 38 L122 32 L128 38 L134 32 L138 38 Z" strokeWidth="1" />
-          <circle cx="128" cy="46" r="6.8" strokeWidth="1.2" />
-          <path d="M116 54 L110 136 L146 136 L140 54 Z" strokeWidth="1.2" />
+          <path d="M131 41 L135 35 L142 41 L149 35 L153 41 Z" strokeWidth="1.15" />
+          <circle cx="142" cy="50" r="7.5" strokeWidth="1.35" />
+          <path d="M129 59 L122 148 L162 148 L155 59 Z" strokeWidth="1.35" />
           {/* Chalice & bread */}
-          <path d="M142 72 L166 66 M166 56 L174 56 L170 64 L170 70 L166 70" strokeWidth="1.1" />
+          <path d="M158 78 L184 72 M184 61 L193 61 L188 70 L188 76 L184 76" strokeWidth="1.25" />
 
           {/* Abraham bowing in reverence on right */}
-          <circle cx="222" cy="58" r="6.8" strokeWidth="1.15" />
-          <path d="M212 66 L206 136 L242 136 L234 66 Z" strokeWidth="1.15" />
-          <path d="M212 76 L188 72" strokeWidth="1.15" />
+          <circle cx="246" cy="63" r="7.5" strokeWidth="1.3" />
+          <path d="M235 72 L229 148 L268 148 L260 72 Z" strokeWidth="1.3" />
+          <path d="M235 83 L209 78" strokeWidth="1.3" />
         </svg>
       );
 
     case 'isaiah_prophecy':
       return (
         <svg
-          viewBox="0 0 360 155"
-          className="w-full h-auto max-h-40"
+          viewBox="0 0 400 175"
+          className={svgClass}
           fill="none"
           stroke="currentColor"
           strokeLinecap="round"
           strokeLinejoin="round"
-          role="img"
-          aria-label="Traditional line drawing of the Prophet Isaiah proclaiming the sign of Immanuel"
+          aria-hidden="true"
         >
-          <path d="M16 136 L344 136" strokeWidth="1.15" />
+          <path d="M18 148 L382 148" strokeWidth="1.3" />
           {/* Classical pillar of Jerusalem */}
-          <path d="M58 28 L58 136 M82 28 L82 136 M52 28 L88 28" strokeWidth="1" opacity="0.6" />
+          <path d="M64 30 L64 148 M91 30 L91 148 M58 30 L98 30" strokeWidth="1.15" opacity="0.65" />
 
           {/* Prophet Isaiah with scroll & outstretched hand */}
-          <circle cx="152" cy="48" r="7" strokeWidth="1.2" />
-          <path d="M140 56 L134 136 L172 136 L164 56 Z" strokeWidth="1.2" />
-          <path d="M164 64 L204 46" strokeWidth="1.25" />
-          <path d="M122 72 L138 72 L138 96 L122 96 Z" strokeWidth="1" />
+          <circle cx="169" cy="52" r="7.8" strokeWidth="1.35" />
+          <path d="M155 61 L149 148 L191 148 L182 61 Z" strokeWidth="1.35" />
+          <path d="M182 70 L226 50" strokeWidth="1.4" />
+          <path d="M135 78 L153 78 L153 104 L135 104 Z" strokeWidth="1.15" />
 
           {/* Listener of the House of David */}
-          <circle cx="248" cy="56" r="6.8" strokeWidth="1.15" />
-          <path d="M238 64 L232 136 L266 136 L260 64 Z" strokeWidth="1.15" />
+          <circle cx="275" cy="61" r="7.5" strokeWidth="1.3" />
+          <path d="M264 70 L258 148 L295 148 L289 70 Z" strokeWidth="1.3" />
         </svg>
       );
 
     case 'lamb_of_god':
       return (
         <svg
-          viewBox="0 0 360 155"
-          className="w-full h-auto max-h-40"
+          viewBox="0 0 400 175"
+          className={svgClass}
           fill="none"
           stroke="currentColor"
           strokeLinecap="round"
           strokeLinejoin="round"
-          role="img"
-          aria-label="Traditional line drawing of Behold the Lamb of God"
+          aria-hidden="true"
         >
-          <path d="M16 134 L344 134" strokeWidth="1.15" />
+          <path d="M18 146 L382 146" strokeWidth="1.3" />
           {/* John the Baptist pointing toward Christ */}
-          <circle cx="114" cy="50" r="6.8" strokeWidth="1.15" />
-          <path d="M104 58 L98 134 L130 134 L124 58 Z" strokeWidth="1.15" />
-          <path d="M124 64 L162 56" strokeWidth="1.25" />
+          <circle cx="126" cy="54" r="7.5" strokeWidth="1.3" />
+          <path d="M115 63 L109 146 L144 146 L138 63 Z" strokeWidth="1.3" />
+          <path d="M138 70 L180 61" strokeWidth="1.4" />
 
           {/* Christ walking in the distance */}
-          <circle cx="228" cy="48" r="12" strokeWidth="0.6" strokeDasharray="2 2" opacity="0.65" />
-          <circle cx="228" cy="48" r="6.8" strokeWidth="1.2" />
-          <path d="M218 56 L212 134 L244 134 L238 56 Z" strokeWidth="1.2" />
+          <circle cx="253" cy="52" r="13.5" strokeWidth="0.7" strokeDasharray="2 2" opacity="0.7" />
+          <circle cx="253" cy="52" r="7.5" strokeWidth="1.35" />
+          <path d="M242 61 L235 146 L271 146 L264 61 Z" strokeWidth="1.35" />
+        </svg>
+      );
+
+    case 'empty_tomb_resurrection':
+      return (
+        <svg
+          viewBox="0 0 400 175"
+          className={svgClass}
+          fill="none"
+          stroke="currentColor"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M18 148 L382 148" strokeWidth="1.3" />
+          {/* Rock-hewn tomb & rolled-away stone */}
+          <path d="M62 148 L62 66 Q128 32 194 66 L194 148" strokeWidth="1.4" />
+          <path d="M104 148 L104 94 A24 24 0 0 1 152 94 L152 148" strokeWidth="1.35" />
+          <circle cx="216" cy="116" r="32" strokeWidth="1.4" />
+          <circle cx="216" cy="116" r="18" strokeWidth="0.85" strokeDasharray="3 3" />
+          {/* Dawn rays from open tomb */}
+          <path d="M128 74 L92 26 M128 74 L128 18 M128 74 L164 26" strokeWidth="0.9" strokeDasharray="3 3" opacity="0.75" />
+          {/* Women arriving at the tomb at dawn */}
+          <circle cx="294" cy="64" r="7.2" strokeWidth="1.3" />
+          <path d="M284 72 L276 148 L312 148 L304 72 Z" strokeWidth="1.3" />
+          <circle cx="332" cy="68" r="7" strokeWidth="1.25" />
+          <path d="M322 76 L316 148 L348 148 L342 76 Z" strokeWidth="1.25" />
+        </svg>
+      );
+
+    case 'red_sea_parting':
+      return (
+        <svg
+          viewBox="0 0 400 175"
+          className={svgClass}
+          fill="none"
+          stroke="currentColor"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M20 150 L380 150" strokeWidth="1.3" />
+          {/* Parted walls of water on left and right */}
+          <path d="M24 150 C34 96, 62 56, 98 38 C86 84, 94 118, 114 150" strokeWidth="1.4" />
+          <path d="M44 146 C52 104, 72 72, 96 56" strokeWidth="1" opacity="0.7" />
+          <path d="M376 150 C366 96, 338 56, 302 38 C314 84, 306 118, 286 150" strokeWidth="1.4" />
+          <path d="M356 146 C348 104, 328 72, 304 56" strokeWidth="1" opacity="0.7" />
+          {/* Moses with outstretched staff on dry ground in the midst */}
+          <circle cx="176" cy="56" r="7.5" strokeWidth="1.35" />
+          <path d="M164 65 L156 150 L194 150 L186 65 Z" strokeWidth="1.35" />
+          <path d="M186 70 L226 42 M226 24 L226 110" strokeWidth="1.4" />
+          <circle cx="248" cy="70" r="6.8" strokeWidth="1.25" />
+          <path d="M238 78 L232 150 L264 150 L258 78 Z" strokeWidth="1.25" />
+        </svg>
+      );
+
+    case 'eden_garden_tree':
+      return (
+        <svg
+          viewBox="0 0 400 175"
+          className={svgClass}
+          fill="none"
+          stroke="currentColor"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M20 148 L380 148" strokeWidth="1.3" />
+          {/* River parting into streams */}
+          <path d="M180 148 Q200 126 230 148 M200 136 Q240 128 290 148" strokeWidth="1.1" opacity="0.75" />
+          {/* Central ancient tree canopy & trunk */}
+          <path d="M192 148 L192 84 Q192 64 166 52 M208 148 L208 84 Q208 64 234 52" strokeWidth="1.4" />
+          <path d="M142 66 C132 36, 174 20, 200 28 C226 20, 268 36, 258 66 C272 84, 240 96, 200 90 C160 96, 128 84, 142 66 Z" strokeWidth="1.3" />
+          {/* Two figures in the garden */}
+          <circle cx="128" cy="72" r="7" strokeWidth="1.3" />
+          <path d="M118 80 L112 148 L142 148 L136 80 Z" strokeWidth="1.3" />
+          <circle cx="272" cy="74" r="7" strokeWidth="1.3" />
+          <path d="M262 82 L256 148 L286 148 L280 82 Z" strokeWidth="1.3" />
+        </svg>
+      );
+
+    case 'noah_ark_flood':
+      return (
+        <svg
+          viewBox="0 0 400 175"
+          className={svgClass}
+          fill="none"
+          stroke="currentColor"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          {/* Flood waters */}
+          <path d="M16 132 Q76 122 136 132 T256 132 T384 132" strokeWidth="1.3" />
+          <path d="M28 144 Q96 136 164 144 T300 144 T372 144" strokeWidth="1.1" opacity="0.8" />
+          {/* Wooden Ark resting on the waters */}
+          <path d="M96 112 L304 112 L284 132 L116 132 Z" strokeWidth="1.4" />
+          <path d="M118 82 L282 82 L282 112 L118 112 Z" strokeWidth="1.35" />
+          <path d="M108 82 L200 58 L292 82" strokeWidth="1.4" />
+          {/* Rainbow covenant arch & dove with olive leaf */}
+          <path d="M64 118 A140 92 0 0 1 336 118" strokeWidth="1.1" strokeDasharray="4 3" opacity="0.75" />
+          <path d="M192 34 L200 40 L208 34 M196 38 L204 44" strokeWidth="1.25" />
+        </svg>
+      );
+
+    case 'abraham_covenant_altar':
+      return (
+        <svg
+          viewBox="0 0 400 175"
+          className={svgClass}
+          fill="none"
+          stroke="currentColor"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M18 148 L382 148" strokeWidth="1.3" />
+          {/* Starry night sky of the Abrahamic promise */}
+          <circle cx="92" cy="28" r="1.5" fill="currentColor" />
+          <circle cx="144" cy="22" r="1.5" fill="currentColor" />
+          <circle cx="204" cy="18" r="1.8" fill="currentColor" />
+          <circle cx="262" cy="26" r="1.5" fill="currentColor" />
+          <circle cx="314" cy="32" r="1.5" fill="currentColor" />
+          {/* Stone altar with ascending flame */}
+          <path d="M184 112 L236 112 L242 148 L178 148 Z" strokeWidth="1.35" />
+          <path d="M182 128 L238 128 M210 112 L210 148" strokeWidth="1.05" />
+          <path d="M202 112 C198 92, 210 78, 210 64 C218 80, 224 94, 218 112" strokeWidth="1.3" />
+          {/* Abraham looking upward in faith */}
+          <circle cx="128" cy="58" r="7.6" strokeWidth="1.35" />
+          <path d="M116 67 L108 148 L146 148 L138 67 Z" strokeWidth="1.35" />
+          <path d="M138 76 L168 54" strokeWidth="1.35" />
+        </svg>
+      );
+
+    case 'david_harp_psalm':
+      return (
+        <svg
+          viewBox="0 0 400 175"
+          className={svgClass}
+          fill="none"
+          stroke="currentColor"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M20 148 L380 148" strokeWidth="1.3" />
+          <path d="M220 132 Q290 96 376 132" strokeWidth="1" opacity="0.6" />
+          {/* King David seated with lyre/harp */}
+          <circle cx="156" cy="54" r="7.6" strokeWidth="1.35" />
+          <path d="M148 44 L152 38 L156 44 L160 38 L164 44 Z" strokeWidth="1.15" />
+          <path d="M142 63 L134 148 L178 148 L170 63 Z" strokeWidth="1.35" />
+          {/* Biblical kinnor (lyre) */}
+          <path d="M180 68 Q192 98 206 68 M180 68 L206 68" strokeWidth="1.3" />
+          <path d="M188 68 L188 86 M193 68 L193 88 M198 68 L198 86" strokeWidth="0.85" />
+          {/* Grazing sheep on Judean hills */}
+          <path d="M268 134 Q282 124 294 134 L294 148 L268 148 Z" strokeWidth="1.2" />
+          <circle cx="298" cy="130" r="4.5" strokeWidth="1.2" />
+        </svg>
+      );
+
+    case 'pentecost_spirit':
+      return (
+        <svg
+          viewBox="0 0 400 175"
+          className={svgClass}
+          fill="none"
+          stroke="currentColor"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M20 148 L380 148" strokeWidth="1.3" />
+          {/* Descending rays and tongues of fire */}
+          <path d="M200 14 L132 52 M200 14 L200 48 M200 14 L268 52" strokeWidth="0.95" strokeDasharray="3 3" opacity="0.75" />
+          <path d="M132 50 Q135 42 132 36 Q129 42 132 50 Z" strokeWidth="1.2" />
+          <path d="M200 46 Q203 38 200 32 Q197 38 200 46 Z" strokeWidth="1.2" />
+          <path d="M268 50 Q271 42 268 36 Q265 42 268 50 Z" strokeWidth="1.2" />
+          {/* Gathered disciples in upper room */}
+          <circle cx="132" cy="64" r="7.4" strokeWidth="1.3" />
+          <path d="M120 73 L114 148 L150 148 L144 73 Z" strokeWidth="1.3" />
+          <circle cx="200" cy="60" r="7.8" strokeWidth="1.35" />
+          <path d="M186 70 L180 148 L220 148 L214 70 Z" strokeWidth="1.35" />
+          <path d="M186 80 L166 64 M214 80 L234 64" strokeWidth="1.3" />
+          <circle cx="268" cy="64" r="7.4" strokeWidth="1.3" />
+          <path d="M256 73 L250 148 L286 148 L280 73 Z" strokeWidth="1.3" />
+        </svg>
+      );
+
+    case 'apostolic_scroll':
+      return (
+        <svg
+          viewBox="0 0 400 175"
+          className={svgClass}
+          fill="none"
+          stroke="currentColor"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M20 148 L380 148" strokeWidth="1.3" />
+          {/* Writing desk, parchment scroll & oil lamp */}
+          <path d="M188 106 L312 106 L312 148 M204 106 L204 148" strokeWidth="1.35" />
+          <path d="M216 94 L276 94 L284 106 L208 106 Z" strokeWidth="1.25" />
+          {/* Apostle writing at desk */}
+          <circle cx="144" cy="58" r="7.8" strokeWidth="1.35" />
+          <path d="M130 68 L122 148 L168 148 L158 68 Z" strokeWidth="1.35" />
+          <path d="M158 80 L218 96" strokeWidth="1.35" />
+        </svg>
+      );
+
+    case 'throne_new_jerusalem':
+      return (
+        <svg
+          viewBox="0 0 400 175"
+          className={svgClass}
+          fill="none"
+          stroke="currentColor"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M20 148 L380 148" strokeWidth="1.3" />
+          {/* Sea of glass & river of life */}
+          <path d="M176 148 Q200 116 212 96 M224 148 Q208 118 200 96" strokeWidth="1.2" />
+          {/* Exalted throne & radiant glory */}
+          <path d="M176 52 L224 52 L230 96 L170 96 Z" strokeWidth="1.4" />
+          <path d="M140 96 A60 56 0 0 1 260 96" strokeWidth="1.15" strokeDasharray="3 3" />
+          <path d="M200 16 L200 38 M156 26 L174 44 M244 26 L226 44" strokeWidth="1.1" />
         </svg>
       );
 
@@ -712,31 +1330,30 @@ function EngravedSceneArtwork({
     default:
       return (
         <svg
-          viewBox="0 0 360 155"
-          className="w-full h-auto max-h-40"
+          viewBox="0 0 400 175"
+          className={svgClass}
           fill="none"
           stroke="currentColor"
           strokeLinecap="round"
           strokeLinejoin="round"
-          role="img"
-          aria-label="Traditional line drawing of Jesus teaching Nicodemus by night"
+          aria-hidden="true"
         >
-          <path d="M16 136 L344 136" strokeWidth="1.15" />
+          <path d="M18 148 L382 148" strokeWidth="1.3" />
           {/* Crescent moon & night stars */}
-          <path d="M292 24 A12 12 0 1 0 304 40 A9 9 0 1 1 292 24 Z" strokeWidth="1" />
+          <path d="M324 26 A13 13 0 1 0 338 44 A10 10 0 1 1 324 26 Z" strokeWidth="1.15" />
           {/* Oil lamp on pedestal in center */}
-          <path d="M180 88 L180 136 M168 88 L192 88" strokeWidth="1.1" />
-          <path d="M172 84 Q180 78 188 84 Z" strokeWidth="1.1" />
-          <path d="M180 72 Q184 78 180 82 Q176 78 180 72 Z" strokeWidth="1" />
+          <path d="M200 96 L200 148 M186 96 L214 96" strokeWidth="1.25" />
+          <path d="M191 91 Q200 85 209 91 Z" strokeWidth="1.25" />
+          <path d="M200 78 Q204 85 200 89 Q196 85 200 78 Z" strokeWidth="1.15" />
 
           {/* Jesus seated on left */}
-          <circle cx="124" cy="54" r="7" strokeWidth="1.2" />
-          <path d="M112 62 L106 136 L142 136 L136 62 Z" strokeWidth="1.2" />
-          <path d="M136 72 L162 60" strokeWidth="1.2" />
+          <circle cx="138" cy="58" r="7.8" strokeWidth="1.35" />
+          <path d="M124 67 L118 148 L158 148 L151 67 Z" strokeWidth="1.35" />
+          <path d="M151 78 L180 65" strokeWidth="1.35" />
 
           {/* Nicodemus leaning in to listen on right */}
-          <circle cx="236" cy="56" r="7" strokeWidth="1.15" />
-          <path d="M224 64 L218 136 L254 136 L248 64 Z" strokeWidth="1.15" />
+          <circle cx="262" cy="61" r="7.8" strokeWidth="1.3" />
+          <path d="M249 70 L242 148 L282 148 L275 70 Z" strokeWidth="1.3" />
         </svg>
       );
   }
@@ -750,40 +1367,12 @@ export default function BibleLineDrawing({
   isLight: boolean;
 }) {
   return (
-    <figure
-      className={`my-4 rounded-xl border px-4 py-3.5 transition select-none ${
-        isLight
-          ? 'bg-[#FAF7F0] border-stone-300/80 text-stone-900'
-          : 'bg-[#141414] border-zinc-800 text-zinc-200'
+    <div
+      className={`my-6 sm:my-7 mx-auto w-full max-w-lg pointer-events-none select-none ${
+        isLight ? 'text-stone-900' : 'text-zinc-200'
       }`}
     >
-      <div className="mx-auto max-w-md">
-        <EngravedSceneArtwork sceneType={illustration.sceneType} />
-      </div>
-      <figcaption className="mt-2.5 pt-2 border-t border-stone-200/80 dark:border-zinc-800 text-center space-y-0.5">
-        <p
-          className={`font-serif text-xs sm:text-sm font-bold tracking-tight ${
-            isLight ? 'text-stone-900' : 'text-zinc-100'
-          }`}
-        >
-          {illustration.title} ({illustration.scriptureRef})
-        </p>
-        <p
-          className={`font-serif text-[11px] sm:text-xs italic leading-relaxed ${
-            isLight ? 'text-stone-600' : 'text-zinc-400'
-          }`}
-        >
-          {illustration.caption}
-        </p>
-        <p
-          className={`text-[10px] pt-0.5 ${
-            isLight ? 'text-stone-400' : 'text-zinc-500'
-          }`}
-        >
-          {illustration.attribution}
-        </p>
-      </figcaption>
-    </figure>
+      <EngravedSceneArtwork sceneType={illustration.sceneType} />
+    </div>
   );
 }
-

@@ -11,6 +11,7 @@ import {
   ReferenceCategory,
   SavedConnection,
   SavedContextItem,
+  SavedTypeShadowItem,
   SavedVerseItem,
   TranslationId,
   UserPreferences,
@@ -22,10 +23,11 @@ import { getSupabaseClient } from '@/lib/supabase';
 
 export type PrimaryPage = 'bible' | 'saved' | 'community' | 'notes';
 
-interface ReadingPosition {
+export interface ReadingPosition {
   book: string;
   chapter: number;
   verse?: number;
+  scrollY?: number;
   label: string;
 }
 
@@ -43,6 +45,7 @@ interface PlatformContextValue {
   activeReferenceMode: InspectorMode;
   openReferenceInspector: (canonicalRef: string | null, mode?: InspectorMode) => void;
   previousReadingPosition: ReadingPosition | null;
+  navigationHistoryStack: ReadingPosition[];
   navigateToPassage: (
     book: string,
     chapter: number,
@@ -116,10 +119,33 @@ interface PlatformContextValue {
   updateSavedVerse: (id: string, updates: Partial<SavedVerseItem>) => void;
   deleteSavedVerse: (id: string) => void;
 
+  // 4. Saved Types & Shadows Relationships
+  savedTypeShadows: SavedTypeShadowItem[];
+  saveTypeShadowItem: (params: {
+    title: string;
+    selectedVerseRef?: string;
+    otTypeRef: string;
+    ntAntitypeRef: string;
+    otTypeText?: string;
+    ntAntitypeText?: string;
+    translation?: TranslationId;
+    typeName?: string;
+    fulfilmentName?: string;
+    explanation: string;
+    biblicalContext?: string;
+    typologyBasis?: SavedTypeShadowItem['typologyBasis'];
+    personalNotes?: string;
+    collectionId?: string;
+    sharedToCommunity?: boolean;
+  }) => SavedTypeShadowItem;
+  updateSavedTypeShadow: (id: string, updates: Partial<SavedTypeShadowItem>) => void;
+  deleteSavedTypeShadow: (id: string) => void;
+
   // Community Feed Items & Likes
   communityConnections: SavedConnection[];
   communityContexts: SavedContextItem[];
   communityVerses: SavedVerseItem[];
+  communityTypeShadows: SavedTypeShadowItem[];
   likeCommunityItem: (id: string) => void;
   likedItemIds: string[];
 
@@ -351,6 +377,59 @@ const INITIAL_SAVED_VERSES: SavedVerseItem[] = [
   },
 ];
 
+const INITIAL_SAVED_TYPE_SHADOWS: SavedTypeShadowItem[] = [
+  {
+    id: 'ts-initial-bronze-serpent',
+    title: 'The Bronze Serpent Lifted Up in the Wilderness & The Son of Man Lifted Up',
+    selectedVerseRef: 'John 3:14',
+    otTypeRef: 'Numbers 21:9',
+    ntAntitypeRef: 'John 3:14',
+    otTypeText: getVerseText('Numbers 21:9', 'NIV'),
+    ntAntitypeText: getVerseText('John 3:14', 'NIV'),
+    translation: 'NIV',
+    typeName: 'The Bronze Serpent Lifted on the Pole in the Wilderness',
+    fulfilmentName: 'Jesus the Son of Man Lifted Up on the Cross for Eternal Life',
+    explanation:
+      'In Numbers 21:8–9, those bitten by fiery serpents could not heal themselves, yet whoever looked in faith at the bronze serpent lifted up on Moses’ pole lived. In John 3:14–15, Jesus explicitly identifies this event as a type of His crucifixion: just as the serpent was lifted up in the wilderness, so the Son of Man must be lifted up so that everyone who believes in Him may have eternal life.',
+    biblicalContext:
+      'Spoken by Jesus to Nicodemus by night in Jerusalem (John 3:1–21), grounding the New Birth and salvation in the redemptive pattern of the Torah.',
+    typologyBasis: 'Explicitly Established by Scripture',
+    personalNotes:
+      'Jesus Himself establishes this Type & Shadow in John 3:14—looking in faith to Christ lifted up brings eternal life.',
+    collectionId: 'col-jesus-ot',
+    sharedToCommunity: true,
+    authorName: 'Berean Scholar',
+    likesCount: 29,
+    dateSaved: '2026-11-05T15:00:00.000Z',
+    updatedAt: '2026-11-05T15:00:00.000Z',
+  },
+  {
+    id: 'ts-initial-passover-lamb',
+    title: 'The Unblemished Passover Lamb & Christ Our Passover',
+    selectedVerseRef: 'John 1:29',
+    otTypeRef: 'Exodus 12:13',
+    ntAntitypeRef: 'John 1:29',
+    otTypeText: getVerseText('Exodus 12:13', 'NIV'),
+    ntAntitypeText: getVerseText('John 1:29', 'NIV'),
+    translation: 'NIV',
+    typeName: 'The Unblemished Passover Lamb Whose Blood Sheltered Israel',
+    fulfilmentName: 'Jesus Christ, the Lamb of God Who Takes Away the Sin of the World',
+    explanation:
+      'In Exodus 12, the blood of an unblemished lamb with no bone broken (Exodus 12:46) spared the households of Israel from judgment. John the Baptist proclaims Jesus as "the Lamb of God, who takes away the sin of the world" (John 1:29), John 19:36 notes that not one of Jesus’ bones was broken in fulfilment of the Passover statute, and Paul declares "Christ, our Passover lamb, has been sacrificed" (1 Corinthians 5:7).',
+    biblicalContext:
+      'Proclaimed by John the Baptist at Bethany beyond the Jordan and fulfilled at the Passover crucifixion in Jerusalem.',
+    typologyBasis: 'Explicitly Established by Scripture',
+    personalNotes:
+      'Every detail of Exodus 12—from the unblemished lamb to "not one bone broken" (John 19:36)—finds its fulfilment in Jesus.',
+    collectionId: 'col-messianic',
+    sharedToCommunity: true,
+    authorName: 'Berean Scholar',
+    likesCount: 34,
+    dateSaved: '2026-11-05T15:30:00.000Z',
+    updatedAt: '2026-11-05T15:30:00.000Z',
+  },
+];
+
 // Additional Community-Shared Items from Other Readers in the Community
 const SEEDED_COMMUNITY_CONNECTIONS: SavedConnection[] = [
   {
@@ -440,6 +519,34 @@ const SEEDED_COMMUNITY_VERSES: SavedVerseItem[] = [
   },
 ];
 
+const SEEDED_COMMUNITY_TYPE_SHADOWS: SavedTypeShadowItem[] = [
+  {
+    id: 'comm-ts-jonah-resurrection',
+    title: 'The Sign of Jonah (Three Days & Three Nights) & The Resurrection of the Son of Man',
+    selectedVerseRef: 'Matthew 12:40',
+    otTypeRef: 'Jonah 1:17',
+    ntAntitypeRef: 'Matthew 12:40',
+    otTypeText: getVerseText('Jonah 1:17', 'NIV'),
+    ntAntitypeText: getVerseText('Matthew 12:40', 'NIV'),
+    translation: 'NIV',
+    typeName: 'Jonah Three Days and Three Nights in the Belly of the Great Fish',
+    fulfilmentName: 'The Son of Man Three Days and Three Nights in the Heart of the Earth',
+    explanation:
+      'Jesus explicitly declares in Matthew 12:39–41 that the historical account of Jonah in the belly of the great fish for three days and three nights (Jonah 1:17) was the prophetic sign and type of His own burial and victorious bodily resurrection on the third day.',
+    biblicalContext:
+      'When scribes and Pharisees demanded a sign, Jesus pointed them to the "Sign of the Prophet Jonah."',
+    typologyBasis: 'Explicitly Established by Scripture',
+    personalNotes:
+      'Christ Himself gives Jonah 1:17 as the supreme Old Testament type of His death, burial, and third-day resurrection.',
+    collectionId: 'col-resurrection',
+    sharedToCommunity: true,
+    authorName: 'Dr. Hannah Samuel',
+    likesCount: 38,
+    dateSaved: '2026-11-05T20:45:00.000Z',
+    updatedAt: '2026-11-05T20:45:00.000Z',
+  },
+];
+
 const INITIAL_PERSONAL_NOTES: PersonalNote[] = [
   {
     id: 'note-initial-1',
@@ -458,6 +565,7 @@ const STORAGE_KEYS = {
   CONNECTIONS: 'bible_verse_saved_connections_v3',
   CONTEXTS: 'bible_verse_saved_contexts_v3',
   VERSES: 'bible_verse_saved_verses_v3',
+  TYPE_SHADOWS: 'bible_verse_saved_type_shadows_v3',
   NOTES: 'bible_verse_personal_notes_v3',
   COLLECTIONS: 'bible_verse_collections_v3',
   BOOKMARKS: 'bible_verse_bookmarks_v3',
@@ -477,9 +585,11 @@ export function PlatformProvider({ children }: { children: React.ReactNode }) {
   const [selectedVerse, setSelectedVerse] = useState<number | null>(null);
   const [activeReferenceVerse, setActiveReferenceVerse] = useState<string | null>(null);
   const [activeReferenceMode, setActiveReferenceMode] = useState<InspectorMode>('reference');
-  const [previousReadingPosition, setPreviousReadingPosition] = useState<ReadingPosition | null>(
-    null
-  );
+  const [navigationHistoryStack, setNavigationHistoryStack] = useState<ReadingPosition[]>([]);
+  const previousReadingPosition =
+    navigationHistoryStack.length > 0
+      ? navigationHistoryStack[navigationHistoryStack.length - 1]
+      : null;
 
   const openReferenceInspector = (
     canonicalRef: string | null,
@@ -511,6 +621,9 @@ export function PlatformProvider({ children }: { children: React.ReactNode }) {
   );
   const [savedContexts, setSavedContexts] = useState<SavedContextItem[]>(INITIAL_SAVED_CONTEXTS);
   const [savedVerses, setSavedVerses] = useState<SavedVerseItem[]>(INITIAL_SAVED_VERSES);
+  const [savedTypeShadows, setSavedTypeShadows] = useState<SavedTypeShadowItem[]>(
+    INITIAL_SAVED_TYPE_SHADOWS
+  );
   const [likedItemIds, setLikedItemIds] = useState<string[]>([]);
 
   const [personalNotes, setPersonalNotes] = useState<PersonalNote[]>(INITIAL_PERSONAL_NOTES);
@@ -575,6 +688,9 @@ export function PlatformProvider({ children }: { children: React.ReactNode }) {
       const rawVerses = localStorage.getItem(STORAGE_KEYS.VERSES);
       if (rawVerses) setSavedVerses(JSON.parse(rawVerses));
 
+      const rawTypeShadows = localStorage.getItem(STORAGE_KEYS.TYPE_SHADOWS);
+      if (rawTypeShadows) setSavedTypeShadows(JSON.parse(rawTypeShadows));
+
       const rawNotes = localStorage.getItem(STORAGE_KEYS.NOTES);
       if (rawNotes) setPersonalNotes(JSON.parse(rawNotes));
 
@@ -625,6 +741,7 @@ export function PlatformProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem(STORAGE_KEYS.CONNECTIONS, JSON.stringify(savedConnections));
       localStorage.setItem(STORAGE_KEYS.CONTEXTS, JSON.stringify(savedContexts));
       localStorage.setItem(STORAGE_KEYS.VERSES, JSON.stringify(savedVerses));
+      localStorage.setItem(STORAGE_KEYS.TYPE_SHADOWS, JSON.stringify(savedTypeShadows));
       localStorage.setItem(STORAGE_KEYS.NOTES, JSON.stringify(personalNotes));
       localStorage.setItem(STORAGE_KEYS.COLLECTIONS, JSON.stringify(collections));
       localStorage.setItem(STORAGE_KEYS.BOOKMARKS, JSON.stringify(bookmarks));
@@ -644,6 +761,7 @@ export function PlatformProvider({ children }: { children: React.ReactNode }) {
     savedConnections,
     savedContexts,
     savedVerses,
+    savedTypeShadows,
     personalNotes,
     collections,
     bookmarks,
@@ -675,17 +793,38 @@ export function PlatformProvider({ children }: { children: React.ReactNode }) {
     verse?: number,
     saveReturnPosition = false
   ) => {
-    if (saveReturnPosition && (book !== currentBook || chapter !== currentChapter)) {
-      setPreviousReadingPosition({
+    const targetVerse = verse || null;
+    if (
+      saveReturnPosition &&
+      (book !== currentBook || chapter !== currentChapter || targetVerse !== selectedVerse)
+    ) {
+      const currentScrollY = typeof window !== 'undefined' ? window.scrollY : 0;
+      const entry: ReadingPosition = {
         book: currentBook,
         chapter: currentChapter,
         verse: selectedVerse || undefined,
-        label: `${currentBook} ${currentChapter}${selectedVerse ? `:${selectedVerse}` : ''}`,
+        scrollY: currentScrollY,
+        label:
+          currentChapter === 0
+            ? `${currentBook} Introduction`
+            : `${currentBook} ${currentChapter}${selectedVerse ? `:${selectedVerse}` : ''}`,
+      };
+      setNavigationHistoryStack((prev) => {
+        const last = prev[prev.length - 1];
+        if (
+          last &&
+          last.book === entry.book &&
+          last.chapter === entry.chapter &&
+          last.verse === entry.verse
+        ) {
+          return prev;
+        }
+        return [...prev, entry];
       });
     }
     setCurrentBook(book);
     setCurrentChapter(chapter);
-    setSelectedVerse(verse || null);
+    setSelectedVerse(targetVerse);
     setActivePage('bible');
 
     if (chapter > 0) {
@@ -706,13 +845,18 @@ export function PlatformProvider({ children }: { children: React.ReactNode }) {
   };
 
   const returnToPreviousPosition = () => {
-    if (!previousReadingPosition) return;
-    const { book, chapter, verse } = previousReadingPosition;
-    setPreviousReadingPosition(null);
-    setCurrentBook(book);
-    setCurrentChapter(chapter);
-    setSelectedVerse(verse || null);
+    if (navigationHistoryStack.length === 0) return;
+    const prevPos = navigationHistoryStack[navigationHistoryStack.length - 1];
+    setNavigationHistoryStack((prev) => prev.slice(0, -1));
+    setCurrentBook(prevPos.book);
+    setCurrentChapter(prevPos.chapter);
+    setSelectedVerse(prevPos.verse || null);
     setActivePage('bible');
+    if (typeof window !== 'undefined' && prevPos.scrollY !== undefined && !prevPos.verse) {
+      setTimeout(() => {
+        window.scrollTo({ top: prevPos.scrollY || 0, behavior: 'smooth' });
+      }, 60);
+    }
   };
 
   const toggleBookmark = (canonicalRef: string) => {
@@ -1012,6 +1156,110 @@ export function PlatformProvider({ children }: { children: React.ReactNode }) {
     showToast('Removed verse from Saved');
   };
 
+  // 4. Save Type & Shadow Relationship Item
+  const saveTypeShadowItem: PlatformContextValue['saveTypeShadowItem'] = (params) => {
+    const trans = params.translation || translation;
+    const now = new Date().toISOString();
+    const otText =
+      params.otTypeText ||
+      getVerseText(params.otTypeRef, trans) ||
+      `Scripture text for ${params.otTypeRef}`;
+    const ntText =
+      params.ntAntitypeText ||
+      getVerseText(params.ntAntitypeRef, trans) ||
+      `Scripture text for ${params.ntAntitypeRef}`;
+
+    const existingIdx = savedTypeShadows.findIndex(
+      (item) =>
+        item.otTypeRef.toLowerCase() === params.otTypeRef.toLowerCase() &&
+        item.ntAntitypeRef.toLowerCase() === params.ntAntitypeRef.toLowerCase()
+    );
+
+    if (existingIdx !== -1) {
+      const existing = savedTypeShadows[existingIdx];
+      const updated: SavedTypeShadowItem = {
+        ...existing,
+        title: params.title || existing.title,
+        selectedVerseRef: params.selectedVerseRef || existing.selectedVerseRef,
+        otTypeText: otText,
+        ntAntitypeText: ntText,
+        translation: trans,
+        typeName: params.typeName || existing.typeName,
+        fulfilmentName: params.fulfilmentName || existing.fulfilmentName,
+        explanation: params.explanation || existing.explanation,
+        biblicalContext: params.biblicalContext ?? existing.biblicalContext,
+        typologyBasis: params.typologyBasis ?? existing.typologyBasis,
+        personalNotes:
+          params.personalNotes !== undefined && params.personalNotes !== ''
+            ? params.personalNotes
+            : existing.personalNotes,
+        collectionId: params.collectionId || existing.collectionId,
+        sharedToCommunity:
+          params.sharedToCommunity !== undefined
+            ? params.sharedToCommunity
+            : existing.sharedToCommunity,
+        authorName: preferences.userName,
+        updatedAt: now,
+      };
+      setSavedTypeShadows((prev) => {
+        const copy = [...prev];
+        copy[existingIdx] = updated;
+        return copy;
+      });
+      showToast(
+        params.sharedToCommunity
+          ? `Saved Type & Shadow (${params.otTypeRef} ↔ ${params.ntAntitypeRef}) & shared to Community`
+          : `Saved Type & Shadow (${params.otTypeRef} ↔ ${params.ntAntitypeRef}) to collection`
+      );
+      return updated;
+    }
+
+    const newItem: SavedTypeShadowItem = {
+      id: `ts-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      title: params.title,
+      selectedVerseRef: params.selectedVerseRef || params.otTypeRef,
+      otTypeRef: params.otTypeRef,
+      ntAntitypeRef: params.ntAntitypeRef,
+      otTypeText: otText,
+      ntAntitypeText: ntText,
+      translation: trans,
+      typeName: params.typeName || `Old Testament Type (${params.otTypeRef})`,
+      fulfilmentName: params.fulfilmentName || `New Testament Fulfilment (${params.ntAntitypeRef})`,
+      explanation: params.explanation,
+      biblicalContext: params.biblicalContext,
+      typologyBasis: params.typologyBasis || 'Explicitly Established by Scripture',
+      personalNotes: params.personalNotes || '',
+      collectionId: params.collectionId || collections[0]?.id || 'col-jesus-ot',
+      sharedToCommunity: Boolean(params.sharedToCommunity),
+      authorName: preferences.userName,
+      likesCount: 1,
+      dateSaved: now,
+      updatedAt: now,
+    };
+
+    setSavedTypeShadows((prev) => [newItem, ...prev]);
+    showToast(
+      params.sharedToCommunity
+        ? `Saved Type & Shadow (${params.otTypeRef} ↔ ${params.ntAntitypeRef}) & shared to Community`
+        : `Saved Type & Shadow (${params.otTypeRef} ↔ ${params.ntAntitypeRef}) to collection`
+    );
+    return newItem;
+  };
+
+  const updateSavedTypeShadow = (id: string, updates: Partial<SavedTypeShadowItem>) => {
+    setSavedTypeShadows((prev) =>
+      prev.map((item) =>
+        item.id === id ? { ...item, ...updates, updatedAt: new Date().toISOString() } : item
+      )
+    );
+    showToast('Updated saved Type & Shadow');
+  };
+
+  const deleteSavedTypeShadow = (id: string) => {
+    setSavedTypeShadows((prev) => prev.filter((item) => item.id !== id));
+    showToast('Removed Type & Shadow from Saved');
+  };
+
   // Community Computed Lists (User Shared + Pre-seeded Community Items)
   const communityConnections: SavedConnection[] = [
     ...savedConnections.filter((c) => c.sharedToCommunity),
@@ -1028,6 +1276,13 @@ export function PlatformProvider({ children }: { children: React.ReactNode }) {
   const communityVerses: SavedVerseItem[] = [
     ...savedVerses.filter((v) => v.sharedToCommunity),
     ...SEEDED_COMMUNITY_VERSES.filter((sv) => !savedVerses.some((uv) => uv.id === sv.id)),
+  ];
+
+  const communityTypeShadows: SavedTypeShadowItem[] = [
+    ...savedTypeShadows.filter((ts) => ts.sharedToCommunity),
+    ...SEEDED_COMMUNITY_TYPE_SHADOWS.filter(
+      (sts) => !savedTypeShadows.some((uts) => uts.id === sts.id)
+    ),
   ];
 
   const likeCommunityItem = (id: string) => {
@@ -1100,6 +1355,9 @@ export function PlatformProvider({ children }: { children: React.ReactNode }) {
     setSavedVerses((prev) =>
       prev.map((v) => (v.collectionId === id ? { ...v, collectionId: undefined } : v))
     );
+    setSavedTypeShadows((prev) =>
+      prev.map((ts) => (ts.collectionId === id ? { ...ts, collectionId: undefined } : ts))
+    );
     showToast('Deleted collection');
   };
 
@@ -1112,6 +1370,7 @@ export function PlatformProvider({ children }: { children: React.ReactNode }) {
         savedConnections,
         savedContexts,
         savedVerses,
+        savedTypeShadows,
         personalNotes,
         collections,
         bookmarks,
@@ -1129,6 +1388,7 @@ export function PlatformProvider({ children }: { children: React.ReactNode }) {
       if (Array.isArray(parsed.savedConnections)) setSavedConnections(parsed.savedConnections);
       if (Array.isArray(parsed.savedContexts)) setSavedContexts(parsed.savedContexts);
       if (Array.isArray(parsed.savedVerses)) setSavedVerses(parsed.savedVerses);
+      if (Array.isArray(parsed.savedTypeShadows)) setSavedTypeShadows(parsed.savedTypeShadows);
       if (Array.isArray(parsed.personalNotes)) setPersonalNotes(parsed.personalNotes);
       if (Array.isArray(parsed.collections)) setCollections(parsed.collections);
       if (Array.isArray(parsed.bookmarks)) setBookmarks(parsed.bookmarks);
@@ -1207,6 +1467,7 @@ export function PlatformProvider({ children }: { children: React.ReactNode }) {
         activeReferenceMode,
         openReferenceInspector,
         previousReadingPosition,
+        navigationHistoryStack,
         navigateToPassage,
         navigateToReferenceString,
         returnToPreviousPosition,
@@ -1232,9 +1493,14 @@ export function PlatformProvider({ children }: { children: React.ReactNode }) {
         saveBibleVerseItem,
         updateSavedVerse,
         deleteSavedVerse,
+        savedTypeShadows,
+        saveTypeShadowItem,
+        updateSavedTypeShadow,
+        deleteSavedTypeShadow,
         communityConnections,
         communityContexts,
         communityVerses,
+        communityTypeShadows,
         likeCommunityItem,
         likedItemIds,
         personalNotes,
