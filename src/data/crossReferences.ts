@@ -1368,21 +1368,30 @@ const runtimeVerseCrossRefs = new Map<string, ResolvedCrossReference[]>();
 
 export function registerRuntimeCrossReferences(records: Record<string, ResolvedCrossReference[]>) {
   for (const [ref, list] of Object.entries(records)) {
-    runtimeVerseCrossRefs.set(ref.toLowerCase(), list);
+    // Only register verified connections where passages genuinely correspond and work together
+    const verifiedList = (list || []).filter(
+      (item) =>
+        item.connectedRef &&
+        item.explanation &&
+        item.explanation.length > 20 &&
+        !item.explanation.startsWith('Biblical connection linking')
+    );
+    runtimeVerseCrossRefs.set(ref.toLowerCase(), verifiedList);
   }
 }
 
 /**
  * Bidirectional query: returns all verified cross-references where `canonicalRef`
  * is EITHER the `sourceRef` OR the `targetRef`!
- * Also returns all expanded Treasury of Scripture Knowledge cross-references registered at runtime.
+ * If references do not genuinely correspond and work together, returns [] (skips them).
  */
 export function getCrossReferencesForVerse(canonicalRef: string): ResolvedCrossReference[] {
   const normalized = canonicalRef.trim().toLowerCase();
 
   // If runtime cross references exist for this verse, use them
   if (runtimeVerseCrossRefs.has(normalized)) {
-    return runtimeVerseCrossRefs.get(normalized)!;
+    const runtimeList = runtimeVerseCrossRefs.get(normalized) || [];
+    return runtimeList.slice(0, 4);
   }
 
   const results: ResolvedCrossReference[] = [];
@@ -1429,8 +1438,16 @@ export function getCrossReferencesForVerse(canonicalRef: string): ResolvedCrossR
     }
   }
 
-  // Display only the strongest and most relevant references (1 or 2, max 4)
-  return results.slice(0, 4);
+  // Filter out any non-corresponding or incomplete entries; if none work together, skip (return [])
+  const verifiedOnly = results.filter(
+    (r) =>
+      r.connectedRef &&
+      r.explanation &&
+      r.explanation.length > 20 &&
+      !r.explanation.startsWith('Biblical connection linking')
+  );
+
+  return verifiedOnly.slice(0, 4);
 }
 
 /**

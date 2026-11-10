@@ -294,7 +294,13 @@ export default function BibleReaderPage() {
       return;
     }
     const canonicalRef = `${currentBook} ${currentChapter}:${selectedVerse}`;
-    const refs = getCrossReferencesForVerse(canonicalRef);
+    const refs = getCrossReferencesForVerse(canonicalRef).filter(
+      (r) =>
+        r.connectedRef &&
+        r.explanation &&
+        r.explanation.length > 20 &&
+        !r.explanation.startsWith('Biblical connection linking')
+    );
     const tShadows = getTypesAndShadowsForVerse(canonicalRef);
 
     setPersonalNoteDraft('');
@@ -1132,7 +1138,13 @@ export default function BibleReaderPage() {
           ) : (
             <div className="space-y-3">
               {verses.map((v) => {
-                const refs = getCrossReferencesForVerse(v.canonicalRef);
+                const refs = getCrossReferencesForVerse(v.canonicalRef).filter(
+                  (r) =>
+                    r.connectedRef &&
+                    r.explanation &&
+                    r.explanation.length > 20 &&
+                    !r.explanation.startsWith('Biblical connection linking')
+                );
                 const typeShadows = getTypesAndShadowsForVerse(v.canonicalRef);
                 const isSelected = selectedVerse === v.verse;
                 const isReferenceOpen = isSelected && openPanelMode === 'reference';
@@ -1458,7 +1470,7 @@ export default function BibleReaderPage() {
 
                         {refs.length === 0 ? (
                           <div className="px-4 sm:px-5 py-4 text-xs font-medium text-stone-500 dark:text-zinc-400">
-                            No reference found.
+                            No corresponding cross-reference found for this passage.
                           </div>
                         ) : (
                           refs.map((r, idx) => {

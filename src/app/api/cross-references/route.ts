@@ -225,7 +225,7 @@ export async function GET(req: NextRequest) {
         chapterResults[primaryRef] = [];
       }
 
-      // Check verified canonical cross references first
+      // Include verified canonical cross references that genuinely correspond and work together
       const curated = getCrossReferencesForVerse(primaryRef);
       for (const c of curated) {
         if (!chapterResults[primaryRef].some((x) => x.connectedRef.toLowerCase() === c.connectedRef.toLowerCase())) {
@@ -236,54 +236,7 @@ export async function GET(req: NextRequest) {
         }
       }
 
-      // If no verified connections exist yet, consider strict OT <-> NT connections from TSK (max 2)
-      if (chapterResults[primaryRef].length === 0 && item.r) {
-        const primaryBookObj = findBookByName(parsedPrimary.book);
-        const isOT_Primary = primaryBookObj?.testament === 'OT';
-
-        for (const [targetId, rawTarget] of Object.entries(item.r)) {
-          if (chapterResults[primaryRef].length >= 2) break;
-
-          const parsedTarget = parseRawVerseCode(rawTarget);
-          if (!parsedTarget) continue;
-          if (parsedTarget.canonicalRef === primaryRef) continue;
-
-          const targetBookObj = findBookByName(parsedTarget.book);
-          if (!targetBookObj) continue;
-          const isOT_Target = targetBookObj.testament === 'OT';
-
-          // Strictly require one side to be OT and the other NT
-          if (isOT_Primary === isOT_Target) continue;
-
-          // Check if already in list
-          if (chapterResults[primaryRef].some((x) => x.connectedRef === parsedTarget.canonicalRef)) {
-            continue;
-          }
-
-          const category = determineCategory(primaryRef, parsedTarget.canonicalRef);
-          const testamentLabel = isOT_Target ? 'Old Testament' : 'New Testament';
-
-          const record: ResolvedCrossReference = {
-            id: `tsk-${verseId}-${targetId}`,
-            primaryRef,
-            connectedRef: parsedTarget.canonicalRef,
-            category,
-            connectionLabel: `${primaryRef} ↔ ${parsedTarget.canonicalRef}`,
-            directionLabel: `${testamentLabel} Reference (${category})`,
-            title: `Biblical Connection: ${primaryRef} ↔ ${parsedTarget.canonicalRef}`,
-            explanation: `Biblical connection linking ${primaryRef} with ${parsedTarget.canonicalRef} across the testaments.`,
-            biblicalContext: `Contextual link connecting ${primaryRef} (${primaryBookObj?.category}) with ${parsedTarget.canonicalRef} (${targetBookObj.category}).`,
-            primarySpeaker: 'Historical narration',
-            connectedSpeaker: 'Historical narration',
-            supportingRefs: [parsedTarget.canonicalRef],
-            dataSource: 'Treasury of Scripture Knowledge (TSK)',
-            verificationStatus: 'verified',
-          };
-
-          chapterResults[primaryRef].push(record);
-        }
-      }
-
+      // If references do not genuinely correspond or work together, skip them (do not force generic/synthetic links)
       // Enforce quality cap: maximum 1 to 4 references per verse
       if (chapterResults[primaryRef].length > 4) {
         chapterResults[primaryRef] = chapterResults[primaryRef].slice(0, 4);
