@@ -30,7 +30,9 @@ import {
 import {
   getCrossReferencesForVerse,
   getTypesAndShadowsForVerse,
+  registerRuntimeCrossReferences,
 } from '@/data/crossReferences';
+import { findSectionForVerse } from '@/data/chapterSections';
 import { getVerseText } from '@/data/scriptureDatabase';
 import {
   buildVerseContextData,
@@ -49,7 +51,7 @@ import {
   stopHumanSpeech,
   VoiceOption,
 } from '@/utils/naturalSpeech';
-import BibleLineDrawing, { getIllustrationForChapter } from './BibleLineDrawing';
+import BibleLineDrawing, { getIllustrationForChapter, getIllustrationForSection } from './BibleLineDrawing';
 import BookChapterSelectorModal from './BookChapterSelectorModal';
 import GlobalSearchModal from './GlobalSearchModal';
 
@@ -104,7 +106,7 @@ export default function BibleReaderPage() {
   const [selectedCollectionId, setSelectedCollectionId] = useState<string>(
     collections[0]?.id || 'col-messianic'
   );
-  const [shareToCommunity, setShareToCommunity] = useState<boolean>(false);
+  const [, setCrossRefsCounter] = useState<number>(0);
 
   // Audio speech state
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -202,17 +204,42 @@ export default function BibleReaderPage() {
     setIsLoadingChapter(true);
     fetchChapterVerses(currentBook, currentChapter, translation)
       .then((data) => {
-        if (active) setVerses([...data]);
+        const enriched = data.map((v) => {
+          if (!v.heading) {
+            const sec = findSectionForVerse(currentBook, currentChapter, v.verse);
+            if (sec) return { ...v, heading: sec.heading };
+          }
+          return v;
+        });
+        if (active) setVerses([...enriched]);
         return fetchAllTranslationsForChapter(currentBook, currentChapter);
       })
       .then((allVersionData) => {
         if (active && allVersionData) {
-          setVerses([...allVersionData]);
+          const enriched = allVersionData.map((v) => {
+            if (!v.heading) {
+              const sec = findSectionForVerse(currentBook, currentChapter, v.verse);
+              if (sec) return { ...v, heading: sec.heading };
+            }
+            return v;
+          });
+          setVerses([...enriched]);
         }
       })
       .finally(() => {
         if (active) setIsLoadingChapter(false);
       });
+
+    // Fetch expanded 66-book cross references from API
+    fetch(`/api/cross-references?book=${encodeURIComponent(currentBook)}&chapter=${currentChapter}`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (active && data?.crossReferencesByVerse) {
+          registerRuntimeCrossReferences(data.crossReferencesByVerse);
+          setCrossRefsCounter((prev) => prev + 1);
+        }
+      })
+      .catch(() => {});
 
     return () => {
       active = false;
@@ -413,7 +440,7 @@ export default function BibleReaderPage() {
       highlightColor: highlights[v.canonicalRef],
       personalNotes: personalNoteDraft.trim(),
       collectionId: selectedCollectionId,
-      sharedToCommunity: shareToCommunity,
+      sharedToCommunity: false,
     });
 
     // Automatically close saving card and return user to normal scripture view
@@ -686,18 +713,36 @@ export default function BibleReaderPage() {
               {isDisplayMenuOpen && (
                 <div
                   className={`fixed right-3 left-3 top-28 sm:left-auto sm:top-full sm:absolute sm:right-0 sm:mt-2 sm:w-72 max-w-[calc(100vw-1.5rem)] rounded-2xl border p-4 shadow-2xl z-50 space-y-4 ${
-                    isLight
+                    isChildren
+                      ? isLight
+                        ? 'bg-[#FFFDF4] border-amber-300 text-slate-900 shadow-amber-200/50'
+                        : 'bg-[#182038] border-indigo-700 text-slate-100 shadow-indigo-950/80'
+                      : isLight
                       ? 'bg-white border-stone-200 text-stone-900'
                       : 'bg-[#1b1b1b] border-zinc-800 text-zinc-100'
                   }`}
                 >
                   <div className="flex items-center justify-between pb-1">
-                    <span className="text-xs font-bold uppercase tracking-wider text-stone-400">
-                      Reading & Voice Settings
+                    <span
+                      className={`text-xs font-bold uppercase tracking-wider ${
+                        isChildren
+                          ? isLight
+                            ? 'text-amber-800'
+                            : 'text-amber-300'
+                          : 'text-stone-400'
+                      }`}
+                    >
+                      {isChildren ? '🌈 Reading & Voice Options' : 'Reading & Voice Settings'}
                     </span>
                     <button
                       onClick={() => setIsDisplayMenuOpen(false)}
-                      className="text-xs font-semibold text-amber-700 dark:text-amber-400"
+                      className={`text-xs font-bold ${
+                        isChildren
+                          ? isLight
+                            ? 'text-orange-700 hover:underline'
+                            : 'text-amber-300 hover:underline'
+                          : 'text-amber-700 dark:text-amber-400 font-semibold'
+                      }`}
                     >
                       Done
                     </button>
@@ -705,23 +750,41 @@ export default function BibleReaderPage() {
 
                   <div
                     className={`h-px w-full ${
-                      isLight ? 'bg-stone-200/70' : 'bg-zinc-800'
+                      isChildren
+                        ? isLight
+                          ? 'bg-amber-200/80'
+                          : 'bg-indigo-800/80'
+                        : isLight
+                        ? 'bg-stone-200/70'
+                        : 'bg-zinc-800'
                     }`}
                   />
 
                   {/* Font Size */}
                   <div className="space-y-1.5">
-                    <span className="text-xs text-stone-500">Text Size</span>
+                    <span
+                      className={`text-xs ${
+                        isChildren ? 'font-bold text-slate-700 dark:text-slate-200' : 'text-stone-500'
+                      }`}
+                    >
+                      Text Size
+                    </span>
                     <div className="grid grid-cols-5 gap-1.5">
                       {(['xsmall', 'small', 'medium', 'large', 'xlarge'] as const).map((sz) => (
                         <button
                           key={sz}
                           onClick={() => updatePreferences({ fontSize: sz })}
-                          className={`rounded-lg py-1.5 text-xs font-bold uppercase transition ${
+                          className={`rounded-xl py-1.5 text-xs font-bold uppercase transition ${
                             preferences.fontSize === sz
-                              ? isLight
+                              ? isChildren
+                                ? 'bg-amber-400 text-slate-950 font-extrabold shadow-xs'
+                                : isLight
                                 ? 'bg-amber-700 text-white'
                                 : 'bg-amber-500 text-zinc-950'
+                              : isChildren
+                              ? isLight
+                                ? 'bg-amber-100/80 text-amber-950 hover:bg-amber-200'
+                                : 'bg-indigo-900/60 text-slate-200 hover:bg-indigo-800'
                               : isLight
                               ? 'bg-stone-100 text-stone-700 hover:bg-stone-200'
                               : 'bg-zinc-800 text-zinc-300'
@@ -736,8 +799,12 @@ export default function BibleReaderPage() {
                   {/* Natural Human Voice Selector */}
                   {availableVoices.length > 0 && (
                     <div className="space-y-1.5">
-                      <span className="text-xs text-stone-500 block">
-                        Narrator Voice (Natural Neural)
+                      <span
+                        className={`text-xs ${
+                          isChildren ? 'font-bold text-slate-700 dark:text-slate-200' : 'text-stone-500'
+                        } block`}
+                      >
+                        {isChildren ? 'Narrator Story Voice' : 'Narrator Voice (Natural Neural)'}
                       </span>
                       <select
                         value={
@@ -748,8 +815,12 @@ export default function BibleReaderPage() {
                         onChange={(e) =>
                           updatePreferences({ preferredVoiceName: e.target.value })
                         }
-                        className={`w-full rounded-xl border px-2.5 py-1.5 text-xs ${
-                          isLight
+                        className={`w-full rounded-xl border px-2.5 py-1.5 text-xs font-semibold ${
+                          isChildren
+                            ? isLight
+                              ? 'bg-white border-amber-300 text-slate-900 focus:ring-2 focus:ring-amber-400'
+                              : 'bg-[#12172A] border-indigo-700 text-slate-100 focus:ring-2 focus:ring-amber-400'
+                            : isLight
                             ? 'bg-stone-50 border-stone-300 text-stone-800'
                             : 'bg-zinc-900 border-zinc-700 text-zinc-100'
                         }`}
@@ -765,7 +836,7 @@ export default function BibleReaderPage() {
                   )}
 
                   {/* Toggles */}
-                  <label className="flex items-center justify-between text-xs cursor-pointer pt-1">
+                  <label className="flex items-center justify-between text-xs cursor-pointer pt-1 font-semibold">
                     <span>Red-Letter Words of Jesus</span>
                     <input
                       type="checkbox"
@@ -773,19 +844,19 @@ export default function BibleReaderPage() {
                       onChange={(e) =>
                         updatePreferences({ redLetterEnabled: e.target.checked })
                       }
-                      className="h-4 w-4 accent-amber-700 rounded"
+                      className="h-4 w-4 accent-amber-500 rounded"
                     />
                   </label>
 
-                  <label className="flex items-center justify-between text-xs cursor-pointer">
-                    <span>Show Cross-Reference Pills</span>
+                  <label className="flex items-center justify-between text-xs cursor-pointer font-semibold">
+                    <span>Show Cross-Reference Badges</span>
                     <input
                       type="checkbox"
                       checked={preferences.showReferenceBadges}
                       onChange={(e) =>
                         updatePreferences({ showReferenceBadges: e.target.checked })
                       }
-                      className="h-4 w-4 accent-amber-700 rounded"
+                      className="h-4 w-4 accent-amber-500 rounded"
                     />
                   </label>
                 </div>
@@ -820,12 +891,19 @@ export default function BibleReaderPage() {
 
               {isTranslationMenuOpen && (
                 <div
-                  className={`absolute right-0 mt-2 w-60 max-w-[calc(100vw-1.5rem)] rounded-2xl border p-1.5 shadow-2xl z-50 space-y-0.5 ${
-                    isLight
+                  className={`absolute right-0 mt-2 w-64 max-w-[calc(100vw-1.5rem)] rounded-2xl border p-2 shadow-2xl z-50 space-y-1 ${
+                    isChildren
+                      ? isLight
+                        ? 'bg-[#FFFDF4] border-amber-300 text-slate-900 shadow-amber-200/50'
+                        : 'bg-[#182038] border-indigo-700 text-slate-100 shadow-indigo-950/80'
+                      : isLight
                       ? 'bg-white border-stone-200 text-stone-900'
                       : 'bg-[#1b1b1b] border-zinc-800 text-zinc-100'
                   }`}
                 >
+                  <div className="px-2 py-1 text-[11px] font-bold uppercase tracking-wider text-stone-400">
+                    {isChildren ? '🌈 Translation Versions' : 'Translations'}
+                  </div>
                   {BIBLE_TRANSLATIONS.map((t) => (
                     <button
                       key={t.id}
@@ -836,9 +914,17 @@ export default function BibleReaderPage() {
                       }}
                       className={`w-full rounded-xl px-3 py-2 text-left text-xs font-semibold transition flex items-center justify-between gap-2 ${
                         translation === t.id
-                          ? isLight
+                          ? isChildren
+                            ? isLight
+                              ? 'bg-amber-300/80 text-amber-950 font-extrabold shadow-2xs'
+                              : 'bg-indigo-600 text-white font-extrabold shadow-2xs'
+                            : isLight
                             ? 'bg-amber-50 text-amber-900 font-bold'
                             : 'bg-amber-500/20 text-amber-300 font-bold'
+                          : isChildren
+                          ? isLight
+                            ? 'hover:bg-amber-100 text-slate-800'
+                            : 'hover:bg-indigo-900/80 text-slate-200'
                           : isLight
                           ? 'hover:bg-stone-100 text-stone-700'
                           : 'hover:bg-zinc-800 text-zinc-200'
@@ -848,7 +934,13 @@ export default function BibleReaderPage() {
                       {translation === t.id && (
                         <span
                           className={`text-xs font-bold shrink-0 ${
-                            isLight ? 'text-amber-800' : 'text-amber-400'
+                            isChildren
+                              ? isLight
+                                ? 'text-amber-950'
+                                : 'text-amber-300'
+                              : isLight
+                              ? 'text-amber-800'
+                              : 'text-amber-400'
                           }`}
                         >
                           ✓
@@ -900,33 +992,6 @@ export default function BibleReaderPage() {
                 <ArrowLeft className="h-3.5 w-3.5 shrink-0" />
                 <span>Back to {previousBackLabel}</span>
               </button>
-            </div>
-          )}
-
-          {/* Children's Mode Friendly Banner */}
-          {isChildren && (
-            <div
-              className={`mb-5 rounded-2xl border-2 px-4 py-2.5 flex items-center justify-between gap-2 ${
-                isLight
-                  ? 'bg-gradient-to-r from-amber-100 via-sky-100 to-emerald-100 border-amber-300 text-slate-900'
-                  : 'bg-gradient-to-r from-indigo-900/80 via-purple-900/70 to-slate-900 border-indigo-700 text-amber-200'
-              }`}
-            >
-              <div className="flex items-center gap-2 min-w-0">
-                <Sparkles className="h-4 w-4 text-amber-500 shrink-0" />
-                <span className="text-xs font-extrabold truncate">
-                  Children&apos;s Bible Story Explorer
-                </span>
-              </div>
-              <span
-                className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold shrink-0 ${
-                  isLight
-                    ? 'bg-white/90 text-amber-900'
-                    : 'bg-indigo-950 text-amber-300'
-                }`}
-              >
-                Tap any verse to explore!
-              </span>
             </div>
           )}
 
@@ -1129,17 +1194,34 @@ export default function BibleReaderPage() {
                     id={`verse-row-${v.verse}`}
                     className="space-y-2.5 scroll-mt-28"
                   >
-                    {/* Section Subheading */}
+                    {/* Section Subheading & Passage Illustration */}
                     {v.heading && (
-                      <h3
-                        className={`${
-                          isChildren ? 'font-sans not-italic text-amber-700 dark:text-amber-300' : 'font-serif italic'
-                        } text-base sm:text-lg font-bold pt-5 pb-1 ${
-                          !isChildren ? (isLight ? 'text-stone-700' : 'text-zinc-200') : ''
-                        }`}
-                      >
-                        {v.heading}
-                      </h3>
+                      <div className="space-y-3 pt-6 pb-2">
+                        <h3
+                          className={`${
+                            isChildren ? 'font-sans not-italic text-amber-700 dark:text-amber-300' : 'font-serif italic'
+                          } text-base sm:text-lg font-bold ${
+                            !isChildren ? (isLight ? 'text-stone-700' : 'text-zinc-200') : ''
+                          }`}
+                        >
+                          {v.heading}
+                        </h3>
+                        {(() => {
+                          const secIll = getIllustrationForSection(currentBook, currentChapter, v.heading, v.verse);
+                          if (secIll && v.verse > 1) {
+                            return (
+                              <div className="my-3">
+                                <BibleLineDrawing
+                                  illustration={secIll}
+                                  isLight={isLight}
+                                  mode={isChildren ? 'children' : 'adult'}
+                                />
+                              </div>
+                            );
+                          }
+                          return null;
+                        })()}
+                      </div>
                     )}
 
                     {/* Clean Verse Block — Repositioned closer to header when selected */}
@@ -2199,23 +2281,12 @@ export default function BibleReaderPage() {
                                 />
                               </div>
 
-                              {/* Save Button & Community Share Toggle */}
-                              <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
-                                <label className="flex items-center gap-1.5 text-xs font-semibold cursor-pointer select-none">
-                                  <input
-                                    type="checkbox"
-                                    checked={shareToCommunity}
-                                    onChange={(e) => setShareToCommunity(e.target.checked)}
-                                    className="h-3.5 w-3.5 accent-amber-700 rounded"
-                                  />
-                                  <Share2 className="h-3.5 w-3.5 text-amber-700 dark:text-amber-400" />
-                                  <span>Share to Community</span>
-                                </label>
-
+                              {/* Save Button */}
+                              <div className="flex items-center justify-end gap-2 pt-1">
                                 <button
                                   type="button"
                                   onClick={() => handleSaveBibleVerse(v)}
-                                  className={`rounded-xl px-3.5 py-1.5 text-xs font-bold flex items-center gap-1.5 transition ${
+                                  className={`rounded-xl px-4 py-1.5 text-xs font-bold flex items-center gap-1.5 transition ${
                                     isLight
                                       ? 'bg-amber-700 hover:bg-amber-800 text-white'
                                       : 'bg-amber-500 hover:bg-amber-400 text-zinc-950'

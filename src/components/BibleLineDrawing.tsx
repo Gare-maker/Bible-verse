@@ -30,7 +30,22 @@ export type SceneType =
   | 'david_harp_psalm'
   | 'pentecost_spirit'
   | 'apostolic_scroll'
-  | 'throne_new_jerusalem';
+  | 'throne_new_jerusalem'
+  | 'beatitudes_mount'
+  | 'salt_and_light'
+  | 'love_enemies_prayer'
+  | 'ten_commandments_sinai'
+  | 'david_and_goliath'
+  | 'shepherd_psalm_23'
+  | 'daniel_lions_den'
+  | 'jonah_great_fish'
+  | 'feeding_five_thousand'
+  | 'calming_the_storm'
+  | 'good_samaritan'
+  | 'prodigal_son_father'
+  | 'zacchaeus_sycamore'
+  | 'last_supper_communion'
+  | 'armor_of_god';
 
 export interface BiblicalLineIllustration {
   id: string;
@@ -284,6 +299,21 @@ const SCENE_STORY_TITLES: Record<SceneType, string> = {
   pentecost_spirit: 'God’s Spirit Fills Believers with Joy & Courage',
   apostolic_scroll: 'Sharing the Good News Letters with the Church',
   throne_new_jerusalem: 'God’s Shining City & Forever Kingdom',
+  beatitudes_mount: 'Jesus Blesses and Teaches on the Mountain',
+  salt_and_light: 'You Are the Salt and the Light of the World',
+  love_enemies_prayer: 'Loving and Praying for Everyone Like Our Father',
+  ten_commandments_sinai: 'God Gives the Ten Holy Commandments on Mount Sinai',
+  david_and_goliath: 'Young David With Faith Defeats Giant Goliath',
+  shepherd_psalm_23: 'The Good Shepherd Leads Beside Still Waters',
+  daniel_lions_den: 'Daniel Safe and Protected in the Lions’ Den',
+  jonah_great_fish: 'Jonah and the Great Big Fish by the Shore',
+  feeding_five_thousand: 'Jesus Multiplies the Five Loaves and Two Fish',
+  calming_the_storm: 'Jesus Calms the Wind and Waves from the Boat',
+  good_samaritan: 'The Good Samaritan Shows Loving Kindness',
+  prodigal_son_father: 'The Loving Father Welcomes His Lost Son Home',
+  zacchaeus_sycamore: 'Jesus Calls Zacchaeus Down from the Tree',
+  last_supper_communion: 'Jesus Breaks the Bread with His Disciples',
+  armor_of_god: 'Standing Strong in the Whole Armor of God',
 };
 
 const BOOK_SCENE_POOLS: Record<string, SceneType[]> = {
@@ -494,6 +524,7 @@ function resolvePrimaryChapterScene(book: string, chapter: number): SceneType {
   }
 
   if (b === '1 samuel' || b === '2 samuel') {
+    if (b === '1 samuel' && chapter === 17) return 'david_and_goliath';
     if ((b === '1 samuel' && chapter === 16) || (b === '2 samuel' && chapter === 7))
       return 'david_harp_psalm';
   }
@@ -504,7 +535,7 @@ function resolvePrimaryChapterScene(book: string, chapter: number): SceneType {
 
   if (b === 'psalms') {
     if (chapter === 22) return 'crucifixion_calvary';
-    if (chapter === 23) return 'lamb_of_god';
+    if (chapter === 23) return 'shepherd_psalm_23';
     if (chapter === 2 || chapter === 110 || chapter === 150) return 'david_harp_psalm';
     if (chapter === 119 || chapter === 19 || chapter === 1) return 'wilderness_scroll';
   }
@@ -522,7 +553,9 @@ function resolvePrimaryChapterScene(book: string, chapter: number): SceneType {
     if (chapter === 2) return 'nativity_immanuel';
     if (chapter === 3) return 'baptism_jordan';
     if (chapter === 4) return 'wilderness_scroll';
-    if (chapter === 5) return 'jesus_teaching';
+    if (chapter === 5) return 'beatitudes_mount';
+    if (chapter === 14) return 'feeding_five_thousand';
+    if (chapter === 26) return 'last_supper_communion';
     if (chapter === 6) return 'jesus_crowd_reconciliation';
     if (chapter === 7) return 'wilderness_scroll';
     if (chapter === 8 || chapter === 9) return 'healing_multitudes';
@@ -546,6 +579,10 @@ function resolvePrimaryChapterScene(book: string, chapter: number): SceneType {
   }
 
   if (b === 'luke') {
+    if (chapter === 10) return 'good_samaritan';
+    if (chapter === 15) return 'prodigal_son_father';
+    if (chapter === 19) return 'zacchaeus_sycamore';
+    if (chapter === 22) return 'last_supper_communion';
     if (chapter === 1) return 'joseph_angel_dream';
     if (chapter === 2) return 'nativity_immanuel';
     if (chapter === 3) return 'baptism_jordan';
@@ -594,6 +631,82 @@ function resolvePrimaryChapterScene(book: string, chapter: number): SceneType {
   }
   const idx = (hash + chapter * 3) % pool.length;
   return pool[idx];
+}
+
+
+export function getIllustrationForSection(
+  book: string,
+  chapter: number,
+  heading?: string,
+  verse?: number
+): BiblicalLineIllustration | null {
+  const b = book.trim().toLowerCase();
+  const h = (heading || '').toLowerCase();
+
+  // Matthew 5 distinct sections
+  if (b === 'matthew' && chapter === 5) {
+    if (h.includes('beatitudes') || verse === 1) {
+      return { id: 'ill-sec-mat-5-beatitudes', book, chapter, verse: 1, sceneType: 'beatitudes_mount', childrenStoryTitle: SCENE_STORY_TITLES.beatitudes_mount };
+    }
+    if (h.includes('salt') || h.includes('light') || (verse && verse >= 13 && verse <= 16)) {
+      return { id: 'ill-sec-mat-5-salt-light', book, chapter, verse: 13, sceneType: 'salt_and_light', childrenStoryTitle: SCENE_STORY_TITLES.salt_and_light };
+    }
+    if (h.includes('fulfillment') || h.includes('law') || (verse && verse >= 17 && verse <= 20)) {
+      return { id: 'ill-sec-mat-5-law', book, chapter, verse: 17, sceneType: 'wilderness_scroll', childrenStoryTitle: SCENE_STORY_TITLES.wilderness_scroll };
+    }
+    if (h.includes('anger') || h.includes('reconciliation') || (verse && verse >= 21 && verse <= 26)) {
+      return { id: 'ill-sec-mat-5-reconcile', book, chapter, verse: 21, sceneType: 'jesus_crowd_reconciliation', childrenStoryTitle: SCENE_STORY_TITLES.jesus_crowd_reconciliation };
+    }
+    if (h.includes('love') || h.includes('enemies') || (verse && verse >= 43)) {
+      return { id: 'ill-sec-mat-5-love-enemies', book, chapter, verse: 43, sceneType: 'love_enemies_prayer', childrenStoryTitle: SCENE_STORY_TITLES.love_enemies_prayer };
+    }
+  }
+
+  // Heading-based resolution
+  if (h.includes('beatitude')) {
+    return { id: `ill-sec-${b}-${chapter}-beatitudes`, book, chapter, verse: verse || 1, sceneType: 'beatitudes_mount', childrenStoryTitle: SCENE_STORY_TITLES.beatitudes_mount };
+  }
+  if (h.includes('salt and light') || h.includes('salt of the earth') || h.includes('light of the world')) {
+    return { id: `ill-sec-${b}-${chapter}-salt`, book, chapter, verse: verse || 13, sceneType: 'salt_and_light', childrenStoryTitle: SCENE_STORY_TITLES.salt_and_light };
+  }
+  if (h.includes('ten commandments') || h.includes('commandments')) {
+    return { id: `ill-sec-${b}-${chapter}-decalogue`, book, chapter, verse: verse || 1, sceneType: 'ten_commandments_sinai', childrenStoryTitle: SCENE_STORY_TITLES.ten_commandments_sinai };
+  }
+  if (h.includes('goliath') || (b === '1 samuel' && chapter === 17)) {
+    return { id: `ill-sec-${b}-${chapter}-goliath`, book, chapter, verse: verse || 1, sceneType: 'david_and_goliath', childrenStoryTitle: SCENE_STORY_TITLES.david_and_goliath };
+  }
+  if (h.includes('shepherd') || (b === 'psalms' && chapter === 23)) {
+    return { id: `ill-sec-${b}-${chapter}-shepherd`, book, chapter, verse: verse || 1, sceneType: 'shepherd_psalm_23', childrenStoryTitle: SCENE_STORY_TITLES.shepherd_psalm_23 };
+  }
+  if (h.includes('lions’ den') || h.includes('lions den') || (b === 'daniel' && chapter === 6)) {
+    return { id: `ill-sec-${b}-${chapter}-daniel`, book, chapter, verse: verse || 1, sceneType: 'daniel_lions_den', childrenStoryTitle: SCENE_STORY_TITLES.daniel_lions_den };
+  }
+  if (h.includes('jonah') || b === 'jonah') {
+    return { id: `ill-sec-${b}-${chapter}-jonah`, book, chapter, verse: verse || 1, sceneType: 'jonah_great_fish', childrenStoryTitle: SCENE_STORY_TITLES.jonah_great_fish };
+  }
+  if (h.includes('five thousand') || h.includes('loaves')) {
+    return { id: `ill-sec-${b}-${chapter}-5000`, book, chapter, verse: verse || 1, sceneType: 'feeding_five_thousand', childrenStoryTitle: SCENE_STORY_TITLES.feeding_five_thousand };
+  }
+  if (h.includes('calms the storm') || h.includes('walks on the water') || h.includes('wind and waves')) {
+    return { id: `ill-sec-${b}-${chapter}-storm`, book, chapter, verse: verse || 1, sceneType: 'calming_the_storm', childrenStoryTitle: SCENE_STORY_TITLES.calming_the_storm };
+  }
+  if (h.includes('good samaritan')) {
+    return { id: `ill-sec-${b}-${chapter}-samaritan`, book, chapter, verse: verse || 25, sceneType: 'good_samaritan', childrenStoryTitle: SCENE_STORY_TITLES.good_samaritan };
+  }
+  if (h.includes('lost son') || h.includes('prodigal')) {
+    return { id: `ill-sec-${b}-${chapter}-prodigal`, book, chapter, verse: verse || 11, sceneType: 'prodigal_son_father', childrenStoryTitle: SCENE_STORY_TITLES.prodigal_son_father };
+  }
+  if (h.includes('zacchaeus')) {
+    return { id: `ill-sec-${b}-${chapter}-zacchaeus`, book, chapter, verse: verse || 1, sceneType: 'zacchaeus_sycamore', childrenStoryTitle: SCENE_STORY_TITLES.zacchaeus_sycamore };
+  }
+  if (h.includes('last supper') || h.includes('communion') || h.includes('lord’s supper')) {
+    return { id: `ill-sec-${b}-${chapter}-supper`, book, chapter, verse: verse || 1, sceneType: 'last_supper_communion', childrenStoryTitle: SCENE_STORY_TITLES.last_supper_communion };
+  }
+  if (h.includes('armor of god') || (b === 'ephesians' && chapter === 6)) {
+    return { id: `ill-sec-${b}-${chapter}-armor`, book, chapter, verse: verse || 10, sceneType: 'armor_of_god', childrenStoryTitle: SCENE_STORY_TITLES.armor_of_god };
+  }
+
+  return null;
 }
 
 export function getIllustrationForChapter(
@@ -1428,6 +1541,297 @@ function EngravedSceneArtwork({
         </svg>
       );
 
+
+    case 'beatitudes_mount':
+      return (
+        <svg viewBox="0 0 400 175" className={svgClass} fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M12 156 L388 156" strokeWidth="1.3" />
+          {/* Mountains rising into background */}
+          <path d="M20 156 L120 74 L210 156" strokeWidth="1.2" opacity="0.6" />
+          <path d="M160 156 L270 54 L380 156" strokeWidth="1.2" opacity="0.5" />
+          <path d="M170 30 L170 12 M150 36 L138 24 M190 36 L202 24" strokeWidth="1" strokeDasharray="2 3" opacity="0.6" />
+          {/* Jesus seated on hill on left raising right hand */}
+          <circle cx="168" cy="72" r="8" strokeWidth="1.35" />
+          <path d="M152 82 Q144 120 140 156 L196 156 Q190 120 184 82 Z" strokeWidth="1.35" />
+          <path d="M184 94 L212 78" strokeWidth="1.4" />
+          {/* Multitude listening on slopes */}
+          <circle cx="242" cy="116" r="6" strokeWidth="1.1" />
+          <path d="M232 124 L228 156 L256 156 L252 124 Z" strokeWidth="1.1" />
+          <circle cx="282" cy="112" r="6" strokeWidth="1.1" />
+          <path d="M272 120 L268 156 L296 156 L292 120 Z" strokeWidth="1.1" />
+          <circle cx="328" cy="122" r="5.5" strokeWidth="1.05" />
+          <path d="M318 129 L314 156 L342 156 L338 129 Z" strokeWidth="1.05" />
+        </svg>
+      );
+
+    case 'salt_and_light':
+      return (
+        <svg viewBox="0 0 400 175" className={svgClass} fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M24 154 L376 154" strokeWidth="1.3" />
+          {/* Table stand */}
+          <path d="M140 154 L140 114 L260 114 L260 154" strokeWidth="1.3" />
+          {/* Lampstand elevated in center */}
+          <path d="M200 114 L200 52" strokeWidth="2.2" />
+          <path d="M184 114 L216 114" strokeWidth="1.5" />
+          {/* Clay oil lamp */}
+          <path d="M182 52 Q200 42 218 52 Q224 58 200 60 Q176 58 182 52 Z" strokeWidth="1.3" />
+          {/* Radiating flame */}
+          <path d="M200 32 Q206 42 200 48 Q194 42 200 32 Z" strokeWidth="1.35" fill="none" />
+          {/* Sunburst light rays shining around the room */}
+          <path d="M200 20 L200 10 M176 26 L164 16 M224 26 L236 16 M156 42 L140 40 M244 42 L260 40 M166 62 L150 68 M234 62 L250 68" strokeWidth="1" strokeDasharray="3 3" opacity="0.75" />
+          {/* Salt bowl and salt cellar */}
+          <path d="M84 154 L88 132 L120 132 L124 154 Z" strokeWidth="1.25" />
+          <path d="M92 132 Q104 124 116 132" strokeWidth="1.1" />
+          <circle cx="102" cy="128" r="1" />
+          <circle cx="108" cy="126" r="1" />
+          <circle cx="105" cy="130" r="1" />
+        </svg>
+      );
+
+    case 'love_enemies_prayer':
+      return (
+        <svg viewBox="0 0 400 175" className={svgClass} fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M20 156 L380 156" strokeWidth="1.3" />
+          {/* Sun shining on righteous and unrighteous */}
+          <circle cx="92" cy="52" r="16" strokeWidth="1.3" />
+          <path d="M92 26 L92 16 M92 78 L92 88 M66 52 L56 52 M118 52 L128 52 M74 34 L66 26 M110 70 L118 78 M74 70 L66 78 M110 34 L118 26" strokeWidth="1" strokeDasharray="2 3" opacity="0.7" />
+          {/* Gentle rain clouds providing water for fields */}
+          <path d="M270 48 Q282 36 298 42 Q316 38 326 50 Q336 54 330 64 L264 64 Q258 54 270 48 Z" strokeWidth="1.2" />
+          <path d="M276 74 L272 86 M294 74 L290 86 M312 74 L308 86" strokeWidth="1" strokeDasharray="2 2" opacity="0.65" />
+          {/* Hands lifted in peaceful prayer in center */}
+          <path d="M184 156 L192 108 L198 108 L194 156 Z" strokeWidth="1.3" />
+          <path d="M216 156 L208 108 L202 108 L206 156 Z" strokeWidth="1.3" />
+          <circle cx="200" cy="98" r="8" strokeWidth="1.2" strokeDasharray="3 3" opacity="0.6" />
+        </svg>
+      );
+
+    case 'ten_commandments_sinai':
+      return (
+        <svg viewBox="0 0 400 175" className={svgClass} fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M16 156 L384 156" strokeWidth="1.3" />
+          {/* Mount Sinai crags & clouds */}
+          <path d="M40 156 L160 52 L260 156" strokeWidth="1.2" opacity="0.6" />
+          <path d="M120 38 Q160 22 200 36 Q240 20 280 34" strokeWidth="1.2" strokeDasharray="3 3" opacity="0.7" />
+          {/* Two Stone Tablets */}
+          <path d="M164 68 Q164 56 178 56 Q192 56 192 68 L192 144 L164 144 Z" strokeWidth="1.5" />
+          <path d="M196 68 Q196 56 210 56 Q224 56 224 68 L224 144 L196 144 Z" strokeWidth="1.5" />
+          {/* Inscribed commandments lines */}
+          <path d="M172 74 L184 74 M172 86 L184 86 M172 98 L184 98 M172 110 L184 110 M172 122 L184 122" strokeWidth="1.2" />
+          <path d="M204 74 L216 74 M204 86 L216 86 M204 98 L216 98 M204 110 L216 110 M204 122 L216 122" strokeWidth="1.2" />
+        </svg>
+      );
+
+    case 'david_and_goliath':
+      return (
+        <svg viewBox="0 0 400 175" className={svgClass} fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M20 154 L380 154" strokeWidth="1.3" />
+          {/* Brook in valley of Elah with smooth stones */}
+          <path d="M140 154 Q170 146 200 154 Q230 162 260 154" strokeWidth="1" strokeDasharray="3 3" opacity="0.6" />
+          <circle cx="166" cy="151" r="2" />
+          <circle cx="174" cy="150" r="2" />
+          <circle cx="182" cy="152" r="2" />
+          {/* Young David on left with sling */}
+          <circle cx="112" cy="88" r="7.5" strokeWidth="1.35" />
+          <path d="M102 98 L96 154 L128 154 L122 98 Z" strokeWidth="1.35" />
+          <path d="M122 108 L146 94 M146 94 L152 74" strokeWidth="1.4" />
+          {/* Giant Goliath on right with spear and shield */}
+          <circle cx="288" cy="52" r="10" strokeWidth="1.5" />
+          <path d="M272 65 L264 154 L312 154 L304 65 Z" strokeWidth="1.5" />
+          <path d="M258 78 L258 138 L274 138 L274 78 Z" strokeWidth="1.3" />
+          <path d="M304 74 L328 32 M324 36 L332 28" strokeWidth="1.8" />
+        </svg>
+      );
+
+    case 'shepherd_psalm_23':
+      return (
+        <svg viewBox="0 0 400 175" className={svgClass} fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M12 154 L388 154" strokeWidth="1.3" />
+          {/* Still Waters brook */}
+          <path d="M0 134 Q100 120 200 136 T400 132" strokeWidth="1.2" opacity="0.6" />
+          {/* Rolling green pastures */}
+          <path d="M30 154 Q120 102 240 142" strokeWidth="1" opacity="0.5" />
+          {/* Good Shepherd with staff */}
+          <circle cx="152" cy="62" r="7.5" strokeWidth="1.35" />
+          <path d="M140 71 L134 154 L170 154 L164 71 Z" strokeWidth="1.35" />
+          <path d="M172 154 L172 52 Q172 40 182 46" strokeWidth="1.6" />
+          {/* Gentle sheep resting */}
+          <ellipse cx="236" cy="142" rx="14" ry="9" strokeWidth="1.2" />
+          <circle cx="224" cy="138" r="4.5" strokeWidth="1.2" />
+          <ellipse cx="278" cy="144" rx="12" ry="8" strokeWidth="1.2" />
+          <circle cx="268" cy="140" r="4" strokeWidth="1.2" />
+        </svg>
+      );
+
+    case 'daniel_lions_den':
+      return (
+        <svg viewBox="0 0 400 175" className={svgClass} fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M16 156 L384 156" strokeWidth="1.3" />
+          {/* Stone Den Wall & High Window */}
+          <path d="M184 18 L216 18 L216 48 L184 48 Z" strokeWidth="1.3" />
+          <path d="M200 48 L160 110 M200 48 L240 110" strokeWidth="0.85" strokeDasharray="3 3" opacity="0.65" />
+          {/* Daniel praying in center */}
+          <circle cx="200" cy="84" r="7.5" strokeWidth="1.35" />
+          <path d="M190 94 L186 156 L214 156 L210 94 Z" strokeWidth="1.35" />
+          <path d="M196 98 L196 112 M204 98 L204 112" strokeWidth="1.2" />
+          {/* Peaceful lions lying down */}
+          <path d="M84 156 Q100 134 126 138 Q140 144 144 156 Z" strokeWidth="1.3" />
+          <circle cx="86" cy="142" r="7" strokeWidth="1.3" />
+          <path d="M264 156 Q280 134 306 138 Q320 144 324 156 Z" strokeWidth="1.3" />
+          <circle cx="322" cy="142" r="7" strokeWidth="1.3" />
+        </svg>
+      );
+
+    case 'jonah_great_fish':
+      return (
+        <svg viewBox="0 0 400 175" className={svgClass} fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M20 156 L380 156" strokeWidth="1.3" />
+          {/* Ocean waves */}
+          <path d="M0 138 Q50 126 100 138 T200 138 T300 138 T400 138" strokeWidth="1.2" />
+          {/* Great Fish emerging */}
+          <path d="M180 156 Q190 92 250 102 Q310 110 330 138 Q344 130 354 136 L344 148 L354 154" strokeWidth="1.5" />
+          <circle cx="224" cy="116" r="3" fill="currentColor" />
+          {/* Shoreline on left with Jonah delivered */}
+          <path d="M20 156 Q60 144 110 156" strokeWidth="1.4" />
+          <circle cx="94" cy="128" r="6" strokeWidth="1.2" />
+          <path d="M86 135 L82 156 L106 156 L102 135 Z" strokeWidth="1.2" />
+          <path d="M102 138 L118 126" strokeWidth="1.2" />
+        </svg>
+      );
+
+    case 'feeding_five_thousand':
+      return (
+        <svg viewBox="0 0 400 175" className={svgClass} fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M16 156 L384 156" strokeWidth="1.3" />
+          {/* Five barley loaves and two fish in basket */}
+          <path d="M168 156 L174 126 L226 126 L232 156 Z" strokeWidth="1.35" />
+          <ellipse cx="188" cy="120" rx="9" ry="6" strokeWidth="1.2" />
+          <ellipse cx="204" cy="118" rx="9" ry="6" strokeWidth="1.2" />
+          <ellipse cx="218" cy="121" rx="8" ry="5" strokeWidth="1.2" />
+          {/* Two fish */}
+          <path d="M184 112 Q194 106 204 112 Q194 118 184 112 Z M204 112 L210 108 L210 116 Z" strokeWidth="1.2" />
+          {/* Multitudes seated on hillside */}
+          <circle cx="86" cy="132" r="5" strokeWidth="1.1" />
+          <path d="M78 138 L74 156 L98 156 L94 138 Z" strokeWidth="1.1" />
+          <circle cx="120" cy="128" r="5" strokeWidth="1.1" />
+          <path d="M112 134 L108 156 L132 156 L128 134 Z" strokeWidth="1.1" />
+          <circle cx="280" cy="130" r="5" strokeWidth="1.1" />
+          <path d="M272 136 L268 156 L292 156 L288 136 Z" strokeWidth="1.1" />
+          <circle cx="316" cy="134" r="5" strokeWidth="1.1" />
+          <path d="M308 140 L304 156 L328 156 L324 140 Z" strokeWidth="1.1" />
+        </svg>
+      );
+
+    case 'calming_the_storm':
+      return (
+        <svg viewBox="0 0 400 175" className={svgClass} fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          {/* Fierce storm waves on left, calm on right */}
+          <path d="M12 158 Q50 118 90 158 Q130 118 170 158 L400 158" strokeWidth="1.4" />
+          <path d="M180 156 L390 156" strokeWidth="1.2" />
+          {/* Fishing Boat */}
+          <path d="M164 156 Q194 168 254 156 L274 136 L154 136 Z" strokeWidth="1.4" />
+          <path d="M214 136 L214 74 M214 84 L248 104" strokeWidth="1.4" />
+          {/* Jesus standing in bow stretching out hand */}
+          <circle cx="178" cy="108" r="7" strokeWidth="1.35" />
+          <path d="M168 116 L164 144 L192 144 L188 116 Z" strokeWidth="1.35" />
+          <path d="M168 124 L138 116" strokeWidth="1.5" />
+        </svg>
+      );
+
+    case 'good_samaritan':
+      return (
+        <svg viewBox="0 0 400 175" className={svgClass} fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M20 156 L380 156" strokeWidth="1.3" />
+          {/* Samaritan bandaging traveler */}
+          <circle cx="164" cy="98" r="7.5" strokeWidth="1.35" />
+          <path d="M152 108 L148 156 L180 156 L176 108 Z" strokeWidth="1.35" />
+          <circle cx="218" cy="128" r="7" strokeWidth="1.2" />
+          <path d="M228 136 L268 152 L260 156 L220 156 Z" strokeWidth="1.2" />
+          {/* Oil & Wine cruets */}
+          <path d="M136 156 L138 144 L146 144 L148 156 Z" strokeWidth="1.2" />
+          {/* Patient Donkey waiting on right */}
+          <ellipse cx="324" cy="126" rx="20" ry="14" strokeWidth="1.3" />
+          <path d="M308 126 L308 156 M340 126 L340 156" strokeWidth="1.3" />
+          <circle cx="348" cy="108" r="6" strokeWidth="1.3" />
+          <path d="M346 102 L344 92 M352 102 L354 92" strokeWidth="1.2" />
+        </svg>
+      );
+
+    case 'prodigal_son_father':
+      return (
+        <svg viewBox="0 0 400 175" className={svgClass} fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M20 156 L380 156" strokeWidth="1.3" />
+          {/* Father with open arms */}
+          <circle cx="166" cy="74" r="8" strokeWidth="1.35" />
+          <path d="M152 84 L144 156 L188 156 L180 84 Z" strokeWidth="1.35" />
+          <path d="M180 94 L212 94 M152 94 L130 98" strokeWidth="1.4" />
+          {/* Son kneeling before father in embrace */}
+          <circle cx="224" cy="104" r="7.5" strokeWidth="1.3" />
+          <path d="M214 114 L204 156 L238 156 L234 126 Z" strokeWidth="1.3" />
+          {/* House / estate archway in background */}
+          <path d="M68 156 L68 92 Q88 74 108 92 L108 156" strokeWidth="1.2" opacity="0.65" />
+        </svg>
+      );
+
+    case 'zacchaeus_sycamore':
+      return (
+        <svg viewBox="0 0 400 175" className={svgClass} fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M20 156 L380 156" strokeWidth="1.3" />
+          {/* Sycamore-fig tree on left */}
+          <path d="M84 156 L84 82 Q84 62 104 54 Q124 62 124 82 L124 156" strokeWidth="1.6" />
+          <path d="M52 74 Q84 28 124 28 Q164 28 184 68 Q154 98 114 88" strokeWidth="1.3" />
+          {/* Zacchaeus in tree branches */}
+          <circle cx="132" cy="54" r="6.5" strokeWidth="1.3" />
+          <path d="M124 62 L120 86 L144 86 L140 62 Z" strokeWidth="1.3" />
+          <path d="M140 68 L156 60" strokeWidth="1.3" />
+          {/* Jesus looking up from road */}
+          <circle cx="248" cy="88" r="8" strokeWidth="1.35" />
+          <path d="M236 98 L230 156 L266 156 L260 98 Z" strokeWidth="1.35" />
+          <path d="M236 108 L206 88" strokeWidth="1.4" />
+        </svg>
+      );
+
+    case 'last_supper_communion':
+      return (
+        <svg viewBox="0 0 400 175" className={svgClass} fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M20 156 L380 156" strokeWidth="1.3" />
+          {/* Table */}
+          <path d="M72 156 L72 118 L328 118 L328 156" strokeWidth="1.35" />
+          <path d="M60 118 L340 118" strokeWidth="1.8" />
+          {/* Bread and Chalice */}
+          <path d="M194 118 L197 106 L203 106 L206 118 Z" strokeWidth="1.3" />
+          <path d="M192 106 Q200 98 208 106 Z" strokeWidth="1.3" />
+          <ellipse cx="178" cy="114" rx="7" ry="4" strokeWidth="1.2" />
+          {/* Jesus at center */}
+          <circle cx="200" cy="68" r="8" strokeWidth="1.35" />
+          <path d="M188 78 L182 118 L218 118 L212 78 Z" strokeWidth="1.35" />
+          <path d="M188 88 L176 106 M212 88 L224 106" strokeWidth="1.3" />
+          {/* Disciples on both sides */}
+          <circle cx="146" cy="78" r="6.5" strokeWidth="1.15" />
+          <path d="M136 86 L130 118 L162 118 L156 86 Z" strokeWidth="1.15" />
+          <circle cx="254" cy="78" r="6.5" strokeWidth="1.15" />
+          <path d="M244 86 L238 118 L270 118 L264 86 Z" strokeWidth="1.15" />
+        </svg>
+      );
+
+    case 'armor_of_god':
+      return (
+        <svg viewBox="0 0 400 175" className={svgClass} fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M24 156 L376 156" strokeWidth="1.3" />
+          {/* Helmet of Salvation */}
+          <path d="M186 52 Q200 36 214 52 L214 68 L186 68 Z" strokeWidth="1.4" />
+          <path d="M184 68 L216 68" strokeWidth="1.6" />
+          {/* Breastplate of Righteousness */}
+          <path d="M182 72 L218 72 L212 124 L188 124 Z" strokeWidth="1.4" />
+          <path d="M194 84 L206 84 M194 96 L206 96" strokeWidth="1.1" />
+          {/* Shield of Faith */}
+          <path d="M128 76 L164 76 Q168 114 146 138 Q124 114 128 76 Z" strokeWidth="1.5" />
+          <path d="M146 86 L146 122 M134 98 L158 98" strokeWidth="1.2" />
+          {/* Sword of the Spirit */}
+          <path d="M254 54 L254 138 M244 70 L264 70" strokeWidth="1.8" />
+          <path d="M254 54 L250 62 L258 62 Z" strokeWidth="1.4" />
+        </svg>
+      );
+
     case 'nicodemus_night':
     default:
       return (
@@ -1640,6 +2044,173 @@ function ChildrenCartoonSceneArtwork({
         />
 
         {/* Scene-Specific Playful Cartoon Elements */}
+
+        {sceneType === 'beatitudes_mount' && (
+          <g>
+            <circle cx="160" cy="62" r="38" fill="#FDE047" fillOpacity="0.35" />
+            <CartoonPerson x={160} y={68} robeColor="#38BDF8" sashColor="#FACC15" hasHalo isSmiling />
+            <CartoonPerson x={96} y={108} robeColor="#34D399" isSmiling />
+            <CartoonPerson x={232} y={104} robeColor="#FB923C" isSmiling />
+            <CartoonPerson x={286} y={112} robeColor="#A78BFA" isSmiling />
+          </g>
+        )}
+
+        {sceneType === 'salt_and_light' && (
+          <g>
+            {/* Bright glowing lamp */}
+            <circle cx="200" cy="56" r="36" fill="#FDE047" fillOpacity="0.45" />
+            <path d="M192 110 L208 110 L204 68 L196 68 Z" fill="#92400E" stroke="#451A03" strokeWidth="2" />
+            <circle cx="200" cy="52" r="14" fill="#F59E0B" stroke="#B45309" strokeWidth="2" />
+            <circle cx="200" cy="46" r="8" fill="#FEF08A" />
+            {/* Salt cellar with cute face */}
+            <rect x="110" y="112" width="28" height="38" rx="8" fill="#E2E8F0" stroke="#475569" strokeWidth="2" />
+            <circle cx="120" cy="126" r="2" fill="#1E293B" />
+            <circle cx="128" cy="126" r="2" fill="#1E293B" />
+            <path d="M120 134 Q124 138 128 134" stroke="#1E293B" strokeWidth="1.5" fill="none" />
+            <CartoonPerson x={286} y={88} robeColor="#F43F5E" sashColor="#FEF08A" isSmiling />
+          </g>
+        )}
+
+        {sceneType === 'love_enemies_prayer' && (
+          <g>
+            <circle cx="86" cy="48" r="22" fill="#FACC15" stroke="#EA580C" strokeWidth="2" />
+            <CartoonPerson x={168} y={88} robeColor="#10B981" isSmiling />
+            <CartoonPerson x={232} y={88} robeColor="#EC4899" isSmiling />
+            <path d="M194 96 Q200 90 206 96" stroke="#EF4444" strokeWidth="3" fill="none" />
+          </g>
+        )}
+
+        {sceneType === 'ten_commandments_sinai' && (
+          <g>
+            <rect x="160" y="68" width="34" height="48" rx="8" fill="#CBD5E1" stroke="#334155" strokeWidth="2" />
+            <rect x="206" y="68" width="34" height="48" rx="8" fill="#CBD5E1" stroke="#334155" strokeWidth="2" />
+            <path d="M168 80 L186 80 M168 90 L186 90 M168 100 L186 100" stroke="#334155" strokeWidth="2" />
+            <path d="M214 80 L232 80 M214 90 L232 90 M214 100 L232 100" stroke="#334155" strokeWidth="2" />
+            <CartoonPerson x={112} y={84} robeColor="#DC2626" sashColor="#FEF08A" hasStaff isSmiling />
+          </g>
+        )}
+
+        {sceneType === 'david_and_goliath' && (
+          <g>
+            {/* Small brave David */}
+            <CartoonPerson x={108} y={102} robeColor="#38BDF8" isSmiling />
+            {/* Big armor Goliath */}
+            <g transform="scale(1.4) translate(130, 20)">
+              <CartoonPerson x={90} y={54} robeColor="#64748B" sashColor="#DC2626" isSmiling={false} />
+            </g>
+          </g>
+        )}
+
+        {sceneType === 'shepherd_psalm_23' && (
+          <g>
+            <CartoonPerson x={156} y={74} robeColor="#059669" sashColor="#FEF08A" hasStaff isSmiling />
+            {/* Cute fluffy sheep */}
+            <ellipse cx="232" cy="136" rx="18" ry="12" fill="#FFFFFF" stroke="#475569" strokeWidth="2" />
+            <circle cx="216" cy="130" r="7" fill="#F1F5F9" stroke="#475569" strokeWidth="1.5" />
+            <ellipse cx="282" cy="140" rx="16" ry="10" fill="#FFFFFF" stroke="#475569" strokeWidth="2" />
+            <circle cx="268" cy="134" r="6" fill="#F1F5F9" stroke="#475569" strokeWidth="1.5" />
+          </g>
+        )}
+
+        {sceneType === 'daniel_lions_den' && (
+          <g>
+            <CartoonPerson x={198} y={78} robeColor="#7C3AED" sashColor="#FACC15" isSmiling />
+            {/* Friendly smiling lions */}
+            <g>
+              <ellipse cx="114" cy="138" rx="24" ry="16" fill="#F59E0B" stroke="#B45309" strokeWidth="2" />
+              <circle cx="94" cy="130" r="14" fill="#D97706" />
+              <circle cx="94" cy="130" r="10" fill="#FCD34D" />
+              <circle cx="91" cy="128" r="1.8" fill="#1E293B" />
+              <circle cx="97" cy="128" r="1.8" fill="#1E293B" />
+              <path d="M91 133 Q94 136 97 133" stroke="#1E293B" strokeWidth="1.5" fill="none" />
+            </g>
+            <g>
+              <ellipse cx="286" cy="138" rx="24" ry="16" fill="#F59E0B" stroke="#B45309" strokeWidth="2" />
+              <circle cx="306" cy="130" r="14" fill="#D97706" />
+              <circle cx="306" cy="130" r="10" fill="#FCD34D" />
+              <circle cx="303" cy="128" r="1.8" fill="#1E293B" />
+              <circle cx="309" cy="128" r="1.8" fill="#1E293B" />
+              <path d="M303 133 Q306 136 309 133" stroke="#1E293B" strokeWidth="1.5" fill="none" />
+            </g>
+          </g>
+        )}
+
+        {sceneType === 'jonah_great_fish' && (
+          <g>
+            {/* Big friendly cartoon blue whale/fish */}
+            <path d="M190 156 Q210 90 280 100 Q350 110 370 144 Q386 134 394 140 L386 150 L394 156 Z" fill="#38BDF8" stroke="#0284C7" strokeWidth="2.5" />
+            <circle cx="236" cy="116" r="4" fill="#0C4A6E" />
+            <circle cx="238" cy="114" r="1.5" fill="#FFFFFF" />
+            <CartoonPerson x={96} y={102} robeColor="#F59E0B" isSmiling />
+          </g>
+        )}
+
+        {sceneType === 'feeding_five_thousand' && (
+          <g>
+            <rect x="178" y="112" width="44" height="32" rx="8" fill="#D97706" stroke="#78350F" strokeWidth="2" />
+            <ellipse cx="192" cy="108" rx="8" ry="5" fill="#FDE68A" stroke="#B45309" strokeWidth="1.5" />
+            <ellipse cx="208" cy="108" rx="8" ry="5" fill="#FDE68A" stroke="#B45309" strokeWidth="1.5" />
+            <CartoonPerson x={132} y={82} robeColor="#38BDF8" hasHalo isSmiling />
+            <CartoonPerson x={268} y={86} robeColor="#34D399" isSmiling />
+          </g>
+        )}
+
+        {sceneType === 'calming_the_storm' && (
+          <g>
+            <path d="M140 148 Q180 162 250 148 L270 124 L130 124 Z" fill="#92400E" stroke="#451A03" strokeWidth="2.5" />
+            <CartoonPerson x={168} y={84} robeColor="#38BDF8" hasHalo isSmiling />
+            <CartoonPerson x={224} y={92} robeColor="#F59E0B" isSmiling />
+          </g>
+        )}
+
+        {sceneType === 'good_samaritan' && (
+          <g>
+            <CartoonPerson x={152} y={84} robeColor="#EC4899" sashColor="#FEF08A" isSmiling />
+            <CartoonPerson x={212} y={102} robeColor="#94A3B8" isSmiling />
+            {/* Friendly Donkey */}
+            <ellipse cx="294" cy="126" rx="22" ry="14" fill="#94A3B8" stroke="#475569" strokeWidth="2" />
+            <circle cx="318" cy="108" r="8" fill="#94A3B8" stroke="#475569" strokeWidth="1.5" />
+          </g>
+        )}
+
+        {sceneType === 'prodigal_son_father' && (
+          <g>
+            <CartoonPerson x={164} y={82} robeColor="#DC2626" sashColor="#FDE047" isSmiling />
+            <CartoonPerson x={216} y={86} robeColor="#38BDF8" isSmiling />
+          </g>
+        )}
+
+        {sceneType === 'zacchaeus_sycamore' && (
+          <g>
+            {/* Tree */}
+            <rect x="94" y="80" width="22" height="75" fill="#78350F" />
+            <circle cx="105" cy="62" r="34" fill="#22C55E" />
+            <CartoonPerson x={105} y={48} robeColor="#F59E0B" isSmiling />
+            <CartoonPerson x={232} y={82} robeColor="#38BDF8" hasHalo isSmiling />
+          </g>
+        )}
+
+        {sceneType === 'last_supper_communion' && (
+          <g>
+            <rect x="80" y="118" width="240" height="38" rx="8" fill="#F8FAFC" stroke="#94A3B8" strokeWidth="2" />
+            <CartoonPerson x={200} y={72} robeColor="#38BDF8" hasHalo isSmiling />
+            <CartoonPerson x={148} y={78} robeColor="#F59E0B" isSmiling />
+            <CartoonPerson x={252} y={78} robeColor="#10B981" isSmiling />
+          </g>
+        )}
+
+        {sceneType === 'armor_of_god' && (
+          <g>
+            {/* Golden helmet */}
+            <circle cx="200" cy="54" r="16" fill="#FACC15" stroke="#B45309" strokeWidth="2" />
+            {/* Heart shield */}
+            <path d="M128 78 L160 78 Q164 110 144 130 Q124 110 128 78 Z" fill="#EF4444" stroke="#991B1B" strokeWidth="2" />
+            {/* Shining sword */}
+            <path d="M256 56 L256 136 M246 72 L266 72" stroke="#38BDF8" strokeWidth="4" strokeLinecap="round" />
+            <CartoonPerson x={200} y={84} robeColor="#64748B" isSmiling />
+          </g>
+        )}
+
         {sceneType === 'creation_light' && (
           <g>
             {/* Rainbow arc */}

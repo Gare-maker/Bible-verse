@@ -1345,12 +1345,27 @@ function getTestamentLabel(ref: string): string {
   return book?.testament === 'OT' ? 'Old Testament' : 'New Testament';
 }
 
+const runtimeVerseCrossRefs = new Map<string, ResolvedCrossReference[]>();
+
+export function registerRuntimeCrossReferences(records: Record<string, ResolvedCrossReference[]>) {
+  for (const [ref, list] of Object.entries(records)) {
+    runtimeVerseCrossRefs.set(ref.toLowerCase(), list);
+  }
+}
+
 /**
  * Bidirectional query: returns all verified cross-references where `canonicalRef`
  * is EITHER the `sourceRef` OR the `targetRef`!
+ * Also returns all expanded Treasury of Scripture Knowledge cross-references registered at runtime.
  */
 export function getCrossReferencesForVerse(canonicalRef: string): ResolvedCrossReference[] {
   const normalized = canonicalRef.trim().toLowerCase();
+
+  // If runtime cross references exist for this verse, use them
+  if (runtimeVerseCrossRefs.has(normalized)) {
+    return runtimeVerseCrossRefs.get(normalized)!;
+  }
+
   const results: ResolvedCrossReference[] = [];
 
   for (const record of CANONICAL_CROSS_REFERENCES) {

@@ -1,21 +1,18 @@
 'use client';
 
-import React, { useEffect } from 'react';
-import NavigationShell from '@/components/NavigationShell';
-import CommunityPage from '@/components/CommunityPage';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { usePlatform } from '@/context/PlatformContext';
 
 export default function DirectCommunityRoute() {
+  const router = useRouter();
   const { setActivePage } = usePlatform();
 
   useEffect(() => {
-    setActivePage('community');
-  }, [setActivePage]);
+    setActivePage('bible');
+    router.replace('/');
+  }, [router, setActivePage]);
 
-  return (
-    <NavigationShell>
-      <CommunityPage />
-    </NavigationShell>
-  );
+  return null;
 }
 

@@ -54,6 +54,7 @@ export default function NotesPage() {
   } = usePlatform();
 
   const isLight = preferences.theme === 'light';
+  const isChildren = preferences.experienceMode === 'children';
 
   // Always start at top on initial mount
   useEffect(() => {
@@ -1442,15 +1443,25 @@ export default function NotesPage() {
         <div className="grid grid-cols-2 gap-2 sm:gap-3 w-full">
           {/* First Dropdown: Category Filter (All, Bible Verse, Context, Type and Shadow, References) */}
           <div
-            className={`min-w-0 rounded-xl border px-2.5 sm:px-3 py-2 flex items-center gap-1.5 ${
-              isLight
+            className={`min-w-0 rounded-xl border px-2.5 sm:px-3 py-2 flex items-center gap-1.5 transition ${
+              isChildren
+                ? isLight
+                  ? 'bg-amber-100/90 border-amber-300 text-amber-950 font-bold shadow-2xs'
+                  : 'bg-indigo-900/80 border-indigo-700 text-amber-200 font-bold'
+                : isLight
                 ? 'bg-white border-stone-200/90 text-stone-800 shadow-2xs'
                 : 'bg-[#161616] border-zinc-800 text-zinc-100'
             }`}
           >
             <Filter
               className={`h-3.5 w-3.5 shrink-0 ${
-                isLight ? 'text-amber-700' : 'text-amber-400'
+                isChildren
+                  ? isLight
+                    ? 'text-amber-800'
+                    : 'text-amber-300'
+                  : isLight
+                  ? 'text-amber-700'
+                  : 'text-amber-400'
               }`}
             />
             <select
@@ -1460,7 +1471,13 @@ export default function NotesPage() {
               }
               aria-label="Filter by Content Category"
               className={`w-full min-w-0 bg-transparent text-xs font-semibold truncate focus:outline-none ${
-                isLight ? 'text-stone-800' : 'text-zinc-100'
+                isChildren
+                  ? isLight
+                    ? 'text-amber-950 font-extrabold'
+                    : 'text-amber-200 font-extrabold'
+                  : isLight
+                  ? 'text-stone-800'
+                  : 'text-zinc-100'
               }`}
             >
               <option

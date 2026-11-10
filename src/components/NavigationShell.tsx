@@ -201,7 +201,7 @@ export default function NavigationShell({ children }: { children: React.ReactNod
                 </span>
               </button>
 
-              {/* Requirement 5: Display only the word Saved (no icon in front of Saved) */}
+              {/* Saved (with Bookmark icon) */}
               <button
                 onClick={() => setActivePage('saved')}
                 className={`w-full rounded-xl px-3 py-2.5 text-sm font-semibold flex items-center justify-between transition ${
@@ -218,27 +218,35 @@ export default function NavigationShell({ children }: { children: React.ReactNod
                     : 'text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-200'
                 }`}
               >
-                <span>Saved</span>
-              </button>
-
-              {/* Requirement 6: Display only the text Community (no icon in front of Community) */}
-              <button
-                onClick={() => setActivePage('community')}
-                className={`w-full rounded-xl px-3 py-2.5 text-sm font-semibold flex items-center justify-between transition ${
-                  activePage === 'community'
-                    ? isChildren
+                <span className="flex items-center gap-2.5">
+                  <Bookmark
+                    className={`h-4 w-4 ${
+                      activePage === 'saved' || activePage === 'notes'
+                        ? isChildren
+                          ? isLight
+                            ? 'text-slate-950'
+                            : 'text-amber-300'
+                          : isLight
+                          ? 'text-amber-700'
+                          : 'text-amber-400'
+                        : 'opacity-70'
+                    }`}
+                  />
+                  <span>Saved</span>
+                </span>
+                <span
+                  className={`text-[11px] font-medium ${
+                    (activePage === 'saved' || activePage === 'notes') && isChildren
                       ? isLight
-                        ? 'bg-amber-400 text-slate-950 shadow-sm font-extrabold'
-                        : 'bg-indigo-600 text-white shadow-sm font-extrabold'
+                        ? 'text-slate-800'
+                        : 'text-indigo-200'
                       : isLight
-                      ? 'bg-white text-stone-900 shadow-sm border border-stone-200/80'
-                      : 'bg-zinc-800 text-white shadow-sm'
-                    : isLight
-                    ? 'text-stone-600 hover:bg-stone-200/60 hover:text-stone-900'
-                    : 'text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-200'
-                }`}
-              >
-                <span>Community</span>
+                      ? 'text-stone-400'
+                      : 'text-zinc-500'
+                  }`}
+                >
+                  {savedConnections.length}
+                </span>
               </button>
             </nav>
           </div>
@@ -431,18 +439,6 @@ export default function NavigationShell({ children }: { children: React.ReactNod
         </button>
 
         <div className="flex items-center gap-1.5">
-          {isChildren && (
-            <span
-              className={`rounded-full px-2.5 py-0.5 text-[10px] font-extrabold ${
-                isLight
-                  ? 'bg-amber-200/80 text-amber-950'
-                  : 'bg-indigo-900 text-amber-300'
-              }`}
-            >
-              Kids Mode
-            </span>
-          )}
-
           <button
             onClick={() =>
               updatePreferences({
@@ -485,18 +481,18 @@ export default function NavigationShell({ children }: { children: React.ReactNod
       <div className="flex-1 min-w-0 flex flex-col">{children}</div>
 
       {/* =====================================================================
-          MOBILE BOTTOM NAVBAR (< lg) — 3 Items: Bible, Saved (text only), Community (text only)
+          MOBILE BOTTOM NAVBAR (< lg) — 2 Sections: Bible & Saved
           ===================================================================== */}
       <nav
         aria-label="Mobile Bottom Navigation"
-        className={`lg:hidden fixed bottom-0 inset-x-0 z-40 h-16 grid grid-cols-3 px-3 backdrop-blur-lg shadow-[0_-4px_24px_rgba(0,0,0,0.06)] ${
+        className={`lg:hidden fixed bottom-0 inset-x-0 z-40 h-16 grid grid-cols-2 px-6 backdrop-blur-lg shadow-[0_-4px_24px_rgba(0,0,0,0.06)] ${
           isChildren
             ? isLight
               ? 'bg-[#FFF9E6]/95 border-t border-amber-200 text-slate-900'
               : 'bg-[#161D35]/95 border-t border-indigo-800/60 text-slate-100'
             : isLight
-            ? 'bg-white/95 text-stone-900'
-            : 'bg-[#141414]/95 text-zinc-100'
+            ? 'bg-white/95 text-stone-900 border-t border-stone-200/80'
+            : 'bg-[#141414]/95 text-zinc-100 border-t border-zinc-800/80'
         }`}
       >
         <button
@@ -504,7 +500,7 @@ export default function NavigationShell({ children }: { children: React.ReactNod
           className="flex flex-col items-center justify-center gap-1 group"
         >
           <div
-            className={`rounded-full px-4 py-1 flex items-center justify-center transition ${
+            className={`rounded-full px-5 py-1 flex items-center justify-center transition ${
               activePage === 'bible'
                 ? isLight
                   ? 'bg-amber-700/15 text-amber-800'
@@ -531,13 +527,12 @@ export default function NavigationShell({ children }: { children: React.ReactNod
           </span>
         </button>
 
-        {/* Requirement 5: Remove icon in front of Saved; display only the word Saved */}
         <button
           onClick={() => setActivePage('saved')}
-          className="flex items-center justify-center group"
+          className="flex flex-col items-center justify-center gap-1 group"
         >
-          <span
-            className={`rounded-full px-4 py-1.5 text-xs font-bold tracking-tight whitespace-nowrap transition ${
+          <div
+            className={`rounded-full px-5 py-1 flex items-center justify-center transition ${
               activePage === 'saved' || activePage === 'notes'
                 ? isLight
                   ? 'bg-amber-700/15 text-amber-800'
@@ -547,27 +542,20 @@ export default function NavigationShell({ children }: { children: React.ReactNod
                 : 'text-zinc-400 group-hover:text-zinc-200'
             }`}
           >
-            Saved
-          </span>
-        </button>
-
-        {/* Requirement 6: Remove icon in front of Community; display only the text Community */}
-        <button
-          onClick={() => setActivePage('community')}
-          className="flex items-center justify-center group"
-        >
+            <Bookmark className="h-4 w-4" />
+          </div>
           <span
-            className={`rounded-full px-4 py-1.5 text-xs font-bold tracking-tight whitespace-nowrap transition ${
-              activePage === 'community'
+            className={`text-[11px] font-bold tracking-tight whitespace-nowrap ${
+              activePage === 'saved' || activePage === 'notes'
                 ? isLight
-                  ? 'bg-amber-700/15 text-amber-800'
-                  : 'bg-amber-500/20 text-amber-400'
+                  ? 'text-amber-800'
+                  : 'text-amber-400'
                 : isLight
-                ? 'text-stone-500 group-hover:text-stone-800'
-                : 'text-zinc-400 group-hover:text-zinc-200'
+                ? 'text-stone-500'
+                : 'text-zinc-400'
             }`}
           >
-            Community
+            Saved
           </span>
         </button>
       </nav>
