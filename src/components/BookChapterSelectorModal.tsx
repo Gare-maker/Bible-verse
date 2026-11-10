@@ -224,7 +224,7 @@ export default function BookChapterSelectorModal({
               <button
                 key={`${item.book}-${item.chapter}-${i}`}
                 onClick={() => {
-                  navigateToPassage(item.book, item.chapter, undefined, true);
+                  navigateToPassage(item.book, item.chapter, undefined, false);
                   onClose();
                 }}
                 className={`w-full flex items-center justify-between rounded-xl px-4 py-3 text-left border transition ${
@@ -290,7 +290,7 @@ export default function BookChapterSelectorModal({
                       <div className="mt-3 grid grid-cols-5 gap-2">
                         <button
                           onClick={() => {
-                            navigateToPassage(book.name, 0, undefined, true);
+                            navigateToPassage(book.name, 0, undefined, false);
                             onClose();
                           }}
                           className={`h-10 rounded-xl text-xs font-semibold flex items-center justify-center transition ${
@@ -313,7 +313,7 @@ export default function BookChapterSelectorModal({
                             <button
                               key={ch}
                               onClick={() => {
-                                navigateToPassage(book.name, ch, undefined, true);
+                                navigateToPassage(book.name, ch, undefined, false);
                                 onClose();
                               }}
                               className={`h-10 rounded-xl text-xs sm:text-sm font-semibold flex items-center justify-center transition ${

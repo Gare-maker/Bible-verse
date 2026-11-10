@@ -5,24 +5,14 @@ import {
   Bookmark,
   BookOpen,
   CheckCircle2,
-  Cloud,
   Compass,
-  Database,
-  Download,
   Moon,
-  NotebookPen,
-  RefreshCw,
+  Sparkles,
   Sun,
-  Upload,
   User,
-  Users,
   X,
 } from 'lucide-react';
 import { usePlatform } from '@/context/PlatformContext';
-import {
-  configureRuntimeSupabase,
-  getSupabaseConfigStatus,
-} from '@/lib/supabase';
 
 const SIDEBAR_PASSAGES = [
   { label: 'Matthew 1:23', subtitle: 'Virgin Birth • Isa 7:14', book: 'Matthew', chapter: 1, verse: 23 },
@@ -45,77 +35,37 @@ export default function NavigationShell({ children }: { children: React.ReactNod
     preferences,
     updatePreferences,
     savedConnections,
-    savedContexts,
-    savedVerses,
-    communityConnections,
-    communityContexts,
-    communityVerses,
-    personalNotes,
-    exportNotebookJson,
-    importNotebookJson,
-    syncWithSupabase,
     toastMessage,
+    showToast,
   } = usePlatform();
 
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const [importDraft, setImportDraft] = useState('');
-  const [showImportBox, setShowImportBox] = useState(false);
-
-  const sbStatus = getSupabaseConfigStatus();
-  const [sbUrlInput, setSbUrlInput] = useState(sbStatus.url);
-  const [sbKeyInput, setSbKeyInput] = useState('');
-  const [sbSyncMessage, setSbSyncMessage] = useState<string | null>(null);
-  const [isSyncingSb, setIsSyncingSb] = useState(false);
 
   const isLight = preferences.theme === 'light';
-  const totalSavedCount =
-    (savedConnections?.length || 0) +
-    (savedContexts?.length || 0) +
-    (savedVerses?.length || 0) +
-    (personalNotes?.length || 0);
-
-  const totalCommunityCount =
-    (communityConnections?.length || 0) +
-    (communityContexts?.length || 0) +
-    (communityVerses?.length || 0);
-
-  const handleExportDownload = () => {
-    const json = exportNotebookJson();
-    if (typeof window !== 'undefined') {
-      const blob = new Blob([json], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `bible-verse-sync-${new Date().toISOString().slice(0, 10)}.json`;
-      a.click();
-      URL.revokeObjectURL(url);
-    }
-  };
-
-  const handleConnectSupabase = async () => {
-    setIsSyncingSb(true);
-    if (sbUrlInput.trim() && sbKeyInput.trim()) {
-      configureRuntimeSupabase(sbUrlInput.trim(), sbKeyInput.trim());
-    }
-    const res = await syncWithSupabase();
-    setSbSyncMessage(res.message);
-    setIsSyncingSb(false);
-  };
+  const isChildren = preferences.experienceMode === 'children';
 
   return (
     <div
       className={`min-h-screen flex flex-col lg:flex-row transition-colors ${
-        isLight
+        isChildren
+          ? isLight
+            ? 'bg-[#FFFDF4] text-slate-900'
+            : 'dark bg-[#111629] text-slate-100'
+          : isLight
           ? 'bg-[#FBF9F5] text-stone-900'
           : 'dark bg-[#0F0F0F] text-zinc-100'
       }`}
     >
       {/* =====================================================================
-          DESKTOP LEFT SIDEBAR (lg and up) — Real Native App Layout
+          DESKTOP LEFT SIDEBAR (lg and up)
           ===================================================================== */}
       <aside
         className={`hidden lg:flex lg:w-64 xl:w-68 shrink-0 flex-col justify-between select-none sticky top-0 h-screen ${
-          isLight
+          isChildren
+            ? isLight
+              ? 'bg-gradient-to-b from-amber-100/80 via-sky-50/70 to-emerald-50/60 border-r-2 border-amber-200 text-slate-800'
+              : 'bg-gradient-to-b from-[#182039] to-[#13192E] border-r border-indigo-800/60 text-slate-100'
+            : isLight
             ? 'bg-[#F4F1EA] text-stone-800'
             : 'bg-[#141414] text-zinc-200'
         }`}
@@ -129,27 +79,41 @@ export default function NavigationShell({ children }: { children: React.ReactNod
             >
               <div
                 className={`h-9 w-9 rounded-xl flex items-center justify-center shadow-sm transition shrink-0 ${
-                  isLight
+                  isChildren
+                    ? isLight
+                      ? 'bg-gradient-to-br from-amber-400 to-orange-500 text-white'
+                      : 'bg-gradient-to-br from-amber-400 to-pink-500 text-slate-950'
+                    : isLight
                     ? 'bg-amber-700 text-white'
                     : 'bg-amber-500 text-zinc-950'
                 }`}
               >
-                <BookOpen className="h-4 w-4" />
+                {isChildren ? (
+                  <Sparkles className="h-4 w-4" />
+                ) : (
+                  <BookOpen className="h-4 w-4" />
+                )}
               </div>
               <div className="min-w-0">
                 <span
-                  className={`font-serif text-base font-bold tracking-tight block leading-none truncate ${
-                    isLight ? 'text-stone-900' : 'text-white'
-                  }`}
+                  className={`text-base font-bold tracking-tight block leading-none truncate ${
+                    isChildren ? 'font-sans' : 'font-serif'
+                  } ${isLight ? 'text-stone-900' : 'text-white'}`}
                 >
-                  Bible Verse
+                  {isChildren ? 'Bible Kids' : 'Bible Verse'}
                 </span>
                 <span
                   className={`text-[11px] font-medium block mt-1 truncate ${
-                    isLight ? 'text-stone-500' : 'text-zinc-400'
+                    isChildren
+                      ? isLight
+                        ? 'text-orange-700'
+                        : 'text-amber-300'
+                      : isLight
+                      ? 'text-stone-500'
+                      : 'text-zinc-400'
                   }`}
                 >
-                  Scripture & Context Research
+                  {isChildren ? 'Fun Stories & Pictures!' : 'Scripture & Context Research'}
                 </span>
               </div>
             </button>
@@ -161,7 +125,11 @@ export default function NavigationShell({ children }: { children: React.ReactNod
                 })
               }
               className={`rounded-lg p-2 border transition shrink-0 ${
-                isLight
+                isChildren
+                  ? isLight
+                    ? 'bg-white border-amber-300 text-amber-600 hover:bg-amber-50'
+                    : 'bg-indigo-900/80 border-indigo-700 text-amber-300 hover:bg-indigo-800'
+                  : isLight
                   ? 'bg-white border-stone-200 text-stone-700 hover:bg-stone-100'
                   : 'bg-zinc-800 border-zinc-700 text-amber-400 hover:bg-zinc-700'
               }`}
@@ -176,21 +144,25 @@ export default function NavigationShell({ children }: { children: React.ReactNod
             </button>
           </div>
 
-          {/* Primary Navigation — 3 Main Destinations: Bible, Saved, Community */}
+          {/* Primary Navigation — 3 Main Destinations: Bible, Saved (no icon in front), Community (no icon in front) */}
           <div className="space-y-1">
             <div
               className={`px-2.5 pb-1 text-[10px] font-bold uppercase tracking-wider ${
                 isLight ? 'text-stone-400' : 'text-zinc-500'
               }`}
             >
-              Workspace
+              {isChildren ? 'Explore' : 'Workspace'}
             </div>
             <nav aria-label="Desktop Primary Navigation" className="space-y-1">
               <button
                 onClick={() => setActivePage('bible')}
                 className={`w-full rounded-xl px-3 py-2.5 text-sm font-semibold flex items-center justify-between transition ${
                   activePage === 'bible'
-                    ? isLight
+                    ? isChildren
+                      ? isLight
+                        ? 'bg-amber-400 text-slate-950 shadow-sm font-extrabold'
+                        : 'bg-indigo-600 text-white shadow-sm font-extrabold'
+                      : isLight
                       ? 'bg-white text-stone-900 shadow-sm border border-stone-200/80'
                       : 'bg-zinc-800 text-white shadow-sm'
                     : isLight
@@ -202,28 +174,43 @@ export default function NavigationShell({ children }: { children: React.ReactNod
                   <BookOpen
                     className={`h-4 w-4 ${
                       activePage === 'bible'
-                        ? isLight
+                        ? isChildren
+                          ? isLight
+                            ? 'text-slate-950'
+                            : 'text-amber-300'
+                          : isLight
                           ? 'text-amber-700'
                           : 'text-amber-400'
-                        : ' opacity-70'
+                        : 'opacity-70'
                     }`}
                   />
-                  <span>Bible Reader</span>
+                  <span>{isChildren ? 'Bible Stories' : 'Bible Reader'}</span>
                 </span>
                 <span
                   className={`text-[11px] font-medium ${
-                    isLight ? 'text-stone-400' : 'text-zinc-500'
+                    activePage === 'bible' && isChildren
+                      ? isLight
+                        ? 'text-slate-800'
+                        : 'text-indigo-200'
+                      : isLight
+                      ? 'text-stone-400'
+                      : 'text-zinc-500'
                   }`}
                 >
                   {currentBook.slice(0, 4)} {currentChapter === 0 ? 'Intro' : currentChapter}
                 </span>
               </button>
 
+              {/* Requirement 5: Display only the word Saved (no icon in front of Saved) */}
               <button
                 onClick={() => setActivePage('saved')}
                 className={`w-full rounded-xl px-3 py-2.5 text-sm font-semibold flex items-center justify-between transition ${
                   activePage === 'saved' || activePage === 'notes'
-                    ? isLight
+                    ? isChildren
+                      ? isLight
+                        ? 'bg-amber-400 text-slate-950 shadow-sm font-extrabold'
+                        : 'bg-indigo-600 text-white shadow-sm font-extrabold'
+                      : isLight
                       ? 'bg-white text-stone-900 shadow-sm border border-stone-200/80'
                       : 'bg-zinc-800 text-white shadow-sm'
                     : isLight
@@ -231,25 +218,19 @@ export default function NavigationShell({ children }: { children: React.ReactNod
                     : 'text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-200'
                 }`}
               >
-                <span className="flex items-center gap-2.5">
-                  <Bookmark
-                    className={`h-4 w-4 ${
-                      activePage === 'saved' || activePage === 'notes'
-                        ? isLight
-                          ? 'text-amber-700'
-                          : 'text-amber-400'
-                        : 'opacity-70'
-                    }`}
-                  />
-                  <span>Saved</span>
-                </span>
+                <span>Saved</span>
               </button>
 
+              {/* Requirement 6: Display only the text Community (no icon in front of Community) */}
               <button
                 onClick={() => setActivePage('community')}
                 className={`w-full rounded-xl px-3 py-2.5 text-sm font-semibold flex items-center justify-between transition ${
                   activePage === 'community'
-                    ? isLight
+                    ? isChildren
+                      ? isLight
+                        ? 'bg-amber-400 text-slate-950 shadow-sm font-extrabold'
+                        : 'bg-indigo-600 text-white shadow-sm font-extrabold'
+                      : isLight
                       ? 'bg-white text-stone-900 shadow-sm border border-stone-200/80'
                       : 'bg-zinc-800 text-white shadow-sm'
                     : isLight
@@ -257,23 +238,12 @@ export default function NavigationShell({ children }: { children: React.ReactNod
                     : 'text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-200'
                 }`}
               >
-                <span className="flex items-center gap-2.5">
-                  <Users
-                    className={`h-4 w-4 ${
-                      activePage === 'community'
-                        ? isLight
-                          ? 'text-amber-700'
-                          : 'text-amber-400'
-                        : 'opacity-70'
-                    }`}
-                  />
-                  <span>Community</span>
-                </span>
+                <span>Community</span>
               </button>
             </nav>
           </div>
 
-          {/* Key Connected Passages (Clean Sidebar List instead of Cluttered Top Pills) */}
+          {/* Key Study Passages */}
           <div className="space-y-1.5">
             <div
               className={`px-2.5 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider ${
@@ -281,7 +251,7 @@ export default function NavigationShell({ children }: { children: React.ReactNod
               }`}
             >
               <Compass className="h-3 w-3" />
-              <span>Key Study Passages</span>
+              <span>{isChildren ? 'Favorite Bible Stories' : 'Key Study Passages'}</span>
             </div>
             <div className="space-y-0.5">
               {SIDEBAR_PASSAGES.map((item) => {
@@ -293,7 +263,7 @@ export default function NavigationShell({ children }: { children: React.ReactNod
                   <button
                     key={item.label}
                     onClick={() => {
-                      navigateToPassage(item.book, item.chapter, item.verse);
+                      navigateToPassage(item.book, item.chapter, item.verse, false);
                       openReferenceInspector(item.label, 'reference');
                     }}
                     className={`w-full rounded-lg px-2.5 py-1.5 text-left transition flex items-center justify-between ${
@@ -320,7 +290,7 @@ export default function NavigationShell({ children }: { children: React.ReactNod
             </div>
           </div>
 
-          {/* Connected Notebook Bridge: Recent Saved References */}
+          {/* Recent Saved References */}
           <div className="space-y-1.5">
             <div className="px-2.5 flex items-center justify-between">
               <span
@@ -345,7 +315,7 @@ export default function NavigationShell({ children }: { children: React.ReactNod
                 <button
                   key={conn.id}
                   onClick={() => {
-                    navigateToReferenceString(conn.primaryRef);
+                    navigateToReferenceString(conn.primaryRef, false);
                     openReferenceInspector(conn.primaryRef, 'reference');
                   }}
                   className={`w-full rounded-lg px-2.5 py-2 text-left transition border ${
@@ -375,7 +345,13 @@ export default function NavigationShell({ children }: { children: React.ReactNod
         {/* Bottom Sidebar Account Bar */}
         <div
           className={`p-3 flex items-center justify-between gap-2 ${
-            isLight ? 'bg-[#EFECE4]/60' : 'bg-[#111111]'
+            isChildren
+              ? isLight
+                ? 'bg-amber-100/70'
+                : 'bg-[#12172B]'
+              : isLight
+              ? 'bg-[#EFECE4]/60'
+              : 'bg-[#111111]'
           }`}
         >
           <button
@@ -384,7 +360,11 @@ export default function NavigationShell({ children }: { children: React.ReactNod
           >
             <div
               className={`h-7 w-7 rounded-full font-bold flex items-center justify-center text-xs shrink-0 ${
-                isLight ? 'bg-amber-700 text-white' : 'bg-amber-500 text-zinc-950'
+                isChildren
+                  ? 'bg-gradient-to-br from-amber-400 to-orange-500 text-white'
+                  : isLight
+                  ? 'bg-amber-700 text-white'
+                  : 'bg-amber-500 text-zinc-950'
               }`}
             >
               {preferences.userName.slice(0, 1).toUpperCase()}
@@ -396,8 +376,12 @@ export default function NavigationShell({ children }: { children: React.ReactNod
                   isLight ? 'text-stone-500' : 'text-zinc-400'
                 }`}
               >
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 inline-block" />
-                {sbStatus.isConnected ? 'Supabase Synced' : 'Local Workspace'}
+                <span
+                  className={`h-1.5 w-1.5 rounded-full inline-block ${
+                    isChildren ? 'bg-amber-400' : 'bg-emerald-500'
+                  }`}
+                />
+                {isChildren ? "Children's Mode" : 'Adult Mode'}
               </p>
             </div>
           </button>
@@ -405,11 +389,15 @@ export default function NavigationShell({ children }: { children: React.ReactNod
       </aside>
 
       {/* =====================================================================
-          MOBILE & TABLET TOP HEADER (< lg)
+          MOBILE & TABLET TOP HEADER (< lg) — Header 1: Logo, Bible info, Profile
           ===================================================================== */}
       <header
         className={`lg:hidden sticky top-0 z-30 h-12 px-4 flex items-center justify-between shadow-xs ${
-          isLight
+          isChildren
+            ? isLight
+              ? 'bg-[#FFF9E6] border-b border-amber-200 text-slate-900'
+              : 'bg-[#161D35] border-b border-indigo-800/60 text-slate-100'
+            : isLight
             ? 'bg-[#FBF9F5] text-stone-900'
             : 'bg-[#0F0F0F] text-zinc-100'
         }`}
@@ -420,17 +408,41 @@ export default function NavigationShell({ children }: { children: React.ReactNod
         >
           <div
             className={`h-7 w-7 rounded-lg flex items-center justify-center ${
-              isLight ? 'bg-amber-700 text-white' : 'bg-amber-500 text-zinc-950'
+              isChildren
+                ? 'bg-gradient-to-br from-amber-400 to-orange-500 text-white'
+                : isLight
+                ? 'bg-amber-700 text-white'
+                : 'bg-amber-500 text-zinc-950'
             }`}
           >
-            <BookOpen className="h-3.5 w-3.5" />
+            {isChildren ? (
+              <Sparkles className="h-3.5 w-3.5" />
+            ) : (
+              <BookOpen className="h-3.5 w-3.5" />
+            )}
           </div>
-          <span className="font-serif text-sm font-bold tracking-tight">
-            Bible Verse
+          <span
+            className={`text-sm font-bold tracking-tight ${
+              isChildren ? 'font-sans' : 'font-serif'
+            }`}
+          >
+            {isChildren ? 'Bible Kids' : 'Bible Verse'}
           </span>
         </button>
 
         <div className="flex items-center gap-1.5">
+          {isChildren && (
+            <span
+              className={`rounded-full px-2.5 py-0.5 text-[10px] font-extrabold ${
+                isLight
+                  ? 'bg-amber-200/80 text-amber-950'
+                  : 'bg-indigo-900 text-amber-300'
+              }`}
+            >
+              Kids Mode
+            </span>
+          )}
+
           <button
             onClick={() =>
               updatePreferences({
@@ -452,11 +464,15 @@ export default function NavigationShell({ children }: { children: React.ReactNod
           <button
             onClick={() => setIsProfileOpen(true)}
             className={`rounded-full p-1.5 border ${
-              isLight
+              isChildren
+                ? isLight
+                  ? 'bg-amber-100 border-amber-300 text-amber-900'
+                  : 'bg-indigo-900 border-indigo-700 text-amber-300'
+                : isLight
                 ? 'bg-stone-100 border-stone-200 text-stone-800'
                 : 'bg-zinc-800 border-zinc-700 text-zinc-200'
             }`}
-            aria-label="Profile and Sync Settings"
+            aria-label="Profile Settings"
           >
             <User className="h-4 w-4" />
           </button>
@@ -469,13 +485,16 @@ export default function NavigationShell({ children }: { children: React.ReactNod
       <div className="flex-1 min-w-0 flex flex-col">{children}</div>
 
       {/* =====================================================================
-          MOBILE BOTTOM NAVBAR (< lg) — Strictly Pinned to Bottom with 3 Items
-          (No Numerical Indicators & Single-Line Labels)
+          MOBILE BOTTOM NAVBAR (< lg) — 3 Items: Bible, Saved (text only), Community (text only)
           ===================================================================== */}
       <nav
         aria-label="Mobile Bottom Navigation"
         className={`lg:hidden fixed bottom-0 inset-x-0 z-40 h-16 grid grid-cols-3 px-3 backdrop-blur-lg shadow-[0_-4px_24px_rgba(0,0,0,0.06)] ${
-          isLight
+          isChildren
+            ? isLight
+              ? 'bg-[#FFF9E6]/95 border-t border-amber-200 text-slate-900'
+              : 'bg-[#161D35]/95 border-t border-indigo-800/60 text-slate-100'
+            : isLight
             ? 'bg-white/95 text-stone-900'
             : 'bg-[#141414]/95 text-zinc-100'
         }`}
@@ -512,12 +531,13 @@ export default function NavigationShell({ children }: { children: React.ReactNod
           </span>
         </button>
 
+        {/* Requirement 5: Remove icon in front of Saved; display only the word Saved */}
         <button
           onClick={() => setActivePage('saved')}
-          className="flex flex-col items-center justify-center gap-1 group"
+          className="flex items-center justify-center group"
         >
-          <div
-            className={`rounded-full px-4 py-1 flex items-center justify-center transition ${
+          <span
+            className={`rounded-full px-4 py-1.5 text-xs font-bold tracking-tight whitespace-nowrap transition ${
               activePage === 'saved' || activePage === 'notes'
                 ? isLight
                   ? 'bg-amber-700/15 text-amber-800'
@@ -525,31 +545,19 @@ export default function NavigationShell({ children }: { children: React.ReactNod
                 : isLight
                 ? 'text-stone-500 group-hover:text-stone-800'
                 : 'text-zinc-400 group-hover:text-zinc-200'
-            }`}
-          >
-            <Bookmark className="h-4 w-4" />
-          </div>
-          <span
-            className={`text-[11px] font-bold tracking-tight whitespace-nowrap ${
-              activePage === 'saved' || activePage === 'notes'
-                ? isLight
-                  ? 'text-amber-800'
-                  : 'text-amber-400'
-                : isLight
-                ? 'text-stone-500'
-                : 'text-zinc-400'
             }`}
           >
             Saved
           </span>
         </button>
 
+        {/* Requirement 6: Remove icon in front of Community; display only the text Community */}
         <button
           onClick={() => setActivePage('community')}
-          className="flex flex-col items-center justify-center gap-1 group"
+          className="flex items-center justify-center group"
         >
-          <div
-            className={`rounded-full px-4 py-1 flex items-center justify-center transition ${
+          <span
+            className={`rounded-full px-4 py-1.5 text-xs font-bold tracking-tight whitespace-nowrap transition ${
               activePage === 'community'
                 ? isLight
                   ? 'bg-amber-700/15 text-amber-800'
@@ -557,19 +565,6 @@ export default function NavigationShell({ children }: { children: React.ReactNod
                 : isLight
                 ? 'text-stone-500 group-hover:text-stone-800'
                 : 'text-zinc-400 group-hover:text-zinc-200'
-            }`}
-          >
-            <Users className="h-4 w-4" />
-          </div>
-          <span
-            className={`text-[11px] font-bold tracking-tight whitespace-nowrap ${
-              activePage === 'community'
-                ? isLight
-                  ? 'text-amber-800'
-                  : 'text-amber-400'
-                : isLight
-                ? 'text-stone-500'
-                : 'text-zinc-400'
             }`}
           >
             Community
@@ -592,7 +587,8 @@ export default function NavigationShell({ children }: { children: React.ReactNod
       )}
 
       {/* =====================================================================
-          PROFILE, SUPABASE CONNECTION & CLOUD SYNC MODAL (Light/Dark Aware)
+          PROFILE MODAL (Requirement 7: Supabase Cloud Data & Cross-device sync removed;
+          Adult Mode vs Children's Mode switcher added)
           ===================================================================== */}
       {isProfileOpen && (
         <div
@@ -601,18 +597,20 @@ export default function NavigationShell({ children }: { children: React.ReactNod
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className={`relative w-full max-w-md max-h-[88vh] overflow-y-auto rounded-2xl border p-5 sm:p-6 shadow-2xl space-y-5 my-auto ${
-              isLight
+            className={`relative w-full max-w-md rounded-2xl border p-5 sm:p-6 shadow-2xl space-y-5 my-auto ${
+              isChildren
+                ? isLight
+                  ? 'bg-[#FFFDF5] border-2 border-amber-300 text-slate-900'
+                  : 'bg-[#182039] border-2 border-indigo-700 text-slate-100'
+                : isLight
                 ? 'bg-white border-stone-200 text-stone-900'
                 : 'bg-[#181818] border-zinc-800 text-zinc-100'
             }`}
           >
-            <div className="flex items-center justify-between pb-3">
+            <div className="flex items-center justify-between pb-2">
               <div className="flex items-center gap-2.5">
                 <User className={`h-5 w-5 ${isLight ? 'text-amber-700' : 'text-amber-400'}`} />
-                <h2 className="text-base font-bold">
-                  Workspace Settings & Supabase Sync
-                </h2>
+                <h2 className="text-base font-bold">Profile Settings</h2>
               </div>
               <button
                 onClick={() => setIsProfileOpen(false)}
@@ -622,10 +620,10 @@ export default function NavigationShell({ children }: { children: React.ReactNod
               </button>
             </div>
 
-            {/* Profile Name (Appearance removed per specification — only one top theme switch) */}
+            {/* Profile Name */}
             <div className="text-xs">
               <label className="text-stone-500 dark:text-zinc-400 font-medium block mb-1">
-                Scholar Name
+                Reader Name
               </label>
               <input
                 type="text"
@@ -639,135 +637,73 @@ export default function NavigationShell({ children }: { children: React.ReactNod
               />
             </div>
 
-            {/* Live Supabase Connection Box */}
-            <div
-              className={`rounded-xl border p-4 space-y-3 ${
-                isLight
-                  ? 'bg-stone-50 border-stone-200/90'
-                  : 'bg-zinc-900/70 border-zinc-800'
-              }`}
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold flex items-center gap-1.5">
-                  <Database className={`h-4 w-4 ${isLight ? 'text-amber-700' : 'text-amber-400'}`} />
-                  Supabase Cloud Database
-                </span>
-                <span
-                  className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold ${
-                    sbStatus.isConnected
-                      ? 'bg-emerald-500/15 text-emerald-700 border border-emerald-500/30'
-                      : 'bg-amber-500/15 text-amber-800 border border-amber-500/30'
-                  }`}
-                >
-                  {sbStatus.isConnected ? 'Connected' : 'Local Persistence Active'}
-                </span>
-              </div>
+            {/* Experience Mode Switcher: Adult Mode vs Children's Mode */}
+            <div className="space-y-2.5">
+              <label className="text-xs font-bold block text-stone-600 dark:text-zinc-300">
+                Reading Experience Mode
+              </label>
 
-              <div className="space-y-2 text-xs">
-                <input
-                  type="url"
-                  value={sbUrlInput}
-                  onChange={(e) => setSbUrlInput(e.target.value)}
-                  placeholder="https://your-project.supabase.co"
-                  className={`w-full rounded-lg border px-3 py-1.5 text-xs ${
-                    isLight
-                      ? 'bg-white border-stone-300 text-stone-900'
-                      : 'bg-zinc-950 border-zinc-700 text-white'
-                  }`}
-                />
-                <input
-                  type="password"
-                  value={sbKeyInput}
-                  onChange={(e) => setSbKeyInput(e.target.value)}
-                  placeholder="Supabase Anon Public Key (eyJ...)"
-                  className={`w-full rounded-lg border px-3 py-1.5 text-xs ${
-                    isLight
-                      ? 'bg-white border-stone-300 text-stone-900'
-                      : 'bg-zinc-950 border-zinc-700 text-white'
-                  }`}
-                />
+              <div className="grid grid-cols-2 gap-2.5">
                 <button
-                  onClick={handleConnectSupabase}
-                  disabled={isSyncingSb}
-                  className={`w-full rounded-lg py-2 text-xs font-bold flex items-center justify-center gap-1.5 transition ${
-                    isLight
-                      ? 'bg-amber-700 hover:bg-amber-800 text-white'
-                      : 'bg-amber-500 hover:bg-amber-400 text-zinc-950'
+                  type="button"
+                  onClick={() => {
+                    updatePreferences({ experienceMode: 'adult' });
+                    showToast('Switched to Adult Mode');
+                  }}
+                  className={`rounded-2xl border p-3.5 text-left transition space-y-1 ${
+                    !isChildren
+                      ? isLight
+                        ? 'bg-amber-50 border-2 border-amber-700 text-stone-900 shadow-xs'
+                        : 'bg-amber-500/15 border-2 border-amber-400 text-white shadow-xs'
+                      : isLight
+                      ? 'bg-white hover:bg-stone-50 border-stone-200 text-stone-700'
+                      : 'bg-zinc-900/70 hover:bg-zinc-800 border-zinc-700 text-zinc-300'
                   }`}
                 >
-                  <RefreshCw className={`h-3.5 w-3.5 ${isSyncingSb ? 'animate-spin' : ''}`} />
-                  <span>{isSyncingSb ? 'Testing Connection...' : 'Connect & Sync Supabase'}</span>
-                </button>
-                {sbSyncMessage && (
-                  <p className="text-[11px] text-stone-500 leading-relaxed pt-1">
-                    {sbSyncMessage}
+                  <div className="flex items-center justify-between">
+                    <BookOpen className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                    {!isChildren && (
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400">
+                        Active
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs sm:text-sm font-bold pt-1">Adult Mode</p>
+                  <p className="text-[11px] text-stone-500 dark:text-zinc-400 leading-snug">
+                    Classical study interface & detailed engraved illustrations.
                   </p>
-                )}
-              </div>
-            </div>
+                </button>
 
-            {/* Cross-Device Backup & Restore */}
-            <div
-              className={`rounded-xl border p-4 space-y-2.5 ${
-                isLight
-                  ? 'bg-stone-50 border-stone-200/90'
-                  : 'bg-zinc-900/70 border-zinc-800'
-              }`}
-            >
-              <span className="text-xs font-bold flex items-center gap-1.5">
-                <Cloud className={`h-4 w-4 ${isLight ? 'text-amber-700' : 'text-amber-400'}`} />
-                Cross-Device Research Backup
-              </span>
-              <div className="flex flex-wrap gap-2">
                 <button
-                  onClick={handleExportDownload}
-                  className={`rounded-lg px-3 py-1.5 text-xs font-semibold flex items-center gap-1.5 border ${
-                    isLight
-                      ? 'bg-white border-stone-300 text-stone-800 hover:bg-stone-100'
-                      : 'bg-zinc-800 border-zinc-700 text-zinc-200'
+                  type="button"
+                  onClick={() => {
+                    updatePreferences({ experienceMode: 'children' });
+                    showToast("Switched to Children's Mode");
+                  }}
+                  className={`rounded-2xl border p-3.5 text-left transition space-y-1 ${
+                    isChildren
+                      ? isLight
+                        ? 'bg-gradient-to-br from-amber-100 via-sky-50 to-emerald-50 border-2 border-amber-500 text-slate-900 shadow-sm'
+                        : 'bg-gradient-to-br from-indigo-900/90 to-purple-900/70 border-2 border-amber-400 text-white shadow-sm'
+                      : isLight
+                      ? 'bg-white hover:bg-amber-50/40 border-stone-200 text-stone-700'
+                      : 'bg-zinc-900/70 hover:bg-zinc-800 border-zinc-700 text-zinc-300'
                   }`}
                 >
-                  <Download className="h-3.5 w-3.5" />
-                  <span>Export JSON</span>
-                </button>
-                <button
-                  onClick={() => setShowImportBox((prev) => !prev)}
-                  className={`rounded-lg px-3 py-1.5 text-xs font-semibold flex items-center gap-1.5 border ${
-                    isLight
-                      ? 'bg-white border-stone-300 text-stone-800 hover:bg-stone-100'
-                      : 'bg-zinc-800 border-zinc-700 text-zinc-200'
-                  }`}
-                >
-                  <Upload className="h-3.5 w-3.5" />
-                  <span>Import JSON</span>
+                  <div className="flex items-center justify-between">
+                    <Sparkles className="h-4 w-4 text-amber-500" />
+                    {isChildren && (
+                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-amber-600 dark:text-amber-300">
+                        Active
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs sm:text-sm font-bold pt-1">Children&apos;s Mode</p>
+                  <p className="text-[11px] text-stone-500 dark:text-zinc-400 leading-snug">
+                    Playful, colourful story view with cartoon illustrations.
+                  </p>
                 </button>
               </div>
-              {showImportBox && (
-                <div className="space-y-2 pt-1">
-                  <textarea
-                    rows={2}
-                    value={importDraft}
-                    onChange={(e) => setImportDraft(e.target.value)}
-                    placeholder="Paste exported JSON sync bundle..."
-                    className={`w-full rounded-lg border p-2 text-xs font-mono ${
-                      isLight
-                        ? 'bg-white border-stone-300 text-stone-900'
-                        : 'bg-zinc-950 border-zinc-700 text-white'
-                    }`}
-                  />
-                  <button
-                    onClick={() => {
-                      if (importNotebookJson(importDraft)) {
-                        setImportDraft('');
-                        setShowImportBox(false);
-                      }
-                    }}
-                    className="rounded-lg bg-emerald-600 text-white font-bold px-3 py-1.5 text-xs"
-                  >
-                    Restore State
-                  </button>
-                </div>
-              )}
             </div>
           </div>
         </div>

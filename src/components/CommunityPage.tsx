@@ -865,18 +865,9 @@ export default function CommunityPage() {
   return (
     <div className="flex-1 min-w-0 pb-28 lg:pb-16">
       <div className="mx-auto w-full max-w-4xl px-4 sm:px-8 pt-6 sm:pt-8 space-y-4">
-        {/* 1. Community Header Row: Community Heading on Left + Search Icon at Top-Right on the Same Horizontal Line */}
+        {/* 1. Community Header Row: Community Heading on Left (no icon in front) + Search Icon at Top-Right on the Same Horizontal Line */}
         <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div
-              className={`h-9 w-9 rounded-xl flex items-center justify-center shrink-0 border ${
-                isLight
-                  ? 'bg-amber-50 border-amber-200/80 text-amber-800'
-                  : 'bg-amber-500/15 border-amber-500/30 text-amber-400'
-              }`}
-            >
-              <Users className="h-4 w-4" />
-            </div>
+          <div className="flex items-center min-w-0">
             <h1
               className={`text-2xl sm:text-3xl font-serif font-bold tracking-tight truncate ${
                 isLight ? 'text-stone-900' : 'text-white'
@@ -929,7 +920,7 @@ export default function CommunityPage() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search community verses, content, types & shadows, or references..."
+              placeholder="Search community verses, context, types & shadows, or references..."
               className={`w-full bg-transparent text-xs sm:text-sm focus:outline-none ${
                 isLight
                   ? 'text-stone-900 placeholder-stone-400'
@@ -960,7 +951,7 @@ export default function CommunityPage() {
 
         {/* 2. Two Dropdowns Row (Fits Neatly Within the Same Horizontal Row on Mobile & Desktop) */}
         <div className="grid grid-cols-2 gap-2 sm:gap-3 w-full">
-          {/* First Dropdown: Category Filter (All, Bible Verse, Content, Type and Shadow, References) */}
+          {/* First Dropdown: Category Filter (All, Bible Verse, Context, Type and Shadow, References) */}
           <div
             className={`min-w-0 rounded-xl border px-2.5 sm:px-3 py-2 flex items-center gap-1.5 ${
               isLight
@@ -1011,7 +1002,7 @@ export default function CommunityPage() {
                     : 'bg-[#161616] text-zinc-100'
                 }
               >
-                Content
+                Context
               </option>
               <option
                 value="type_shadow"

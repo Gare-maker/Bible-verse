@@ -38,6 +38,7 @@ export interface BiblicalLineIllustration {
   chapter: number;
   verse: number;
   sceneType: SceneType;
+  childrenStoryTitle?: string;
 }
 
 export const BIBLICAL_LINE_ILLUSTRATIONS: BiblicalLineIllustration[] = [
@@ -254,31 +255,183 @@ export function getIllustrationForVerse(
   );
 }
 
-/**
- * Determines the primary visual storytelling scene for a chapter.
- * Returns null when a chapter is a direct continuation of the previous chapter's
- * ongoing event/discourse (e.g., Genesis 2 after Genesis 1 creation, Matthew 6–7
- * continuing the Sermon on the Mount begun in Matthew 5, etc.) or when consecutive
- * chapters would repeat the same scene.
- */
-function resolveRawChapterScene(book: string, chapter: number): SceneType | null {
-  if (chapter <= 0) return null;
-  const b = book.trim().toLowerCase();
+const SCENE_STORY_TITLES: Record<SceneType, string> = {
+  creation_light: 'God Creates Light, Sky, Land & Living Creatures',
+  eden_garden_tree: 'The Garden of Eden & God’s Promise',
+  noah_ark_flood: 'Noah’s Ark & God’s Rainbow Promise',
+  abraham_covenant_altar: 'God’s Promise to Abraham Under the Stars',
+  melchizedek_abraham: 'Abraham Meets King Melchizedek',
+  joseph_angel_dream: 'God’s Messenger Brings Good News',
+  moses_exodus_passover: 'Moses & The Passover Deliverance',
+  red_sea_parting: 'God Parts the Waters for His People',
+  moses_song_witness: 'Moses Teaches God’s Covenant Word',
+  wilderness_scroll: 'Learning & Living by God’s Word',
+  bronze_serpent: 'Looking Up in Faith for Healing in the Wilderness',
+  david_harp_psalm: 'Songs of Praise, Wisdom & Trust in the Lord',
+  isaiah_prophecy: 'The Prophet Shares God’s Promise of Hope',
+  nativity_immanuel: 'The Birth of Jesus — Immanuel, God With Us',
+  temple_presentation: 'Worship & Dedication in the House of the Lord',
+  baptism_jordan: 'The Baptism at the Jordan River',
+  calling_fishermen: 'Jesus Calls the Fishermen by the Sea of Galilee',
+  healing_multitudes: 'Jesus Heals & Helps the People with Kindness',
+  jesus_teaching: 'Jesus Teaches About God’s Kingdom',
+  jesus_crowd_reconciliation: 'Forgiving, Sharing & Loving One Another',
+  nicodemus_night: 'Talking with Jesus Under the Night Sky',
+  lamb_of_god: 'The Good Shepherd & The Lamb of God',
+  triumphal_entry: 'Hosanna! Welcoming the King into Jerusalem',
+  crucifixion_calvary: 'Jesus Gives His Life Out of Love for All',
+  empty_tomb_resurrection: 'He Is Risen! The Joy of the Empty Tomb',
+  pentecost_spirit: 'God’s Spirit Fills Believers with Joy & Courage',
+  apostolic_scroll: 'Sharing the Good News Letters with the Church',
+  throne_new_jerusalem: 'God’s Shining City & Forever Kingdom',
+};
 
-  // Explicit continuous-discourse chapters that should not repeat the preceding chapter's illustration
+const BOOK_SCENE_POOLS: Record<string, SceneType[]> = {
+  torah: [
+    'creation_light',
+    'eden_garden_tree',
+    'noah_ark_flood',
+    'abraham_covenant_altar',
+    'melchizedek_abraham',
+    'joseph_angel_dream',
+    'moses_exodus_passover',
+    'red_sea_parting',
+    'moses_song_witness',
+    'wilderness_scroll',
+    'bronze_serpent',
+    'temple_presentation',
+    'lamb_of_god',
+  ],
+  history: [
+    'moses_song_witness',
+    'red_sea_parting',
+    'abraham_covenant_altar',
+    'david_harp_psalm',
+    'temple_presentation',
+    'isaiah_prophecy',
+    'jesus_crowd_reconciliation',
+    'wilderness_scroll',
+  ],
+  wisdom: [
+    'david_harp_psalm',
+    'creation_light',
+    'lamb_of_god',
+    'wilderness_scroll',
+    'temple_presentation',
+    'eden_garden_tree',
+    'throne_new_jerusalem',
+  ],
+  prophets: [
+    'isaiah_prophecy',
+    'nativity_immanuel',
+    'lamb_of_god',
+    'throne_new_jerusalem',
+    'pentecost_spirit',
+    'triumphal_entry',
+    'moses_song_witness',
+    'david_harp_psalm',
+  ],
+  gospels: [
+    'joseph_angel_dream',
+    'nativity_immanuel',
+    'temple_presentation',
+    'baptism_jordan',
+    'wilderness_scroll',
+    'calling_fishermen',
+    'healing_multitudes',
+    'jesus_teaching',
+    'jesus_crowd_reconciliation',
+    'nicodemus_night',
+    'lamb_of_god',
+    'triumphal_entry',
+    'crucifixion_calvary',
+    'empty_tomb_resurrection',
+  ],
+  epistles: [
+    'apostolic_scroll',
+    'pentecost_spirit',
+    'jesus_crowd_reconciliation',
+    'jesus_teaching',
+    'abraham_covenant_altar',
+    'lamb_of_god',
+    'empty_tomb_resurrection',
+    'throne_new_jerusalem',
+  ],
+};
+
+function getPoolForBook(bookLower: string): SceneType[] {
   if (
-    (b === 'genesis' && (chapter === 2 || chapter === 5 || chapter === 10 || chapter === 36)) ||
-    (b === 'matthew' && (chapter === 6 || chapter === 7 || chapter === 10 || chapter === 24 || chapter === 25)) ||
-    (b === 'john' && (chapter === 15 || chapter === 16 || chapter === 17)) ||
-    (b === 'exodus' && (chapter >= 26 && chapter <= 31)) ||
-    (b === 'exodus' && (chapter >= 36 && chapter <= 39)) ||
-    (b === 'leviticus' && chapter % 2 === 0) ||
-    (b === 'numbers' && (chapter === 2 || chapter === 4 || chapter === 7 || chapter === 26 || chapter === 29)) ||
-    (b === 'deuteronomy' && (chapter >= 13 && chapter <= 26 && chapter % 2 === 0)) ||
-    (b === '1 chronicles' && chapter <= 9)
+    bookLower === 'genesis' ||
+    bookLower === 'exodus' ||
+    bookLower === 'leviticus' ||
+    bookLower === 'numbers' ||
+    bookLower === 'deuteronomy'
   ) {
-    return null;
+    return BOOK_SCENE_POOLS.torah;
   }
+  if (
+    bookLower === 'joshua' ||
+    bookLower === 'judges' ||
+    bookLower === 'ruth' ||
+    bookLower === '1 samuel' ||
+    bookLower === '2 samuel' ||
+    bookLower === '1 kings' ||
+    bookLower === '2 kings' ||
+    bookLower === '1 chronicles' ||
+    bookLower === '2 chronicles' ||
+    bookLower === 'ezra' ||
+    bookLower === 'nehemiah' ||
+    bookLower === 'esther'
+  ) {
+    return BOOK_SCENE_POOLS.history;
+  }
+  if (
+    bookLower === 'job' ||
+    bookLower === 'psalms' ||
+    bookLower === 'proverbs' ||
+    bookLower === 'ecclesiastes' ||
+    bookLower === 'song of solomon'
+  ) {
+    return BOOK_SCENE_POOLS.wisdom;
+  }
+  if (
+    bookLower === 'isaiah' ||
+    bookLower === 'jeremiah' ||
+    bookLower === 'lamentations' ||
+    bookLower === 'ezekiel' ||
+    bookLower === 'daniel' ||
+    bookLower === 'hosea' ||
+    bookLower === 'joel' ||
+    bookLower === 'amos' ||
+    bookLower === 'obadiah' ||
+    bookLower === 'jonah' ||
+    bookLower === 'micah' ||
+    bookLower === 'nahum' ||
+    bookLower === 'habakkuk' ||
+    bookLower === 'zephaniah' ||
+    bookLower === 'haggai' ||
+    bookLower === 'zechariah' ||
+    bookLower === 'malachi'
+  ) {
+    return BOOK_SCENE_POOLS.prophets;
+  }
+  if (
+    bookLower === 'matthew' ||
+    bookLower === 'mark' ||
+    bookLower === 'luke' ||
+    bookLower === 'john'
+  ) {
+    return BOOK_SCENE_POOLS.gospels;
+  }
+  return BOOK_SCENE_POOLS.epistles;
+}
+
+/**
+ * Determines the primary visual storytelling scene for any Bible chapter.
+ * Persistent and deterministic across navigation and page refreshes.
+ */
+function resolvePrimaryChapterScene(book: string, chapter: number): SceneType {
+  const b = book.trim().toLowerCase();
 
   // Exact chapter matches from curated list
   const explicit = BIBLICAL_LINE_ILLUSTRATIONS.find(
@@ -291,34 +444,39 @@ function resolveRawChapterScene(book: string, chapter: number): SceneType | null
   // Book-specific narrative arc mapping
   if (b === 'genesis') {
     if (chapter === 1) return 'creation_light';
-    if (chapter === 3 || chapter === 4) return 'eden_garden_tree';
-    if (chapter >= 6 && chapter <= 9) return chapter === 6 || chapter === 8 ? 'noah_ark_flood' : null;
-    if (chapter === 12 || chapter === 15 || chapter === 17 || chapter === 22) return 'abraham_covenant_altar';
+    if (chapter === 2 || chapter === 3) return 'eden_garden_tree';
+    if (chapter === 4) return 'abraham_covenant_altar';
+    if (chapter >= 6 && chapter <= 9)
+      return chapter % 2 === 0 ? 'noah_ark_flood' : 'abraham_covenant_altar';
+    if (chapter === 12 || chapter === 15 || chapter === 17 || chapter === 22)
+      return 'abraham_covenant_altar';
     if (chapter === 14) return 'melchizedek_abraham';
-    if (chapter === 28 || chapter === 32) return 'joseph_angel_dream';
-    return chapter % 2 === 1 ? 'abraham_covenant_altar' : null;
+    if (chapter === 28 || chapter === 32 || chapter === 37 || chapter === 41)
+      return 'joseph_angel_dream';
   }
 
   if (b === 'exodus') {
-    if (chapter === 3 || chapter === 19 || chapter === 20 || chapter === 24 || chapter === 34) return 'moses_song_witness';
+    if (chapter === 1 || chapter === 2) return 'moses_exodus_passover';
+    if (chapter === 3 || chapter === 19 || chapter === 20 || chapter === 24 || chapter === 32 || chapter === 34)
+      return 'moses_song_witness';
     if (chapter === 12) return 'moses_exodus_passover';
-    if (chapter === 14 || chapter === 15) return chapter === 14 ? 'red_sea_parting' : null;
-    if (chapter === 25 || chapter === 40) return 'temple_presentation';
-    return chapter % 3 === 1 ? 'moses_exodus_passover' : null;
+    if (chapter === 14 || chapter === 15) return 'red_sea_parting';
+    if (chapter === 16 || chapter === 17) return 'wilderness_scroll';
+    if (chapter >= 25 && chapter <= 40)
+      return chapter % 2 === 1 ? 'temple_presentation' : 'lamb_of_god';
   }
 
   if (b === 'leviticus') {
     if (chapter === 1 || chapter === 16) return 'lamb_of_god';
-    if (chapter === 8 || chapter === 9) return chapter === 8 ? 'temple_presentation' : null;
+    if (chapter === 8 || chapter === 9) return 'temple_presentation';
     if (chapter === 19 || chapter === 23) return 'moses_song_witness';
-    return null;
   }
 
   if (b === 'numbers') {
     if (chapter === 21) return 'bronze_serpent';
-    if (chapter === 6 || chapter === 11 || chapter === 20 || chapter === 24) return 'moses_song_witness';
+    if (chapter === 6 || chapter === 11 || chapter === 20 || chapter === 24)
+      return 'moses_song_witness';
     if (chapter === 9) return 'moses_exodus_passover';
-    return chapter % 4 === 1 ? 'wilderness_scroll' : null;
   }
 
   if (b === 'deuteronomy') {
@@ -327,125 +485,91 @@ function resolveRawChapterScene(book: string, chapter: number): SceneType | null
     if (chapter === 8) return 'wilderness_scroll';
     if (chapter === 16) return 'moses_exodus_passover';
     if (chapter === 18) return 'isaiah_prophecy';
-    return null;
   }
 
-  if (b === 'joshua' || b === 'judges' || b === 'ruth') {
-    if (b === 'joshua' && (chapter === 1 || chapter === 24)) return 'moses_song_witness';
-    if (b === 'joshua' && chapter === 3) return 'red_sea_parting';
-    if (b === 'ruth' && chapter === 2) return 'jesus_crowd_reconciliation';
-    return chapter % 3 === 1 ? 'abraham_covenant_altar' : null;
+  if (b === 'joshua') {
+    if (chapter === 1 || chapter === 24) return 'moses_song_witness';
+    if (chapter === 3 || chapter === 4) return 'red_sea_parting';
+    if (chapter === 6) return 'triumphal_entry';
   }
 
-  if (
-    b === '1 samuel' ||
-    b === '2 samuel' ||
-    b === '1 kings' ||
-    b === '2 kings' ||
-    b === '1 chronicles' ||
-    b === '2 chronicles' ||
-    b === 'ezra' ||
-    b === 'nehemiah' ||
-    b === 'esther'
-  ) {
-    if ((b === '1 samuel' && chapter === 16) || (b === '2 samuel' && chapter === 7)) return 'david_harp_psalm';
-    if (b === '1 kings' && (chapter === 6 || chapter === 8)) return chapter === 8 ? 'temple_presentation' : null;
-    return chapter % 3 === 1 ? 'isaiah_prophecy' : null;
+  if (b === '1 samuel' || b === '2 samuel') {
+    if ((b === '1 samuel' && chapter === 16) || (b === '2 samuel' && chapter === 7))
+      return 'david_harp_psalm';
   }
 
-  if (b === 'job' || b === 'psalms' || b === 'proverbs' || b === 'ecclesiastes' || b === 'song of solomon') {
-    if (b === 'psalms') {
-      if (chapter === 22) return 'crucifixion_calvary';
-      if (chapter === 23) return 'lamb_of_god';
-      if (chapter === 2 || chapter === 110) return 'david_harp_psalm';
-      if (chapter === 119 || chapter === 19 || chapter === 1) return 'wilderness_scroll';
-      return chapter % 3 === 1 ? 'david_harp_psalm' : null;
-    }
-    return chapter % 2 === 1 ? 'david_harp_psalm' : null;
+  if (b === '1 kings' && (chapter === 6 || chapter === 8)) {
+    return 'temple_presentation';
   }
 
-  // Major & Minor Prophets
-  if (
-    b === 'isaiah' ||
-    b === 'jeremiah' ||
-    b === 'lamentations' ||
-    b === 'ezekiel' ||
-    b === 'daniel' ||
-    b === 'hosea' ||
-    b === 'joel' ||
-    b === 'amos' ||
-    b === 'obadiah' ||
-    b === 'jonah' ||
-    b === 'micah' ||
-    b === 'nahum' ||
-    b === 'habakkuk' ||
-    b === 'zephaniah' ||
-    b === 'haggai' ||
-    b === 'zechariah' ||
-    b === 'malachi'
-  ) {
-    if (b === 'isaiah' && chapter === 6) return 'throne_new_jerusalem';
-    if (b === 'isaiah' && (chapter === 7 || chapter === 9)) return 'nativity_immanuel';
-    if (b === 'isaiah' && chapter === 53) return 'lamb_of_god';
-    if (b === 'micah' && chapter === 5) return 'nativity_immanuel';
-    if (b === 'joel' && chapter === 2) return 'pentecost_spirit';
-    if (b === 'zechariah' && chapter === 9) return 'triumphal_entry';
-    return chapter % 2 === 1 ? 'isaiah_prophecy' : null;
+  if (b === 'psalms') {
+    if (chapter === 22) return 'crucifixion_calvary';
+    if (chapter === 23) return 'lamb_of_god';
+    if (chapter === 2 || chapter === 110 || chapter === 150) return 'david_harp_psalm';
+    if (chapter === 119 || chapter === 19 || chapter === 1) return 'wilderness_scroll';
   }
 
-  // Gospels
-  if (b === 'matthew' || b === 'mark' || b === 'luke' || b === 'john') {
-    if (b === 'matthew') {
-      if (chapter === 1) return 'joseph_angel_dream';
-      if (chapter === 2) return 'nativity_immanuel';
-      if (chapter === 3) return 'baptism_jordan';
-      if (chapter === 4) return 'wilderness_scroll';
-      if (chapter === 5) return 'jesus_teaching';
-      if (chapter === 8 || chapter === 9) return chapter === 8 ? 'healing_multitudes' : null;
-      if (chapter === 13) return 'calling_fishermen';
-      if (chapter === 14) return 'healing_multitudes';
-      if (chapter === 18) return 'jesus_crowd_reconciliation';
-      if (chapter === 21) return 'triumphal_entry';
-      if (chapter === 22) return 'jesus_teaching';
-      if (chapter === 26) return 'nicodemus_night';
-      if (chapter === 27) return 'crucifixion_calvary';
-      if (chapter === 28) return 'empty_tomb_resurrection';
-      return chapter % 2 === 1 ? 'jesus_teaching' : null;
-    }
-    if (b === 'mark') {
-      if (chapter === 1) return 'baptism_jordan';
-      if (chapter === 2 || chapter === 5) return 'healing_multitudes';
-      if (chapter === 4) return 'calling_fishermen';
-      if (chapter === 11) return 'triumphal_entry';
-      if (chapter === 15) return 'crucifixion_calvary';
-      if (chapter === 16) return 'empty_tomb_resurrection';
-      return chapter % 2 === 1 ? 'jesus_teaching' : null;
-    }
-    if (b === 'luke') {
-      if (chapter === 1) return 'joseph_angel_dream';
-      if (chapter === 2) return 'nativity_immanuel';
-      if (chapter === 3) return 'baptism_jordan';
-      if (chapter === 4) return 'wilderness_scroll';
-      if (chapter === 5) return 'calling_fishermen';
-      if (chapter === 15) return 'jesus_crowd_reconciliation';
-      if (chapter === 19) return 'triumphal_entry';
-      if (chapter === 23) return 'crucifixion_calvary';
-      if (chapter === 24) return 'empty_tomb_resurrection';
-      return chapter % 2 === 1 ? 'jesus_teaching' : null;
-    }
-    if (b === 'john') {
-      if (chapter === 1) return 'creation_light';
-      if (chapter === 2) return 'temple_presentation';
-      if (chapter === 3) return 'nicodemus_night';
-      if (chapter === 6 || chapter === 9 || chapter === 11) return 'healing_multitudes';
-      if (chapter === 10) return 'lamb_of_god';
-      if (chapter === 12) return 'triumphal_entry';
-      if (chapter === 14) return 'jesus_teaching';
-      if (chapter === 19) return 'crucifixion_calvary';
-      if (chapter === 20) return 'empty_tomb_resurrection';
-      if (chapter === 21) return 'calling_fishermen';
-      return chapter % 2 === 1 ? 'jesus_teaching' : null;
-    }
+  if (b === 'isaiah') {
+    if (chapter === 6) return 'throne_new_jerusalem';
+    if (chapter === 7 || chapter === 9) return 'nativity_immanuel';
+    if (chapter === 40) return 'wilderness_scroll';
+    if (chapter === 53) return 'lamb_of_god';
+    if (chapter === 61) return 'jesus_teaching';
+  }
+
+  if (b === 'matthew') {
+    if (chapter === 1) return 'joseph_angel_dream';
+    if (chapter === 2) return 'nativity_immanuel';
+    if (chapter === 3) return 'baptism_jordan';
+    if (chapter === 4) return 'wilderness_scroll';
+    if (chapter === 5) return 'jesus_teaching';
+    if (chapter === 6) return 'jesus_crowd_reconciliation';
+    if (chapter === 7) return 'wilderness_scroll';
+    if (chapter === 8 || chapter === 9) return 'healing_multitudes';
+    if (chapter === 13) return 'calling_fishermen';
+    if (chapter === 14) return 'healing_multitudes';
+    if (chapter === 18) return 'jesus_crowd_reconciliation';
+    if (chapter === 21) return 'triumphal_entry';
+    if (chapter === 22) return 'jesus_teaching';
+    if (chapter === 26) return 'nicodemus_night';
+    if (chapter === 27) return 'crucifixion_calvary';
+    if (chapter === 28) return 'empty_tomb_resurrection';
+  }
+
+  if (b === 'mark') {
+    if (chapter === 1) return 'baptism_jordan';
+    if (chapter === 2 || chapter === 5) return 'healing_multitudes';
+    if (chapter === 4) return 'calling_fishermen';
+    if (chapter === 11) return 'triumphal_entry';
+    if (chapter === 15) return 'crucifixion_calvary';
+    if (chapter === 16) return 'empty_tomb_resurrection';
+  }
+
+  if (b === 'luke') {
+    if (chapter === 1) return 'joseph_angel_dream';
+    if (chapter === 2) return 'nativity_immanuel';
+    if (chapter === 3) return 'baptism_jordan';
+    if (chapter === 4) return 'wilderness_scroll';
+    if (chapter === 5) return 'calling_fishermen';
+    if (chapter === 15) return 'jesus_crowd_reconciliation';
+    if (chapter === 19) return 'triumphal_entry';
+    if (chapter === 23) return 'crucifixion_calvary';
+    if (chapter === 24) return 'empty_tomb_resurrection';
+  }
+
+  if (b === 'john') {
+    if (chapter === 1) return 'creation_light';
+    if (chapter === 2) return 'temple_presentation';
+    if (chapter === 3) return 'nicodemus_night';
+    if (chapter === 4) return 'jesus_teaching';
+    if (chapter === 6 || chapter === 9 || chapter === 11) return 'healing_multitudes';
+    if (chapter === 10) return 'lamb_of_god';
+    if (chapter === 12) return 'triumphal_entry';
+    if (chapter === 13 || chapter === 15) return 'jesus_crowd_reconciliation';
+    if (chapter === 14 || chapter === 16 || chapter === 17) return 'jesus_teaching';
+    if (chapter === 19) return 'crucifixion_calvary';
+    if (chapter === 20) return 'empty_tomb_resurrection';
+    if (chapter === 21) return 'calling_fishermen';
   }
 
   if (b === 'acts') {
@@ -453,72 +577,50 @@ function resolveRawChapterScene(book: string, chapter: number): SceneType | null
     if (chapter === 2) return 'pentecost_spirit';
     if (chapter === 3) return 'healing_multitudes';
     if (chapter === 9) return 'joseph_angel_dream';
-    return chapter % 2 === 1 ? 'apostolic_scroll' : null;
   }
 
   if (b === 'revelation') {
     if (chapter === 1 || chapter === 4 || chapter === 21 || chapter === 22)
-      return chapter === 22 ? null : 'throne_new_jerusalem';
+      return 'throne_new_jerusalem';
     if (chapter === 5) return 'lamb_of_god';
     if (chapter === 12) return 'nativity_immanuel';
-    return chapter % 2 === 1 ? 'throne_new_jerusalem' : null;
   }
 
-  // Epistles (Romans through Jude)
-  if (b === 'romans') {
-    if (chapter === 1 || chapter === 8) return 'apostolic_scroll';
-    if (chapter === 3 || chapter === 5) return 'crucifixion_calvary';
-    if (chapter === 4) return 'abraham_covenant_altar';
-    if (chapter === 6) return 'empty_tomb_resurrection';
-    if (chapter === 12) return 'jesus_crowd_reconciliation';
-    return null;
+  // Deterministic chapter-specific fallback from book's thematic pool
+  const pool = getPoolForBook(b);
+  let hash = 0;
+  for (let i = 0; i < b.length; i++) {
+    hash = (hash * 31 + b.charCodeAt(i)) % 997;
   }
-  if (b === '1 corinthians') {
-    if (chapter === 1) return 'apostolic_scroll';
-    if (chapter === 5 || chapter === 11) return 'moses_exodus_passover';
-    if (chapter === 10) return 'moses_song_witness';
-    if (chapter === 13) return 'jesus_crowd_reconciliation';
-    if (chapter === 15) return 'empty_tomb_resurrection';
-    return null;
-  }
-  if (b === 'hebrews') {
-    if (chapter === 1) return 'creation_light';
-    if (chapter === 3 || chapter === 4) return chapter === 3 ? 'moses_song_witness' : null;
-    if (chapter === 7) return 'melchizedek_abraham';
-    if (chapter === 8 || chapter === 9 || chapter === 10) return chapter === 9 ? 'temple_presentation' : null;
-    if (chapter === 11) return 'abraham_covenant_altar';
-    if (chapter === 12) return 'crucifixion_calvary';
-    return null;
-  }
-
-  // Remaining epistles: show on opening chapter and non-consecutive key chapters
-  if (chapter === 1) return 'apostolic_scroll';
-  if (chapter === 3) return 'jesus_crowd_reconciliation';
-  if (chapter === 5) return 'pentecost_spirit';
-  return null;
+  const idx = (hash + chapter * 3) % pool.length;
+  return pool[idx];
 }
 
 export function getIllustrationForChapter(
   book: string,
   chapter: number
 ): BiblicalLineIllustration | null {
-  const scene = resolveRawChapterScene(book, chapter);
-  if (!scene) return null;
+  if (chapter <= 0) return null;
+  const b = book.trim().toLowerCase();
+  const pool = getPoolForBook(b);
+  let scene = resolvePrimaryChapterScene(book, chapter);
 
-  // Never repeat the exact same illustration on two consecutive chapters
+  // Ensure consecutive chapters in the same book have distinct illustrations
   if (chapter > 1) {
-    const prevScene = resolveRawChapterScene(book, chapter - 1);
-    if (prevScene && prevScene === scene) {
-      return null;
+    const prevScene = resolvePrimaryChapterScene(book, chapter - 1);
+    if (prevScene === scene) {
+      const currentIdx = pool.indexOf(scene);
+      scene = pool[(currentIdx + 1) % pool.length];
     }
   }
 
   return {
-    id: `ill-chap-${book.toLowerCase()}-${chapter}`,
+    id: `ill-chap-${b}-${chapter}`,
     book,
     chapter,
     verse: 1,
     sceneType: scene,
+    childrenStoryTitle: SCENE_STORY_TITLES[scene],
   };
 }
 
@@ -1359,13 +1461,436 @@ function EngravedSceneArtwork({
   }
 }
 
-export default function BibleLineDrawing({
+function CartoonPerson({
+  x,
+  y,
+  robeColor,
+  sashColor,
+  skinColor = '#FBCFA8',
+  hasHalo = false,
+  hasStaff = false,
+  isSmiling = true,
+}: {
+  x: number;
+  y: number;
+  robeColor: string;
+  sashColor?: string;
+  skinColor?: string;
+  hasHalo?: boolean;
+  hasStaff?: boolean;
+  isSmiling?: boolean;
+}) {
+  return (
+    <g>
+      {hasHalo && (
+        <circle
+          cx={x}
+          cy={y - 2}
+          r={18}
+          fill="#FDE047"
+          fillOpacity={0.35}
+          stroke="#FACC15"
+          strokeWidth="1.5"
+          strokeDasharray="3 2"
+        />
+      )}
+      {/* Body robe */}
+      <path
+        d={`M${x - 14} ${y + 12} Q${x - 18} ${y + 42} ${x - 20} ${y + 58} L${x + 20} ${y + 58} Q${x + 18} ${y + 42} ${x + 14} ${y + 12} Z`}
+        fill={robeColor}
+        stroke="#1E293B"
+        strokeWidth="2"
+        strokeLinejoin="round"
+      />
+      {sashColor && (
+        <path
+          d={`M${x - 10} ${y + 13} L${x + 12} ${y + 48} L${x + 4} ${y + 52} L${x - 14} ${y + 18} Z`}
+          fill={sashColor}
+        />
+      )}
+      {/* Head */}
+      <circle
+        cx={x}
+        cy={y}
+        r={12}
+        fill={skinColor}
+        stroke="#1E293B"
+        strokeWidth="2"
+      />
+      {/* Hair */}
+      <path
+        d={`M${x - 12} ${y - 2} Q${x} ${y - 16} ${x + 12} ${y - 2} Q${x + 8} ${y - 9} ${x} ${y - 9} Q${x - 8} ${y - 9} ${x - 12} ${y - 2} Z`}
+        fill="#451A03"
+      />
+      {/* Friendly eyes & smile */}
+      <circle cx={x - 4} cy={y - 1} r={1.6} fill="#1E293B" />
+      <circle cx={x + 4} cy={y - 1} r={1.6} fill="#1E293B" />
+      {isSmiling && (
+        <path
+          d={`M${x - 4.5} ${y + 4} Q${x} ${y + 8} ${x + 4.5} ${y + 4}`}
+          fill="none"
+          stroke="#1E293B"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+        />
+      )}
+      {/* Rosy cheeks */}
+      <circle cx={x - 7} cy={y + 2.5} r={2.2} fill="#FB7185" fillOpacity="0.55" />
+      <circle cx={x + 7} cy={y + 2.5} r={2.2} fill="#FB7185" fillOpacity="0.55" />
+      {hasStaff && (
+        <path
+          d={`M${x + 18} ${y + 58} L${x + 18} ${y - 8} Q${x + 18} ${y - 18} ${x + 26} ${y - 14} Q${x + 30} ${y - 10} ${x + 24} ${y - 6}`}
+          fill="none"
+          stroke="#92400E"
+          strokeWidth="3"
+          strokeLinecap="round"
+        />
+      )}
+    </g>
+  );
+}
+
+/**
+ * Playful, colourful, cartoon-style storybook illustration for Children's Mode.
+ * Properly adapted for both Light and Dark themes.
+ */
+function ChildrenCartoonSceneArtwork({
   illustration,
   isLight,
 }: {
   illustration: BiblicalLineIllustration;
   isLight: boolean;
 }) {
+  const { sceneType, book, chapter, childrenStoryTitle } = illustration;
+  const isNightScene =
+    sceneType === 'nicodemus_night' ||
+    sceneType === 'nativity_immanuel' ||
+    sceneType === 'joseph_angel_dream' ||
+    sceneType === 'abraham_covenant_altar';
+
+  const skyBg = isNightScene
+    ? isLight
+      ? '#1E293B'
+      : '#0F172A'
+    : isLight
+    ? '#E0F2FE'
+    : '#1E2642';
+  const hillBack = isLight ? '#86EFAC' : '#1E4638';
+  const hillFront = isLight ? '#4ADE80' : '#15803D';
+  const desertHill = isLight ? '#FDE68A' : '#78350F';
+
+  return (
+    <div
+      className={`rounded-3xl border-2 overflow-hidden shadow-md transition ${
+        isLight
+          ? 'bg-gradient-to-b from-sky-50 to-amber-50/60 border-amber-300'
+          : 'bg-gradient-to-b from-[#1B223B] to-[#151A2E] border-indigo-500/40'
+      }`}
+    >
+      <svg
+        viewBox="0 0 400 185"
+        className="w-full h-auto max-h-60 sm:max-h-68 block mx-auto"
+        role="img"
+        aria-label={childrenStoryTitle || `${book} ${chapter} Story Picture`}
+      >
+        {/* Sky Background */}
+        <rect x="0" y="0" width="400" height="185" fill={skyBg} />
+
+        {/* Sun or Stars + Moon */}
+        {isNightScene || !isLight ? (
+          <g>
+            <circle cx="348" cy="34" r="16" fill="#FDE047" />
+            <circle cx="355" cy="29" r="13" fill={skyBg} />
+            <circle cx="52" cy="28" r="2.5" fill="#FEF08A" />
+            <circle cx="108" cy="22" r="3" fill="#FDE047" />
+            <circle cx="176" cy="30" r="2.2" fill="#FEF08A" />
+            <circle cx="248" cy="18" r="2.8" fill="#FDE047" />
+            <circle cx="298" cy="36" r="2.2" fill="#FEF08A" />
+          </g>
+        ) : (
+          <g>
+            <circle cx="346" cy="36" r="22" fill="#FDE047" fillOpacity="0.4" />
+            <circle cx="346" cy="36" r="15" fill="#FACC15" stroke="#F59E0B" strokeWidth="2" />
+            {/* Fluffy Cartoon Clouds */}
+            <g fill="#FFFFFF" fillOpacity="0.92">
+              <circle cx="66" cy="34" r="12" />
+              <circle cx="80" cy="30" r="15" />
+              <circle cx="95" cy="34" r="11" />
+              <circle cx="238" cy="28" r="10" />
+              <circle cx="250" cy="25" r="13" />
+              <circle cx="263" cy="28" r="10" />
+            </g>
+          </g>
+        )}
+
+        {/* Rolling Cartoon Hills */}
+        <path
+          d="M0 145 Q100 105 220 138 T400 130 L400 185 L0 185 Z"
+          fill={
+            sceneType === 'wilderness_scroll' ||
+            sceneType === 'bronze_serpent' ||
+            sceneType === 'moses_song_witness'
+              ? desertHill
+              : hillBack
+          }
+        />
+        <path
+          d="M0 155 Q150 130 280 152 T400 148 L400 185 L0 185 Z"
+          fill={hillFront}
+        />
+
+        {/* Scene-Specific Playful Cartoon Elements */}
+        {sceneType === 'creation_light' && (
+          <g>
+            {/* Rainbow arc */}
+            <path
+              d="M70 155 A130 110 0 0 1 330 155"
+              fill="none"
+              stroke="#FB7185"
+              strokeWidth="6"
+              strokeLinecap="round"
+            />
+            <path
+              d="M78 155 A122 102 0 0 1 322 155"
+              fill="none"
+              stroke="#FACC15"
+              strokeWidth="6"
+              strokeLinecap="round"
+            />
+            <path
+              d="M86 155 A114 94 0 0 1 314 155"
+              fill="none"
+              stroke="#38BDF8"
+              strokeWidth="6"
+              strokeLinecap="round"
+            />
+            {/* Glowing globe & birds & trees */}
+            <circle cx="200" cy="96" r="32" fill="#38BDF8" stroke="#1E293B" strokeWidth="2.5" />
+            <path
+              d="M182 82 Q196 74 206 88 Q216 98 202 114 Q186 118 178 102 Z"
+              fill="#4ADE80"
+            />
+            {/* Happy birds */}
+            <path d="M118 68 Q124 60 130 68 Q136 60 142 68" fill="none" stroke="#F59E0B" strokeWidth="2.5" strokeLinecap="round" />
+            <path d="M262 62 Q268 54 274 62 Q280 54 286 62" fill="none" stroke="#F59E0B" strokeWidth="2.5" strokeLinecap="round" />
+          </g>
+        )}
+
+        {sceneType === 'noah_ark_flood' && (
+          <g>
+            {/* Rainbow */}
+            <path d="M60 140 A140 105 0 0 1 340 140" fill="none" stroke="#F43F5E" strokeWidth="5" />
+            <path d="M66 140 A134 99 0 0 1 334 140" fill="none" stroke="#FACC15" strokeWidth="5" />
+            <path d="M72 140 A128 93 0 0 1 328 140" fill="none" stroke="#38BDF8" strokeWidth="5" />
+            {/* Blue waves */}
+            <rect x="0" y="138" width="400" height="47" fill="#0284C7" />
+            {/* Cartoon Ark */}
+            <path
+              d="M115 112 L285 112 L265 148 L135 148 Z"
+              fill="#B45309"
+              stroke="#1E293B"
+              strokeWidth="2.5"
+              strokeLinejoin="round"
+            />
+            <rect
+              x="145"
+              y="82"
+              width="110"
+              height="30"
+              rx="6"
+              fill="#D97706"
+              stroke="#1E293B"
+              strokeWidth="2.5"
+            />
+            <path
+              d="M135 84 L200 58 L265 84 Z"
+              fill="#EF4444"
+              stroke="#1E293B"
+              strokeWidth="2.5"
+              strokeLinejoin="round"
+            />
+            {/* Windows */}
+            <circle cx="172" cy="97" r="7" fill="#FEF08A" stroke="#1E293B" strokeWidth="2" />
+            <circle cx="200" cy="97" r="7" fill="#FEF08A" stroke="#1E293B" strokeWidth="2" />
+            <circle cx="228" cy="97" r="7" fill="#FEF08A" stroke="#1E293B" strokeWidth="2" />
+          </g>
+        )}
+
+        {(sceneType === 'red_sea_parting' ||
+          sceneType === 'baptism_jordan' ||
+          sceneType === 'calling_fishermen') && (
+          <g>
+            {/* Friendly water stream / sea */}
+            <path
+              d="M0 135 Q100 125 200 135 T400 132 L400 185 L0 185 Z"
+              fill="#38BDF8"
+              stroke="#0284C7"
+              strokeWidth="2"
+            />
+            {sceneType === 'red_sea_parting' && (
+              <>
+                {/* Dry path in center */}
+                <path d="M165 130 L140 185 L260 185 L235 130 Z" fill="#FDE68A" />
+                {/* Parted water walls */}
+                <path d="M80 140 Q125 70 165 135 Z" fill="#0EA5E9" stroke="#0369A1" strokeWidth="2" />
+                <path d="M320 140 Q275 70 235 135 Z" fill="#0EA5E9" stroke="#0369A1" strokeWidth="2" />
+                <CartoonPerson x={200} y={88} robeColor="#EF4444" sashColor="#FACC15" hasStaff />
+              </>
+            )}
+            {sceneType === 'baptism_jordan' && (
+              <>
+                {/* Dove above */}
+                <circle cx="200" cy="36" r="14" fill="#FEF08A" fillOpacity="0.6" />
+                <path d="M188 36 Q200 24 212 36 Q200 42 188 36 Z" fill="#FFFFFF" stroke="#1E293B" strokeWidth="1.8" />
+                <CartoonPerson x={175} y={88} robeColor="#3B82F6" hasHalo />
+                <CartoonPerson x={228} y={90} robeColor="#D97706" />
+              </>
+            )}
+            {sceneType === 'calling_fishermen' && (
+              <>
+                {/* Cartoon Wooden Boat */}
+                <path
+                  d="M175 122 L305 122 L285 152 L195 152 Z"
+                  fill="#D97706"
+                  stroke="#1E293B"
+                  strokeWidth="2.5"
+                />
+                <path d="M240 60 L240 122 M240 64 L285 110 L240 110 Z" fill="#FFFFFF" stroke="#1E293B" strokeWidth="2" />
+                <CartoonPerson x={115} y={86} robeColor="#3B82F6" sashColor="#EF4444" hasHalo />
+                <CartoonPerson x={225} y={86} robeColor="#10B981" />
+                <CartoonPerson x={265} y={88} robeColor="#F59E0B" />
+              </>
+            )}
+          </g>
+        )}
+
+        {(sceneType === 'lamb_of_god' || sceneType === 'moses_exodus_passover') && (
+          <g>
+            <CartoonPerson x={148} y={84} robeColor="#3B82F6" sashColor="#FACC15" hasHalo={sceneType === 'lamb_of_god'} hasStaff />
+            {/* Cute Cartoon Fluffy Lamb */}
+            <g transform="translate(225, 118)">
+              <ellipse cx="22" cy="14" rx="20" ry="14" fill="#FFFFFF" stroke="#1E293B" strokeWidth="2.2" />
+              <circle cx="6" cy="6" r="9" fill="#FFFFFF" stroke="#1E293B" strokeWidth="2.2" />
+              <circle cx="4" cy="5" r="1.6" fill="#1E293B" />
+              <path d="M12 28 L12 38 M20 28 L20 38 M28 28 L28 38 M34 28 L34 38" stroke="#1E293B" strokeWidth="2.5" strokeLinecap="round" />
+            </g>
+          </g>
+        )}
+
+        {(sceneType === 'nativity_immanuel' || sceneType === 'joseph_angel_dream') && (
+          <g>
+            {/* Bright Bethlehem Star */}
+            <path
+              d="M200 14 L205 28 L220 28 L208 36 L212 50 L200 41 L188 50 L192 36 L180 28 L195 28 Z"
+              fill="#FACC15"
+              stroke="#F59E0B"
+              strokeWidth="1.5"
+            />
+            <CartoonPerson x={148} y={88} robeColor="#3B82F6" />
+            <CartoonPerson x={252} y={88} robeColor="#8B5CF6" hasHalo={sceneType === 'joseph_angel_dream'} />
+            {/* Manger Crib */}
+            <path d="M180 126 L220 126 L214 148 L186 148 Z" fill="#D97706" stroke="#1E293B" strokeWidth="2" />
+            <circle cx="200" cy="122" r="8" fill="#FDE047" stroke="#1E293B" strokeWidth="1.8" />
+          </g>
+        )}
+
+        {sceneType !== 'creation_light' &&
+          sceneType !== 'noah_ark_flood' &&
+          sceneType !== 'red_sea_parting' &&
+          sceneType !== 'baptism_jordan' &&
+          sceneType !== 'calling_fishermen' &&
+          sceneType !== 'lamb_of_god' &&
+          sceneType !== 'moses_exodus_passover' &&
+          sceneType !== 'nativity_immanuel' &&
+          sceneType !== 'joseph_angel_dream' && (
+            <g>
+              {/* Friendly Cartoon Trees */}
+              <rect x="48" y="102" width="10" height="42" rx="3" fill="#92400E" stroke="#1E293B" strokeWidth="2" />
+              <circle cx="53" cy="90" r="22" fill="#22C55E" stroke="#1E293B" strokeWidth="2" />
+              <circle cx="44" cy="84" r="4" fill="#EF4444" />
+              <circle cx="62" cy="92" r="4" fill="#EF4444" />
+
+              {/* Central Storytelling Figures */}
+              <CartoonPerson
+                x={160}
+                y={84}
+                robeColor="#3B82F6"
+                sashColor="#FACC15"
+                hasHalo={
+                  sceneType === 'jesus_teaching' ||
+                  sceneType === 'healing_multitudes' ||
+                  sceneType === 'jesus_crowd_reconciliation' ||
+                  sceneType === 'triumphal_entry' ||
+                  sceneType === 'crucifixion_calvary' ||
+                  sceneType === 'empty_tomb_resurrection' ||
+                  sceneType === 'nicodemus_night'
+                }
+                hasStaff={
+                  sceneType === 'moses_song_witness' ||
+                  sceneType === 'bronze_serpent' ||
+                  sceneType === 'abraham_covenant_altar'
+                }
+              />
+              <CartoonPerson x={228} y={88} robeColor="#10B981" sashColor="#FDE047" />
+              <CartoonPerson x={282} y={92} robeColor="#F97316" />
+
+              {/* Open Scroll / Harp / City Crown Accent */}
+              <rect
+                x="182"
+                y="112"
+                width="28"
+                height="20"
+                rx="4"
+                fill="#FEF3C7"
+                stroke="#B45309"
+                strokeWidth="2"
+              />
+            </g>
+          )}
+      </svg>
+
+      {/* Playful Children's Story Caption Strip */}
+      <div
+        className={`px-4 py-2.5 flex items-center justify-between gap-2 border-t ${
+          isLight
+            ? 'bg-amber-100/80 border-amber-200 text-amber-950'
+            : 'bg-indigo-950/80 border-indigo-800/60 text-amber-200'
+        }`}
+      >
+        <span className="text-xs sm:text-sm font-extrabold tracking-tight">
+          🎨 {childrenStoryTitle || `${book} ${chapter} Story Picture`}
+        </span>
+        <span
+          className={`rounded-full px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider shrink-0 ${
+            isLight
+              ? 'bg-white text-amber-800 border border-amber-300'
+              : 'bg-indigo-900 text-amber-300 border border-indigo-700'
+          }`}
+        >
+          {book} {chapter}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+export default function BibleLineDrawing({
+  illustration,
+  isLight,
+  mode = 'adult',
+}: {
+  illustration: BiblicalLineIllustration;
+  isLight: boolean;
+  mode?: 'adult' | 'children';
+}) {
+  if (mode === 'children') {
+    return (
+      <div className="my-5 sm:my-6 mx-auto w-full max-w-xl select-none">
+        <ChildrenCartoonSceneArtwork illustration={illustration} isLight={isLight} />
+      </div>
+    );
+  }
+
   return (
     <div
       className={`my-6 sm:my-7 mx-auto w-full max-w-lg pointer-events-none select-none ${

@@ -294,6 +294,7 @@ export interface NotebookCollection {
 export interface UserPreferences {
   defaultTranslation: TranslationId;
   theme: 'dark' | 'light';
+  experienceMode?: 'adult' | 'children';
   fontSize: 'xsmall' | 'small' | 'medium' | 'large' | 'xlarge';
   redLetterEnabled: boolean;
   showReferenceBadges: boolean;

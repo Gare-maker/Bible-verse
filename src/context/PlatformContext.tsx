@@ -608,6 +608,7 @@ export function PlatformProvider({ children }: { children: React.ReactNode }) {
   const [preferences, setPreferences] = useState<UserPreferences>({
     defaultTranslation: 'NIV',
     theme: 'light',
+    experienceMode: 'adult',
     fontSize: 'medium',
     redLetterEnabled: true,
     showReferenceBadges: true,
@@ -794,9 +795,13 @@ export function PlatformProvider({ children }: { children: React.ReactNode }) {
     saveReturnPosition = false
   ) => {
     const targetVerse = verse || null;
-    if (
-      saveReturnPosition &&
-      (book !== currentBook || chapter !== currentChapter || targetVerse !== selectedVerse)
+    if (!saveReturnPosition) {
+      // Requirement 1A: When using chapter navigation, do not display previous-scripture navigation
+      setNavigationHistoryStack([]);
+    } else if (
+      book !== currentBook ||
+      chapter !== currentChapter ||
+      targetVerse !== selectedVerse
     ) {
       const currentScrollY = typeof window !== 'undefined' ? window.scrollY : 0;
       const entry: ReadingPosition = {
@@ -806,7 +811,7 @@ export function PlatformProvider({ children }: { children: React.ReactNode }) {
         scrollY: currentScrollY,
         label:
           currentChapter === 0
-            ? `${currentBook} Introduction`
+            ? currentBook
             : `${currentBook} ${currentChapter}${selectedVerse ? `:${selectedVerse}` : ''}`,
       };
       setNavigationHistoryStack((prev) => {
@@ -838,7 +843,7 @@ export function PlatformProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const navigateToReferenceString = (ref: string, saveReturnPosition = true) => {
+  const navigateToReferenceString = (ref: string, saveReturnPosition = false) => {
     const parsed = parseScriptureReference(ref);
     if (!parsed) return;
     navigateToPassage(parsed.book, parsed.chapter, parsed.verse, saveReturnPosition);

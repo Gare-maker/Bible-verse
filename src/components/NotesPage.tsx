@@ -333,12 +333,14 @@ export default function NotesPage() {
                   sharedToCommunity: !conn.sharedToCommunity,
                 })
               }
-              className={`rounded-lg p-1.5 border transition ${
+              className={`rounded-lg p-1.5 bg-transparent border-0 transition ${
                 conn.sharedToCommunity
-                  ? 'bg-emerald-600 border-emerald-600 text-white'
+                  ? isLight
+                    ? 'text-emerald-600 hover:text-emerald-700'
+                    : 'text-emerald-400 hover:text-emerald-300'
                   : isLight
-                  ? 'bg-stone-50 hover:bg-stone-100 border-stone-200 text-stone-600'
-                  : 'bg-zinc-800 hover:bg-zinc-700 border-zinc-700 text-zinc-200'
+                  ? 'text-stone-500 hover:text-stone-900'
+                  : 'text-zinc-400 hover:text-zinc-100'
               }`}
               title={
                 conn.sharedToCommunity
@@ -347,7 +349,7 @@ export default function NotesPage() {
               }
               aria-label="Toggle Share to Community"
             >
-              <Share2 className="h-3.5 w-3.5" />
+              <Share2 className="h-4 w-4" />
             </button>
 
             <button
@@ -618,12 +620,14 @@ export default function NotesPage() {
                   sharedToCommunity: !ctx.sharedToCommunity,
                 })
               }
-              className={`rounded-lg p-1.5 border transition ${
+              className={`rounded-lg p-1.5 bg-transparent border-0 transition ${
                 ctx.sharedToCommunity
-                  ? 'bg-emerald-600 border-emerald-600 text-white'
+                  ? isLight
+                    ? 'text-emerald-600 hover:text-emerald-700'
+                    : 'text-emerald-400 hover:text-emerald-300'
                   : isLight
-                  ? 'bg-stone-50 hover:bg-stone-100 border-stone-200 text-stone-600'
-                  : 'bg-zinc-800 hover:bg-zinc-700 border-zinc-700 text-zinc-200'
+                  ? 'text-stone-500 hover:text-stone-900'
+                  : 'text-zinc-400 hover:text-zinc-100'
               }`}
               title={
                 ctx.sharedToCommunity
@@ -632,7 +636,7 @@ export default function NotesPage() {
               }
               aria-label="Toggle Share to Community"
             >
-              <Share2 className="h-3.5 w-3.5" />
+              <Share2 className="h-4 w-4" />
             </button>
 
             <button
@@ -877,12 +881,14 @@ export default function NotesPage() {
                   sharedToCommunity: !vItem.sharedToCommunity,
                 })
               }
-              className={`rounded-lg p-1.5 border transition ${
+              className={`rounded-lg p-1.5 bg-transparent border-0 transition ${
                 vItem.sharedToCommunity
-                  ? 'bg-emerald-600 border-emerald-600 text-white'
+                  ? isLight
+                    ? 'text-emerald-600 hover:text-emerald-700'
+                    : 'text-emerald-400 hover:text-emerald-300'
                   : isLight
-                  ? 'bg-stone-50 hover:bg-stone-100 border-stone-200 text-stone-600'
-                  : 'bg-zinc-800 hover:bg-zinc-700 border-zinc-700 text-zinc-200'
+                  ? 'text-stone-500 hover:text-stone-900'
+                  : 'text-zinc-400 hover:text-zinc-100'
               }`}
               title={
                 vItem.sharedToCommunity
@@ -891,7 +897,7 @@ export default function NotesPage() {
               }
               aria-label="Toggle Share to Community"
             >
-              <Share2 className="h-3.5 w-3.5" />
+              <Share2 className="h-4 w-4" />
             </button>
 
             <button
@@ -1137,12 +1143,14 @@ export default function NotesPage() {
                   sharedToCommunity: !tsItem.sharedToCommunity,
                 })
               }
-              className={`rounded-lg p-1.5 border transition ${
+              className={`rounded-lg p-1.5 bg-transparent border-0 transition ${
                 tsItem.sharedToCommunity
-                  ? 'bg-emerald-600 border-emerald-600 text-white'
+                  ? isLight
+                    ? 'text-emerald-600 hover:text-emerald-700'
+                    : 'text-emerald-400 hover:text-emerald-300'
                   : isLight
-                  ? 'bg-stone-50 hover:bg-stone-100 border-stone-200 text-stone-600'
-                  : 'bg-zinc-800 hover:bg-zinc-700 border-zinc-700 text-zinc-200'
+                  ? 'text-stone-500 hover:text-stone-900'
+                  : 'text-zinc-400 hover:text-zinc-100'
               }`}
               title={
                 tsItem.sharedToCommunity
@@ -1151,7 +1159,7 @@ export default function NotesPage() {
               }
               aria-label="Toggle Share to Community"
             >
-              <Share2 className="h-3.5 w-3.5" />
+              <Share2 className="h-4 w-4" />
             </button>
 
             <button
@@ -1346,18 +1354,9 @@ export default function NotesPage() {
   return (
     <div className="flex-1 min-w-0 pb-28 lg:pb-16">
       <div className="mx-auto w-full max-w-4xl px-4 sm:px-8 pt-6 sm:pt-8 space-y-4">
-        {/* 1. Saved Header Row: Saved Heading on Left, Search Icon at Top-Right on the Same Horizontal Line */}
+        {/* 1. Saved Header Row: Saved Heading on Left (no icon in front), Search Icon at Top-Right on the Same Horizontal Line */}
         <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div
-              className={`h-9 w-9 rounded-xl flex items-center justify-center shrink-0 border ${
-                isLight
-                  ? 'bg-amber-50 border-amber-200/80 text-amber-800'
-                  : 'bg-amber-500/15 border-amber-500/30 text-amber-400'
-              }`}
-            >
-              <Bookmark className="h-4 w-4" />
-            </div>
+          <div className="flex items-center min-w-0">
             <h1
               className={`text-2xl sm:text-3xl font-serif font-bold tracking-tight truncate ${
                 isLight ? 'text-stone-900' : 'text-white'
@@ -1410,7 +1409,7 @@ export default function NotesPage() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search saved verses, content, types & shadows, or references..."
+              placeholder="Search saved verses, context, types & shadows, or references..."
               className={`w-full bg-transparent text-xs sm:text-sm focus:outline-none ${
                 isLight
                   ? 'text-stone-900 placeholder-stone-400'
@@ -1441,7 +1440,7 @@ export default function NotesPage() {
 
         {/* 2. Two Dropdowns Row (Fits Neatly Within the Same Horizontal Row on Mobile & Desktop) */}
         <div className="grid grid-cols-2 gap-2 sm:gap-3 w-full">
-          {/* First Dropdown: Category Filter (All, Bible Verse, Content, Type and Shadow, References) */}
+          {/* First Dropdown: Category Filter (All, Bible Verse, Context, Type and Shadow, References) */}
           <div
             className={`min-w-0 rounded-xl border px-2.5 sm:px-3 py-2 flex items-center gap-1.5 ${
               isLight
@@ -1492,7 +1491,7 @@ export default function NotesPage() {
                     : 'bg-[#161616] text-zinc-100'
                 }
               >
-                Content
+                Context
               </option>
               <option
                 value="type_shadow"
