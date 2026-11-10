@@ -6,8 +6,9 @@ import {
   ResolvedCrossReference,
 } from '@/types/bible';
 import { findBookByName, parseScriptureReference } from './bibleBooks';
+import { VERIFIED_CANONICAL_CROSS_REFERENCES } from './canonicalCrossReferences';
 
-export const CANONICAL_CROSS_REFERENCES: CrossReferenceRecord[] = [
+const RAW_CANONICAL_CROSS_REFERENCES: CrossReferenceRecord[] = [
   // 1. Matthew 1:23 <-> Isaiah 7:14 (Primary MVP Test 2, 3, 4, 5)
   {
     id: 'xref-mat-1-23-isa-7-14',
@@ -795,6 +796,24 @@ export const CANONICAL_CROSS_REFERENCES: CrossReferenceRecord[] = [
   },
 ];
 
+const existingIds = new Set<string>();
+export const CANONICAL_CROSS_REFERENCES: CrossReferenceRecord[] = [];
+
+for (const item of VERIFIED_CANONICAL_CROSS_REFERENCES) {
+  const key = `${item.sourceRef.toLowerCase()}->${item.targetRef.toLowerCase()}`;
+  existingIds.add(key);
+  CANONICAL_CROSS_REFERENCES.push(item);
+}
+
+for (const item of RAW_CANONICAL_CROSS_REFERENCES) {
+  const key = `${item.sourceRef.toLowerCase()}->${item.targetRef.toLowerCase()}`;
+  const reverseKey = `${item.targetRef.toLowerCase()}->${item.sourceRef.toLowerCase()}`;
+  if (!existingIds.has(key) && !existingIds.has(reverseKey)) {
+    existingIds.add(key);
+    CANONICAL_CROSS_REFERENCES.push(item);
+  }
+}
+
 // ============================================================================
 // VERIFIED BIBLICAL TYPES & SHADOWS (Old Testament Type <-> New Testament Fulfilment)
 // Strictly grounded in explicit canonical typology — never invented
@@ -1383,7 +1402,7 @@ export function getCrossReferencesForVerse(canonicalRef: string): ResolvedCrossR
         biblicalContext: record.biblicalContext,
         primarySpeaker: record.sourceSpeaker,
         connectedSpeaker: record.targetSpeaker,
-        supportingRefs: record.supportingRefs,
+        supportingRefs: (record.supportingRefs || []).slice(0, 2),
         disputedNote: record.disputedNote,
         dataSource: record.dataSource,
         verificationStatus: record.verificationStatus,
@@ -1402,7 +1421,7 @@ export function getCrossReferencesForVerse(canonicalRef: string): ResolvedCrossR
         biblicalContext: record.biblicalContext,
         primarySpeaker: record.targetSpeaker,
         connectedSpeaker: record.sourceSpeaker,
-        supportingRefs: record.supportingRefs,
+        supportingRefs: (record.supportingRefs || []).slice(0, 2),
         disputedNote: record.disputedNote,
         dataSource: record.dataSource,
         verificationStatus: record.verificationStatus,
@@ -1410,7 +1429,8 @@ export function getCrossReferencesForVerse(canonicalRef: string): ResolvedCrossR
     }
   }
 
-  return results;
+  // Display only the strongest and most relevant references (1 or 2, max 4)
+  return results.slice(0, 4);
 }
 
 /**
@@ -1426,8 +1446,9 @@ export const REFERENCE_CATEGORIES: ReferenceCategory[] = [
   'Direct quotation',
   'Prophecy',
   'Prophecy fulfilment',
+  'Messianic reference',
   'Allusion',
-  'Thematic connection',
+  'Theological connection',
   'Parallel passage',
   'Historical connection',
 ];

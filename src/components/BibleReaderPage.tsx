@@ -1379,13 +1379,20 @@ export default function BibleReaderPage() {
                         ========================================================= */}
                     {isReferenceOpen && (
                       <div
-                        className={`rounded-2xl border overflow-hidden mt-2 mb-2 animate-in fade-in duration-150 ${
+                        className={`rounded-2xl border overflow-hidden mt-2 mb-2 flex flex-col max-h-[72vh] sm:max-h-[78vh] shadow-sm animate-in fade-in duration-150 ${
                           isLight
-                            ? 'bg-white border-stone-200/90 shadow-sm text-stone-900'
+                            ? 'bg-white border-stone-200/90 text-stone-900'
                             : 'bg-[#171717] border-zinc-800 shadow-md text-zinc-100'
                         }`}
                       >
-                        <div className="px-4 sm:px-5 py-3 flex items-center justify-between gap-3">
+                        {/* Sticky Card Header: Category label, Actions, Close (X) button */}
+                        <div
+                          className={`sticky top-0 z-20 shrink-0 px-4 sm:px-5 py-3 flex items-center justify-between gap-3 border-b backdrop-blur-md ${
+                            isLight
+                              ? 'bg-white/95 border-stone-200/90'
+                              : 'bg-[#171717]/95 border-zinc-800'
+                          }`}
+                        >
                           <span
                             className={`text-[10px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded w-fit ${
                               isLight
@@ -1463,39 +1470,27 @@ export default function BibleReaderPage() {
                           </div>
                         </div>
 
-                        <div
-                          className={`h-px w-full ${
-                            isLight ? 'bg-stone-200/90' : 'bg-zinc-800'
-                          }`}
-                        />
+                        {/* Scrollable Card Body */}
+                        <div className="flex-1 overflow-y-auto overscroll-contain divide-y divide-stone-200/90 dark:divide-zinc-800">
+                          {refs.length === 0 ? (
+                            <div className="px-4 sm:px-5 py-4 text-xs font-medium text-stone-500 dark:text-zinc-400">
+                              No reference found.
+                            </div>
+                          ) : (
+                            refs.map((r) => {
+                              const supportKey = `ref-support-${r.id}`;
+                              const isSupportingOpen = expandedSupportingRefId === supportKey;
+                              const supportingList = (r.supportingRefs || []).filter(
+                                (sup) => sup.toLowerCase() !== r.connectedRef.toLowerCase()
+                              );
+                              const refVerseText =
+                                resolvedRefTexts[r.connectedRef] ||
+                                getVerseText(r.connectedRef, translation) ||
+                                'Loading scripture text...';
+                              const contextText = r.biblicalContext || r.explanation;
 
-                        {refs.length === 0 ? (
-                          <div className="px-4 sm:px-5 py-4 text-xs font-medium text-stone-500 dark:text-zinc-400">
-                            No reference found.
-                          </div>
-                        ) : (
-                          refs.map((r, idx) => {
-                            const supportKey = `ref-support-${r.id}`;
-                            const isSupportingOpen = expandedSupportingRefId === supportKey;
-                            const supportingList = (r.supportingRefs || []).filter(
-                              (sup) => sup.toLowerCase() !== r.connectedRef.toLowerCase()
-                            );
-                            const refVerseText =
-                              resolvedRefTexts[r.connectedRef] ||
-                              getVerseText(r.connectedRef, translation) ||
-                              'Loading scripture text...';
-                            const contextText = r.biblicalContext || r.explanation;
-
-                            return (
-                              <React.Fragment key={`inline-ref-${r.id}`}>
-                                {idx > 0 && (
-                                  <div
-                                    className={`h-px w-full ${
-                                      isLight ? 'bg-stone-200/90' : 'bg-zinc-800'
-                                    }`}
-                                  />
-                                )}
-                                <div className="px-4 sm:px-5 py-4 space-y-3.5">
+                              return (
+                                <div key={`inline-ref-${r.id}`} className="px-4 sm:px-5 py-4 space-y-3.5">
                                   {/* 1. Reference Scripture & 2. Full Scripture Text */}
                                   <div className="space-y-1.5">
                                     <button
@@ -1594,10 +1589,10 @@ export default function BibleReaderPage() {
                                     </div>
                                   )}
                                 </div>
-                              </React.Fragment>
-                            );
-                          })
-                        )}
+                              );
+                            })
+                          )}
+                        </div>
                       </div>
                     )}
 
@@ -1609,13 +1604,20 @@ export default function BibleReaderPage() {
                         ========================================================= */}
                     {isTypesOpen && (
                       <div
-                        className={`rounded-2xl border overflow-hidden mt-2 mb-2 animate-in fade-in duration-150 ${
+                        className={`rounded-2xl border overflow-hidden mt-2 mb-2 flex flex-col max-h-[72vh] sm:max-h-[78vh] shadow-sm animate-in fade-in duration-150 ${
                           isLight
-                            ? 'bg-white border-stone-200/90 shadow-sm text-stone-900'
+                            ? 'bg-white border-stone-200/90 text-stone-900'
                             : 'bg-[#171717] border-zinc-800 shadow-md text-zinc-100'
                         }`}
                       >
-                        <div className="px-4 sm:px-5 py-3 flex items-center justify-between gap-3">
+                        {/* Sticky Card Header: Category label, Actions, Close (X) button */}
+                        <div
+                          className={`sticky top-0 z-20 shrink-0 px-4 sm:px-5 py-3 flex items-center justify-between gap-3 border-b backdrop-blur-md ${
+                            isLight
+                              ? 'bg-white/95 border-stone-200/90'
+                              : 'bg-[#171717]/95 border-zinc-800'
+                          }`}
+                        >
                           <span
                             className={`text-[10px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded w-fit ${
                               isLight
@@ -1688,18 +1690,14 @@ export default function BibleReaderPage() {
                           </div>
                         </div>
 
-                        <div
-                          className={`h-px w-full ${
-                            isLight ? 'bg-stone-200/90' : 'bg-zinc-800'
-                          }`}
-                        />
-
-                        {typeShadows.length === 0 ? (
-                          <div className="px-4 sm:px-5 py-4 text-xs font-medium text-stone-500 dark:text-zinc-400">
-                            No type and shadow found.
-                          </div>
-                        ) : (
-                          typeShadows.map((ts, idx) => {
+                        {/* Scrollable Card Body */}
+                        <div className="flex-1 overflow-y-auto overscroll-contain">
+                          {typeShadows.length === 0 ? (
+                            <div className="px-4 sm:px-5 py-4 text-xs font-medium text-stone-500 dark:text-zinc-400">
+                              No type and shadow found.
+                            </div>
+                          ) : (
+                            typeShadows.map((ts, idx) => {
                             const supportKey = `ts-support-${ts.id}`;
                             const isSupportingOpen = expandedSupportingRefId === supportKey;
                             const supportingList = ts.supportingRefs || [];
@@ -1850,6 +1848,7 @@ export default function BibleReaderPage() {
                             );
                           })
                         )}
+                        </div>
                       </div>
                     )}
 
@@ -2039,8 +2038,15 @@ export default function BibleReaderPage() {
                           </>
                         ) : activeActionView === 'context' ? (
                           /* FOCUSED VIEW: Context Explanation (Requirement 3 & Requirement 4) */
-                          <div>
-                            <div className="px-4 sm:px-5 py-3 flex items-center justify-between gap-3">
+                          <div className="flex flex-col max-h-[72vh] sm:max-h-[78vh]">
+                            {/* Sticky Card Header */}
+                            <div
+                              className={`sticky top-0 z-20 shrink-0 px-4 sm:px-5 py-3 flex items-center justify-between gap-3 border-b backdrop-blur-md ${
+                                isLight
+                                  ? 'bg-white/95 border-stone-200/90'
+                                  : 'bg-[#171717]/95 border-zinc-800'
+                              }`}
+                            >
                               <div className="flex items-center gap-2 flex-wrap">
                                 <span
                                   className={`text-[10px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded w-fit ${
@@ -2091,31 +2097,35 @@ export default function BibleReaderPage() {
                               </div>
                             </div>
 
-                            <div
-                              className={`h-px w-full ${
-                                isLight ? 'bg-stone-200/90' : 'bg-zinc-800'
-                              }`}
-                            />
-
-                            {isLoadingInlineContext || !inlineContextData ? (
-                              <div className="px-4 sm:px-5 py-4 text-xs text-stone-500 dark:text-zinc-400">
-                                Loading passage context...
-                              </div>
-                            ) : (
-                              <div className="px-4 sm:px-5 py-4 space-y-2">
-                                <h4 className="text-xs sm:text-sm font-bold text-stone-900 dark:text-zinc-100">
-                                  {inlineContextData.mainTheme}
-                                </h4>
-                                <p className="text-xs sm:text-[13px] leading-relaxed text-stone-700 dark:text-zinc-300">
-                                  {unifiedExplanationParagraphs.join(' ')}
-                                </p>
-                              </div>
-                            )}
+                            {/* Scrollable Body */}
+                            <div className="flex-1 overflow-y-auto overscroll-contain">
+                              {isLoadingInlineContext || !inlineContextData ? (
+                                <div className="px-4 sm:px-5 py-4 text-xs text-stone-500 dark:text-zinc-400">
+                                  Loading passage context...
+                                </div>
+                              ) : (
+                                <div className="px-4 sm:px-5 py-4 space-y-2">
+                                  <h4 className="text-xs sm:text-sm font-bold text-stone-900 dark:text-zinc-100">
+                                    {inlineContextData.mainTheme}
+                                  </h4>
+                                  <p className="text-xs sm:text-[13px] leading-relaxed text-stone-700 dark:text-zinc-300">
+                                    {unifiedExplanationParagraphs.join(' ')}
+                                  </p>
+                                </div>
+                              )}
+                            </div>
                           </div>
                         ) : activeActionView === 'compare' ? (
                           /* FOCUSED VIEW: Compare Translation */
-                          <div>
-                            <div className="px-4 sm:px-5 py-3.5 flex items-center justify-between gap-3">
+                          <div className="flex flex-col max-h-[72vh] sm:max-h-[78vh]">
+                            {/* Sticky Card Header */}
+                            <div
+                              className={`sticky top-0 z-20 shrink-0 px-4 sm:px-5 py-3.5 flex items-center justify-between gap-3 border-b backdrop-blur-md ${
+                                isLight
+                                  ? 'bg-white/95 border-stone-200/90'
+                                  : 'bg-[#171717]/95 border-zinc-800'
+                              }`}
+                            >
                               <div className="flex items-center gap-2 flex-wrap">
                                 <span
                                   className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded w-fit ${
@@ -2151,14 +2161,11 @@ export default function BibleReaderPage() {
                               </button>
                             </div>
 
-                            {BIBLE_TRANSLATIONS.map((t) => (
-                              <React.Fragment key={t.id}>
+                            {/* Scrollable Body */}
+                            <div className="flex-1 overflow-y-auto overscroll-contain divide-y divide-stone-200/90 dark:divide-zinc-800">
+                              {BIBLE_TRANSLATIONS.map((t) => (
                                 <div
-                                  className={`h-px w-full ${
-                                    isLight ? 'bg-stone-200/90' : 'bg-zinc-800'
-                                  }`}
-                                />
-                                <div
+                                  key={t.id}
                                   onClick={() => setTranslation(t.id)}
                                   className={`cursor-pointer px-4 sm:px-5 py-3 text-xs transition ${
                                     translation === t.id
@@ -2188,13 +2195,20 @@ export default function BibleReaderPage() {
                                     “{v.translations[t.id]}”
                                   </p>
                                 </div>
-                              </React.Fragment>
-                            ))}
+                              ))}
+                            </div>
                           </div>
                         ) : activeActionView === 'save' ? (
                           /* FOCUSED VIEW: Save Bible Verse (Requirement 4: No redundant content-type selection; auto-closes on save) */
-                          <div>
-                            <div className="px-4 sm:px-5 py-3.5 flex items-center justify-between gap-3">
+                          <div className="flex flex-col max-h-[72vh] sm:max-h-[78vh]">
+                            {/* Sticky Card Header */}
+                            <div
+                              className={`sticky top-0 z-20 shrink-0 px-4 sm:px-5 py-3.5 flex items-center justify-between gap-3 border-b backdrop-blur-md ${
+                                isLight
+                                  ? 'bg-white/95 border-stone-200/90'
+                                  : 'bg-[#171717]/95 border-zinc-800'
+                              }`}
+                            >
                               <div className="flex items-center gap-2 flex-wrap">
                                 <span
                                   className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded w-fit ${
@@ -2230,13 +2244,8 @@ export default function BibleReaderPage() {
                               </button>
                             </div>
 
-                            <div
-                              className={`h-px w-full ${
-                                isLight ? 'bg-stone-200/90' : 'bg-zinc-800'
-                              }`}
-                            />
-
-                            <div className="px-4 sm:px-5 py-3.5 space-y-3">
+                            {/* Scrollable Body */}
+                            <div className="flex-1 overflow-y-auto overscroll-contain px-4 sm:px-5 py-3.5 space-y-3">
                               {/* Collection Selector */}
                               <div>
                                 <label className="text-[11px] font-semibold text-stone-500 dark:text-zinc-400 block mb-1">

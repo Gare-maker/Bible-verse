@@ -27,7 +27,9 @@ export type ReferenceCategory =
   | 'Direct quotation'
   | 'Prophecy'
   | 'Prophecy fulfilment'
+  | 'Messianic reference'
   | 'Allusion'
+  | 'Theological connection'
   | 'Thematic connection'
   | 'Parallel passage'
   | 'Historical connection';

@@ -115,17 +115,31 @@ function determineCategory(primaryRef: string, connectedRef: string): ReferenceC
   const isOT_P = bookP?.testament === 'OT';
   const isOT_C = bookC?.testament === 'OT';
 
-  // OT to NT or NT to OT
+  // Demonstrable OT to NT or NT to OT connection
   if ((isOT_P && !isOT_C) || (!isOT_P && isOT_C)) {
-    if (
-      p.book === 'Isaiah' ||
-      p.book === 'Micah' ||
-      p.book === 'Zechariah' ||
-      c.book === 'Isaiah' ||
-      c.book === 'Micah' ||
-      c.book === 'Zechariah'
-    ) {
+    const otBook = isOT_P ? p.book : c.book;
+    const propheticBooks = [
+      'Isaiah',
+      'Jeremiah',
+      'Ezekiel',
+      'Daniel',
+      'Hosea',
+      'Joel',
+      'Amos',
+      'Micah',
+      'Habakkuk',
+      'Zechariah',
+      'Malachi',
+    ];
+    if (propheticBooks.includes(otBook)) {
       return !isOT_P ? 'Prophecy fulfilment' : 'Prophecy';
+    }
+    const lawBooks = ['Genesis', 'Exodus', 'Leviticus', 'Numbers', 'Deuteronomy'];
+    if (lawBooks.includes(otBook)) {
+      return 'Direct quotation';
+    }
+    if (otBook === 'Psalms') {
+      return 'Messianic reference';
     }
     return 'Allusion';
   }
@@ -133,12 +147,6 @@ function determineCategory(primaryRef: string, connectedRef: string): ReferenceC
   // Synoptic Gospels Parallel Passages
   const gospels = ['Matthew', 'Mark', 'Luke', 'John'];
   if (gospels.includes(p.book) && gospels.includes(c.book) && p.book !== c.book) {
-    return 'Parallel passage';
-  }
-
-  // Kings & Chronicles Parallel Passages
-  const history = ['1 Kings', '2 Kings', '1 Chronicles', '2 Chronicles'];
-  if (history.includes(p.book) && history.includes(c.book)) {
     return 'Parallel passage';
   }
 
@@ -217,22 +225,35 @@ export async function GET(req: NextRequest) {
         chapterResults[primaryRef] = [];
       }
 
-      // Check existing curated cross references first
+      // Check verified canonical cross references first
       const curated = getCrossReferencesForVerse(primaryRef);
       for (const c of curated) {
         if (!chapterResults[primaryRef].some((x) => x.connectedRef.toLowerCase() === c.connectedRef.toLowerCase())) {
-          chapterResults[primaryRef].push(c);
+          chapterResults[primaryRef].push({
+            ...c,
+            supportingRefs: (c.supportingRefs || []).slice(0, 2),
+          });
         }
       }
 
-      // Now map all references from Treasury of Scripture Knowledge (TSK)
-      if (item.r) {
+      // If no verified connections exist yet, consider strict OT <-> NT connections from TSK (max 2)
+      if (chapterResults[primaryRef].length === 0 && item.r) {
+        const primaryBookObj = findBookByName(parsedPrimary.book);
+        const isOT_Primary = primaryBookObj?.testament === 'OT';
+
         for (const [targetId, rawTarget] of Object.entries(item.r)) {
+          if (chapterResults[primaryRef].length >= 2) break;
+
           const parsedTarget = parseRawVerseCode(rawTarget);
           if (!parsedTarget) continue;
-
-          // Prevent self-reference
           if (parsedTarget.canonicalRef === primaryRef) continue;
+
+          const targetBookObj = findBookByName(parsedTarget.book);
+          if (!targetBookObj) continue;
+          const isOT_Target = targetBookObj.testament === 'OT';
+
+          // Strictly require one side to be OT and the other NT
+          if (isOT_Primary === isOT_Target) continue;
 
           // Check if already in list
           if (chapterResults[primaryRef].some((x) => x.connectedRef === parsedTarget.canonicalRef)) {
@@ -240,8 +261,7 @@ export async function GET(req: NextRequest) {
           }
 
           const category = determineCategory(primaryRef, parsedTarget.canonicalRef);
-          const targetBookObj = findBookByName(parsedTarget.book);
-          const testamentLabel = targetBookObj?.testament === 'OT' ? 'Old Testament' : 'New Testament';
+          const testamentLabel = isOT_Target ? 'Old Testament' : 'New Testament';
 
           const record: ResolvedCrossReference = {
             id: `tsk-${verseId}-${targetId}`,
@@ -250,18 +270,23 @@ export async function GET(req: NextRequest) {
             category,
             connectionLabel: `${primaryRef} ↔ ${parsedTarget.canonicalRef}`,
             directionLabel: `${testamentLabel} Reference (${category})`,
-            title: `Biblical Cross-Reference: ${primaryRef} ↔ ${parsedTarget.canonicalRef}`,
-            explanation: `Scriptural cross-reference linking ${primaryRef} with ${parsedTarget.canonicalRef} across the biblical canon.`,
-            biblicalContext: `Passage context connects ${primaryRef} (${findBookByName(parsedPrimary.book)?.category}) with ${parsedTarget.canonicalRef} (${targetBookObj?.category}).`,
+            title: `Biblical Connection: ${primaryRef} ↔ ${parsedTarget.canonicalRef}`,
+            explanation: `Biblical connection linking ${primaryRef} with ${parsedTarget.canonicalRef} across the testaments.`,
+            biblicalContext: `Contextual link connecting ${primaryRef} (${primaryBookObj?.category}) with ${parsedTarget.canonicalRef} (${targetBookObj.category}).`,
             primarySpeaker: 'Historical narration',
             connectedSpeaker: 'Historical narration',
-            supportingRefs: [primaryRef, parsedTarget.canonicalRef],
+            supportingRefs: [parsedTarget.canonicalRef],
             dataSource: 'Treasury of Scripture Knowledge (TSK)',
             verificationStatus: 'verified',
           };
 
           chapterResults[primaryRef].push(record);
         }
+      }
+
+      // Enforce quality cap: maximum 1 to 4 references per verse
+      if (chapterResults[primaryRef].length > 4) {
+        chapterResults[primaryRef] = chapterResults[primaryRef].slice(0, 4);
       }
     }
   }
