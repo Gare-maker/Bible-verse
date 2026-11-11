@@ -6,6 +6,7 @@ import {
   BookOpen,
   CheckCircle2,
   Compass,
+  Languages,
   Moon,
   Sparkles,
   Sun,
@@ -248,6 +249,50 @@ export default function NavigationShell({ children }: { children: React.ReactNod
                   {savedConnections.length}
                 </span>
               </button>
+
+              {/* Interpretation Learning Centre */}
+              <button
+                onClick={() => setActivePage('interpretation')}
+                className={`w-full rounded-xl px-3 py-2.5 text-sm font-semibold flex items-center justify-between transition ${
+                  activePage === 'interpretation'
+                    ? isChildren
+                      ? isLight
+                        ? 'bg-amber-400 text-slate-950 shadow-sm font-extrabold'
+                        : 'bg-indigo-600 text-white shadow-sm font-extrabold'
+                      : isLight
+                      ? 'bg-white text-stone-900 shadow-sm border border-stone-200/80'
+                      : 'bg-zinc-800 text-white shadow-sm'
+                    : isLight
+                    ? 'text-stone-600 hover:bg-stone-200/60 hover:text-stone-900'
+                    : 'text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-200'
+                }`}
+              >
+                <span className="flex items-center gap-2.5">
+                  <Languages
+                    className={`h-4 w-4 ${
+                      activePage === 'interpretation'
+                        ? isChildren
+                          ? isLight
+                            ? 'text-slate-950'
+                            : 'text-amber-300'
+                          : isLight
+                          ? 'text-amber-700'
+                          : 'text-amber-400'
+                        : 'opacity-70'
+                    }`}
+                  />
+                  <span>Interpretation</span>
+                </span>
+                <span
+                  className={`text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${
+                    activePage === 'interpretation'
+                      ? 'bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-300'
+                      : 'text-stone-400'
+                  }`}
+                >
+                  Study
+                </span>
+              </button>
             </nav>
           </div>
 
@@ -439,6 +484,23 @@ export default function NavigationShell({ children }: { children: React.ReactNod
         </button>
 
         <div className="flex items-center gap-1.5">
+          <button
+            onClick={() => setActivePage(activePage === 'interpretation' ? 'bible' : 'interpretation')}
+            className={`rounded-xl px-2.5 py-1 text-xs font-bold border transition flex items-center gap-1 ${
+              activePage === 'interpretation'
+                ? isLight
+                  ? 'bg-amber-700 text-white border-amber-700'
+                  : 'bg-amber-500 text-zinc-950 border-amber-500'
+                : isLight
+                ? 'bg-stone-100 hover:bg-stone-200 border-stone-200 text-stone-700'
+                : 'bg-zinc-800 hover:bg-zinc-700 border-zinc-700 text-zinc-200'
+            }`}
+            title="Interpretation Learning Centre"
+          >
+            <Languages className="h-3.5 w-3.5" />
+            <span>Study</span>
+          </button>
+
           <button
             onClick={() =>
               updatePreferences({

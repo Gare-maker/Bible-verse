@@ -4,6 +4,7 @@ import React from 'react';
 import NavigationShell from '@/components/NavigationShell';
 import BibleReaderPage from '@/components/BibleReaderPage';
 import NotesPage from '@/components/NotesPage';
+import InterpretationPage from '@/components/InterpretationPage';
 import { usePlatform } from '@/context/PlatformContext';
 
 export default function HomePage() {
@@ -11,7 +12,13 @@ export default function HomePage() {
 
   return (
     <NavigationShell>
-      {activePage === 'bible' ? <BibleReaderPage /> : <NotesPage />}
+      {activePage === 'bible' ? (
+        <BibleReaderPage />
+      ) : activePage === 'interpretation' ? (
+        <InterpretationPage />
+      ) : (
+        <NotesPage />
+      )}
     </NavigationShell>
   );
 }

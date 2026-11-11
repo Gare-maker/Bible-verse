@@ -312,3 +312,164 @@ export interface ReadingHistoryEntry {
   translation: TranslationId;
   timestamp: string;
 }
+
+// ============================================================================
+// LEXICON & WORD STUDY TYPES (Section 4 & 4.2)
+// ============================================================================
+export type OriginalLanguage = 'Hebrew' | 'Greek' | 'Aramaic';
+
+export interface LexiconWordUsageExample {
+  ref: string;
+  passageSnippet: string;
+  translationNote: string;
+}
+
+export interface LexiconEntry {
+  id: string; // e.g. "G3341-metanoia"
+  englishWord: string; // e.g. "Repentance"
+  originalSpelling: string; // e.g. "μετάνοια"
+  language: OriginalLanguage; // 'Greek' | 'Hebrew' | 'Aramaic'
+  transliteration: string; // e.g. "Metanoia"
+  pronunciation?: string; // e.g. "meh-TAH-noy-ah"
+  strongsNumber?: string; // e.g. "G3341"
+  partOfSpeech: string; // e.g. "Noun, Feminine"
+  rootWordAndRelatedForms: string; // e.g. "From μετά (meta, denoting change) and νοέω (noeō, to exercise the mind)"
+  lexicalDefinition: string; // e.g. "A change of mind, disposition, and purposeful orientation..."
+  etymologyAndOrigin: string; // e.g. "Derived from the preposition meta (after/with) + nous (mind)..."
+  contextualMeaning: string; // e.g. "In the New Testament, not merely remorse, but a transformative turn toward God..."
+  biblicalOccurrences: number; // e.g. 22
+  relevantReferences: string[]; // e.g. ["Acts 2:38", "Matthew 3:2", "2 Corinthians 7:10"]
+  examplesOfUsage: LexiconWordUsageExample[];
+  sourceAttribution: string; // e.g. "Thayer's Greek-English Lexicon & Strong's Exhaustive Concordance"
+  relatedEnglishWords?: string[]; // e.g. ["Conversion", "Turning", "Shuv"]
+  distinctionNote?: string; // e.g. distinction between agape, phileo, philia, eros
+}
+
+// ============================================================================
+// INTERPRETATION LEARNING CENTRE TYPES (Sections 2, 3, 5, 6, 7, 8)
+// ============================================================================
+export interface InterpretationMethod {
+  id: string;
+  number: number;
+  name: string; // e.g. "Literal Interpretation"
+  slug: string;
+  shortSummary: string;
+  definition: string;
+  detailedExplanation: string;
+  howItWorks: string[];
+  biblicalExamples: {
+    title: string;
+    passage: string;
+    explanation: string;
+  }[];
+  relevantBibleReferences: string[];
+  practicalApplication: string;
+  relatedMethods: string[];
+  sourceAttribution: string;
+}
+
+export interface EssentialConcept {
+  id: string;
+  name: string;
+  greekOrHebrewOrigin?: string;
+  definition: string;
+  importance: string;
+  howItWorks: string;
+  practicalDemonstration?: {
+    passage: string;
+    stepByStep: string[];
+  };
+  keySubtopics?: {
+    title: string;
+    description: string;
+    references: string[];
+  }[];
+  scriptureReferences: string[];
+  sourceAttribution: string;
+}
+
+export interface InterpretationPrinciple {
+  number: number;
+  name: string;
+  role: string;
+  explanation: string;
+  complementaryAspect: string;
+}
+
+// ============================================================================
+// CONTEXTUAL SCRIPTURE INTERPRETATION TYPES (Section 9, 10, 11, 12)
+// ============================================================================
+export interface ScriptureInterpretationWord {
+  englishWord: string;
+  originalSpelling: string;
+  language: OriginalLanguage;
+  transliteration: string;
+  strongsNumber?: string;
+  partOfSpeech: string;
+  meaning: string;
+  contextualUsage: string;
+  lexiconEntryId?: string;
+}
+
+export interface ScriptureCrossReferenceDetail {
+  ref: string;
+  relevanceExplanation: string;
+  category: ReferenceCategory;
+}
+
+export interface ContextualInterpretationData {
+  canonicalRef: string; // e.g. "John 3:5"
+  chapterScope?: string; // e.g. "John 3:1-10"
+  availableTags: (
+    | 'Historical Context'
+    | 'Contextual Explanation'
+    | 'Theological Interpretation'
+    | 'Original Words'
+    | 'Cross References'
+    | 'Literary and Cultural'
+    | 'Typology and Symbolism'
+  )[];
+  historicalContext: {
+    author: string;
+    originalAudience: string;
+    dateWritten: string;
+    historicalCircumstances: string;
+    politicalReligiousSocialConditions: string;
+    historicalEventsExplanation: string;
+    sourceAttribution: string;
+  };
+  contextualExplanation: {
+    beforePassage: string;
+    afterPassage: string;
+    mainSubject: string;
+    authorsIntendedMessage: string;
+    chapterAndBookFit: string;
+    sourceAttribution: string;
+  };
+  theologicalInterpretation: {
+    coreTheologicalThemes: string[];
+    explanation: string;
+    traditionsAndPerspectives?: {
+      tradition: string;
+      perspective: string;
+    }[];
+    disputedInterpretationsNote?: string;
+    sourceAttribution: string;
+  };
+  originalLanguageWords: ScriptureInterpretationWord[];
+  crossReferences: ScriptureCrossReferenceDetail[];
+  literaryAndCulturalContext?: {
+    genre: string;
+    figuresOfSpeechAndIdioms: string;
+    jewishCustomsAndTraditions: string;
+    socialStructures: string;
+    sourceAttribution: string;
+  };
+  typologyAndSymbolism?: {
+    typesAndShadowsIdentified: string;
+    propheticConnections: string;
+    supportingReferences: string[];
+    sourceAttribution: string;
+  };
+}
+

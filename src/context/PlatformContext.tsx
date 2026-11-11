@@ -21,7 +21,7 @@ import { getVerseText } from '@/data/scriptureDatabase';
 import { parseScriptureReference } from '@/data/bibleBooks';
 import { getSupabaseClient } from '@/lib/supabase';
 
-export type PrimaryPage = 'bible' | 'saved' | 'community' | 'notes';
+export type PrimaryPage = 'bible' | 'saved' | 'community' | 'notes' | 'interpretation';
 
 export interface ReadingPosition {
   book: string;

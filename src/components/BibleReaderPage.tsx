@@ -19,6 +19,10 @@ import {
   SlidersHorizontal,
   Sparkles,
   Volume2,
+  Languages,
+  GraduationCap,
+  ExternalLink,
+  ArrowRight,
   X,
 } from 'lucide-react';
 import {
@@ -34,6 +38,7 @@ import {
 } from '@/data/crossReferences';
 import { findSectionForVerse } from '@/data/chapterSections';
 import { getVerseText } from '@/data/scriptureDatabase';
+import { getContextualInterpretation } from '@/data/scriptureInterpretations';
 import {
   buildVerseContextData,
   fetchAllTranslationsForChapter,
@@ -55,8 +60,17 @@ import BibleLineDrawing, { getIllustrationForChapter, getIllustrationForSection 
 import BookChapterSelectorModal from './BookChapterSelectorModal';
 import GlobalSearchModal from './GlobalSearchModal';
 
-type VerseActionView = 'none' | 'context' | 'compare' | 'save';
-type OpenPanelMode = 'none' | 'action' | 'reference' | 'types';
+type VerseActionView = 'none' | 'context' | 'compare' | 'save' | 'interpretation';
+type OpenPanelMode = 'none' | 'action' | 'reference' | 'types' | 'interpretation';
+type InterpretationCategory =
+  | 'all'
+  | 'historical'
+  | 'contextual'
+  | 'theological'
+  | 'words'
+  | 'cross-references'
+  | 'literary'
+  | 'typology';
 
 export default function BibleReaderPage() {
   const {
@@ -81,6 +95,7 @@ export default function BibleReaderPage() {
     saveBibleVerseItem,
     saveTypeShadowItem,
     showToast,
+    setActivePage,
   } = usePlatform();
 
   const [verses, setVerses] = useState<VerseData[]>([]);
@@ -94,6 +109,7 @@ export default function BibleReaderPage() {
   // Inline expanded verse state (Reference, Type and Shadow, and Action are mutually exclusive)
   const [openPanelMode, setOpenPanelMode] = useState<OpenPanelMode>('none');
   const [activeActionView, setActiveActionView] = useState<VerseActionView>('none');
+  const [selectedInterpCategory, setSelectedInterpCategory] = useState<InterpretationCategory>('all');
   const [inlineContextData, setInlineContextData] = useState<VerseContextData | null>(null);
   const [isLoadingInlineContext, setIsLoadingInlineContext] = useState(false);
   const [resolvedRefTexts, setResolvedRefTexts] = useState<Record<string, string>>({});
@@ -335,14 +351,18 @@ export default function BibleReaderPage() {
     };
   }, [selectedVerse, currentBook, currentChapter, translation]);
 
-  // Open independent Reference or Type and Shadow view and position selected verse at top
+  // Open independent Reference, Type and Shadow, or Interpretation view and position selected verse at top
   const openIndependentVersePanel = (
     v: VerseData,
-    mode: 'reference' | 'types'
+    mode: 'reference' | 'types' | 'interpretation',
+    category?: InterpretationCategory
   ) => {
     setSelectedVerse(v.verse);
     setActiveActionView('none');
     setExpandedSupportingRefId(null);
+    if (category) {
+      setSelectedInterpCategory(category);
+    }
     setOpenPanelMode(mode);
     scrollVerseToTop(v.verse);
   };
@@ -1146,11 +1166,13 @@ export default function BibleReaderPage() {
                     !r.explanation.startsWith('Biblical connection linking')
                 );
                 const typeShadows = getTypesAndShadowsForVerse(v.canonicalRef);
+                const interp = getContextualInterpretation(v.canonicalRef);
                 const isSelected = selectedVerse === v.verse;
                 const isReferenceOpen = isSelected && openPanelMode === 'reference';
                 const isTypesOpen = isSelected && openPanelMode === 'types';
+                const isInterpretationOpen = isSelected && openPanelMode === 'interpretation';
                 const isActionOpen = isSelected && openPanelMode === 'action';
-                const hasAnyIntel = refs.length > 0 || typeShadows.length > 0;
+                const hasAnyIntel = refs.length > 0 || typeShadows.length > 0 || Boolean(interp);
                 const isCurrentlySpoken = speakingVerse === v.verse;
                 const isBookmarked = bookmarks.includes(v.canonicalRef);
                 const highlightColor = highlights[v.canonicalRef];
@@ -1353,6 +1375,75 @@ export default function BibleReaderPage() {
                                 <span>Type and Shadow</span>
                               </button>
                             )}
+
+                            {interp && (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (isInterpretationOpen) {
+                                    setSelectedVerse(null);
+                                    setOpenPanelMode('none');
+                                  } else {
+                                    openIndependentVersePanel(v, 'interpretation', 'all');
+                                  }
+                                }}
+                                className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 font-sans text-[11px] font-semibold transition border ${
+                                  isInterpretationOpen
+                                    ? isLight
+                                      ? 'bg-blue-700 text-white border-blue-700 shadow-xs'
+                                      : 'bg-blue-500 text-zinc-950 border-blue-500 shadow-xs font-bold'
+                                    : isLight
+                                    ? 'bg-blue-50 hover:bg-blue-100 text-blue-900 border-blue-200/90'
+                                    : 'bg-blue-500/15 hover:bg-blue-500/25 text-blue-300 border-blue-500/30'
+                                }`}
+                                title={`Open Interpretation for ${v.canonicalRef}`}
+                              >
+                                <Languages className="h-3 w-3" />
+                                <span>Interpretation</span>
+                              </button>
+                            )}
+
+                            {interp && interp.availableTags && interp.availableTags.map((tag) => {
+                              const catMap: Record<string, InterpretationCategory> = {
+                                'Historical Context': 'historical',
+                                'Contextual Explanation': 'contextual',
+                                'Theological Interpretation': 'theological',
+                                'Original Words': 'words',
+                                'Cross References': 'cross-references',
+                                'Literary and Cultural': 'literary',
+                                'Typology and Symbolism': 'typology',
+                              };
+                              const targetCat = catMap[tag] || 'all';
+                              const isTagActive = isInterpretationOpen && selectedInterpCategory === targetCat;
+                              return (
+                                <button
+                                  key={tag}
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (isTagActive) {
+                                      setSelectedVerse(null);
+                                      setOpenPanelMode('none');
+                                    } else {
+                                      openIndependentVersePanel(v, 'interpretation', targetCat);
+                                    }
+                                  }}
+                                  className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-sans text-[10.5px] transition border ${
+                                    isTagActive
+                                      ? isLight
+                                        ? 'bg-sky-700 text-white border-sky-700 font-bold'
+                                        : 'bg-sky-400 text-zinc-950 border-sky-400 font-bold'
+                                      : isLight
+                                      ? 'bg-stone-100 hover:bg-sky-50 text-stone-700 hover:text-sky-900 border-stone-200 hover:border-sky-300'
+                                      : 'bg-zinc-800/80 hover:bg-sky-950/60 text-zinc-300 hover:text-sky-300 border-zinc-700/80 hover:border-sky-600/50'
+                                  }`}
+                                  title={`Open ${tag} for ${v.canonicalRef}`}
+                                >
+                                  <span>[{tag}]</span>
+                                </button>
+                              );
+                            })}
                           </span>
                         )}
 
@@ -1853,6 +1944,343 @@ export default function BibleReaderPage() {
                     )}
 
                     {/* =========================================================
+                        2B. CONTEXTUAL INTERPRETATION CARD
+                        Dedicated view for Historical, Contextual, Theological,
+                        Original Words, Cross-References, Literary & Typology
+                        ========================================================= */}
+                    {isInterpretationOpen && (
+                      <div
+                        className={`rounded-2xl border overflow-hidden mt-2 mb-2 shadow-sm animate-in fade-in duration-150 ${
+                          isLight
+                            ? 'bg-white border-blue-200/90 text-stone-900'
+                            : 'bg-[#141822] border-blue-900/50 text-zinc-100 shadow-md'
+                        }`}
+                      >
+                        {/* Header with Title, Ref, and Learning Centre Quick Jump */}
+                        <div className="px-4 sm:px-5 py-3 flex items-center justify-between gap-3 border-b border-stone-200/80 dark:border-zinc-800">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span
+                              className={`text-[10px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded w-fit ${
+                                isLight
+                                  ? 'bg-blue-100 text-blue-900'
+                                  : 'bg-blue-500/20 text-blue-300'
+                              }`}
+                            >
+                              Interpretation
+                            </span>
+                            <span
+                              className={`text-xs sm:text-sm font-bold ${
+                                isLight ? 'text-blue-950' : 'text-blue-300'
+                              }`}
+                            >
+                              {v.canonicalRef}
+                            </span>
+                            {interp?.chapterScope && (
+                              <span className="text-[11px] text-stone-500 dark:text-zinc-400 font-sans">
+                                (Scope: {interp.chapterScope})
+                              </span>
+                            )}
+                          </div>
+
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            <button
+                              type="button"
+                              onClick={() => setActivePage('interpretation')}
+                              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold border transition ${
+                                isLight
+                                  ? 'bg-blue-50 hover:bg-blue-100 border-blue-200 text-blue-900'
+                                  : 'bg-blue-900/30 hover:bg-blue-800/40 border-blue-800 text-blue-200'
+                              }`}
+                              title="Open Interpretation Learning Centre"
+                            >
+                              <GraduationCap className="h-3.5 w-3.5" />
+                              <span className="hidden sm:inline">Learning Centre</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSelectedVerse(null);
+                                setOpenPanelMode('none');
+                              }}
+                              className={`rounded-lg p-1.5 border transition ${
+                                isLight
+                                  ? 'bg-stone-100 hover:bg-stone-200 border-stone-200 text-stone-600'
+                                  : 'bg-zinc-800 hover:bg-zinc-700 border-zinc-700 text-zinc-300'
+                              }`}
+                              title="Close"
+                              aria-label="Close Interpretation"
+                            >
+                              <X className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Category Navigation Pills */}
+                        <div className="px-4 sm:px-5 py-2.5 flex items-center gap-1.5 overflow-x-auto scrollbar-none border-b border-stone-200/80 dark:border-zinc-800/80 bg-stone-50/60 dark:bg-zinc-900/40">
+                          {(
+                            [
+                              { id: 'all', label: 'All' },
+                              { id: 'historical', label: 'Historical' },
+                              { id: 'contextual', label: 'Contextual' },
+                              { id: 'theological', label: 'Theological' },
+                              { id: 'words', label: 'Original Words' },
+                              { id: 'cross-references', label: 'Cross-References' },
+                              { id: 'literary', label: 'Literary & Cultural' },
+                              { id: 'typology', label: 'Typology' },
+                            ] as const
+                          ).map((cat) => {
+                            const isActive = selectedInterpCategory === cat.id;
+                            return (
+                              <button
+                                key={cat.id}
+                                type="button"
+                                onClick={() => setSelectedInterpCategory(cat.id)}
+                                className={`px-2.5 py-1 rounded-full text-xs font-medium whitespace-nowrap transition border ${
+                                  isActive
+                                    ? isLight
+                                      ? 'bg-blue-700 text-white border-blue-700 font-bold'
+                                      : 'bg-blue-500 text-zinc-950 border-blue-500 font-bold'
+                                    : isLight
+                                    ? 'bg-white hover:bg-stone-100 text-stone-700 border-stone-200'
+                                    : 'bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border-zinc-700'
+                                }`}
+                              >
+                                {cat.label}
+                              </button>
+                            );
+                          })}
+                        </div>
+
+                        {/* Content Area */}
+                        <div className="p-4 sm:p-5 space-y-4 max-h-[500px] overflow-y-auto">
+                          {!interp ? (
+                            <div className="text-center py-6 space-y-3">
+                              <p className="text-sm text-stone-600 dark:text-zinc-300">
+                                Contextual interpretation data is continuously being curated for each verse.
+                              </p>
+                              <button
+                                type="button"
+                                onClick={() => setActivePage('interpretation')}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-700 text-white text-xs font-semibold hover:bg-blue-800 transition"
+                              >
+                                <GraduationCap className="h-4 w-4" />
+                                <span>Explore Interpretation Learning Centre</span>
+                              </button>
+                            </div>
+                          ) : (
+                            <>
+                              {/* 1. Historical Context */}
+                              {(selectedInterpCategory === 'all' || selectedInterpCategory === 'historical') && interp.historicalContext && (
+                                <div className="space-y-2 rounded-xl p-3.5 bg-sky-500/5 dark:bg-sky-500/10 border border-sky-200/70 dark:border-sky-800/40">
+                                  <div className="flex items-center justify-between">
+                                    <h4 className="text-xs font-bold uppercase tracking-wider text-sky-800 dark:text-sky-300">
+                                      Historical Context & Background
+                                    </h4>
+                                    <span className="text-[10px] text-stone-500 dark:text-zinc-400">
+                                      {interp.historicalContext.dateWritten}
+                                    </span>
+                                  </div>
+                                  <div className="text-xs sm:text-[13px] leading-relaxed space-y-2 text-stone-800 dark:text-zinc-200">
+                                    <p><strong>Author:</strong> {interp.historicalContext.author}</p>
+                                    <p><strong>Original Audience:</strong> {interp.historicalContext.originalAudience}</p>
+                                    <p><strong>Setting & Conditions:</strong> {interp.historicalContext.politicalReligiousSocialConditions}</p>
+                                    <p><strong>Historical Circumstances:</strong> {interp.historicalContext.historicalCircumstances}</p>
+                                  </div>
+                                  {interp.historicalContext.sourceAttribution && (
+                                    <div className="pt-1 border-t border-sky-200/50 dark:border-sky-800/30 text-[11px] text-stone-500 dark:text-zinc-400 italic">
+                                      Sources: {interp.historicalContext.sourceAttribution}
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+
+                              {/* 2. Contextual Explanation */}
+                              {(selectedInterpCategory === 'all' || selectedInterpCategory === 'contextual') && interp.contextualExplanation && (
+                                <div className="space-y-2 rounded-xl p-3.5 bg-amber-500/5 dark:bg-amber-500/10 border border-amber-200/70 dark:border-amber-800/40">
+                                  <h4 className="text-xs font-bold uppercase tracking-wider text-amber-800 dark:text-amber-300">
+                                    Contextual Explanation (Flow of Thought)
+                                  </h4>
+                                  <div className="text-xs sm:text-[13px] leading-relaxed space-y-2 text-stone-800 dark:text-zinc-200">
+                                    <p><strong>Main Subject:</strong> {interp.contextualExplanation.mainSubject}</p>
+                                    <p><strong>Before this passage:</strong> {interp.contextualExplanation.beforePassage}</p>
+                                    <p><strong>After this passage:</strong> {interp.contextualExplanation.afterPassage}</p>
+                                    <p><strong>Author&apos;s Intended Message:</strong> {interp.contextualExplanation.authorsIntendedMessage}</p>
+                                    <p><strong>Placement in Chapter & Book:</strong> {interp.contextualExplanation.chapterAndBookFit}</p>
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* 3. Theological Interpretation */}
+                              {(selectedInterpCategory === 'all' || selectedInterpCategory === 'theological') && interp.theologicalInterpretation && (
+                                <div className="space-y-2.5 rounded-xl p-3.5 bg-emerald-500/5 dark:bg-emerald-500/10 border border-emerald-200/70 dark:border-emerald-800/40">
+                                  <h4 className="text-xs font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-300">
+                                    Theological Interpretation
+                                  </h4>
+                                  <div className="text-xs sm:text-[13px] leading-relaxed space-y-2 text-stone-800 dark:text-zinc-200">
+                                    {interp.theologicalInterpretation.coreTheologicalThemes && (
+                                      <p><strong>Core Themes:</strong> {interp.theologicalInterpretation.coreTheologicalThemes.join(', ')}</p>
+                                    )}
+                                    <p><strong>Explanation:</strong> {interp.theologicalInterpretation.explanation}</p>
+                                  </div>
+
+                                  {interp.theologicalInterpretation.traditionsAndPerspectives && interp.theologicalInterpretation.traditionsAndPerspectives.length > 0 && (
+                                    <div className="space-y-2 pt-1 border-t border-emerald-200/50 dark:border-emerald-800/30">
+                                      <p className="text-[11px] font-bold uppercase tracking-wider text-stone-500 dark:text-zinc-400">
+                                        Major Historical Traditions
+                                      </p>
+                                      {interp.theologicalInterpretation.traditionsAndPerspectives.map((trad, idx) => (
+                                        <div key={idx} className="pl-2 border-l-2 border-emerald-400/60 text-xs">
+                                          <span className="font-bold text-emerald-900 dark:text-emerald-300">{trad.tradition}: </span>
+                                          <span className="text-stone-700 dark:text-zinc-300">{trad.perspective}</span>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
+
+                                  {interp.theologicalInterpretation.disputedInterpretationsNote && (
+                                    <p className="text-xs text-stone-600 dark:text-zinc-400 italic">
+                                      Note: {interp.theologicalInterpretation.disputedInterpretationsNote}
+                                    </p>
+                                  )}
+
+                                  {interp.theologicalInterpretation.sourceAttribution && (
+                                    <div className="pt-1 border-t border-emerald-200/50 dark:border-emerald-800/30 text-[11px] text-stone-500 dark:text-zinc-400 italic">
+                                      Sources: {interp.theologicalInterpretation.sourceAttribution}
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+
+                              {/* 4. Original Words */}
+                              {(selectedInterpCategory === 'all' || selectedInterpCategory === 'words') && interp.originalLanguageWords && interp.originalLanguageWords.length > 0 && (
+                                <div className="space-y-2.5 rounded-xl p-3.5 bg-purple-500/5 dark:bg-purple-500/10 border border-purple-200/70 dark:border-purple-800/40">
+                                  <div className="flex items-center justify-between">
+                                    <h4 className="text-xs font-bold uppercase tracking-wider text-purple-800 dark:text-purple-300">
+                                      Original Biblical Languages (Greek / Hebrew)
+                                    </h4>
+                                    <button
+                                      type="button"
+                                      onClick={() => setActivePage('interpretation')}
+                                      className="text-[11px] text-purple-700 dark:text-purple-400 hover:underline font-semibold"
+                                    >
+                                      Word Study Lexicon &rarr;
+                                    </button>
+                                  </div>
+
+                                  <div className="space-y-2.5">
+                                    {interp.originalLanguageWords.map((w, idx) => (
+                                      <div
+                                        key={idx}
+                                        className="p-2.5 rounded-lg bg-white/70 dark:bg-zinc-900/70 border border-purple-200/60 dark:border-purple-900/40 space-y-1"
+                                      >
+                                        <div className="flex items-center justify-between gap-2 flex-wrap">
+                                          <div className="flex items-baseline gap-2">
+                                            <span className="font-serif text-base font-bold text-purple-950 dark:text-purple-200">
+                                              {w.originalSpelling}
+                                            </span>
+                                            <span className="text-xs italic text-stone-600 dark:text-zinc-300">
+                                              ({w.transliteration})
+                                            </span>
+                                            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-purple-100 dark:bg-purple-900/50 text-purple-900 dark:text-purple-300">
+                                              {w.strongsNumber}
+                                            </span>
+                                          </div>
+                                          <span className="text-[10px] text-stone-500 dark:text-zinc-400 font-sans">
+                                            {w.partOfSpeech}
+                                          </span>
+                                        </div>
+                                        <p className="text-xs text-stone-800 dark:text-zinc-200">
+                                          <strong>Meaning:</strong> {w.meaning}
+                                        </p>
+                                        <p className="text-xs text-stone-600 dark:text-zinc-400">
+                                          <strong>Contextual Usage:</strong> {w.contextualUsage}
+                                        </p>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* 5. Cross-References */}
+                              {(selectedInterpCategory === 'all' || selectedInterpCategory === 'cross-references') && interp.crossReferences && interp.crossReferences.length > 0 && (
+                                <div className="space-y-2 rounded-xl p-3.5 bg-stone-500/5 dark:bg-stone-500/10 border border-stone-200/70 dark:border-zinc-800">
+                                  <h4 className="text-xs font-bold uppercase tracking-wider text-stone-700 dark:text-zinc-300">
+                                    Biblical Cross-References & Relevance
+                                  </h4>
+                                  <div className="space-y-2">
+                                    {interp.crossReferences.map((cr, idx) => (
+                                      <div
+                                        key={idx}
+                                        className="p-2.5 rounded-lg bg-white/70 dark:bg-zinc-900/70 border border-stone-200 dark:border-zinc-800 space-y-1"
+                                      >
+                                        <div className="flex items-center justify-between gap-2">
+                                          <button
+                                            type="button"
+                                            onClick={() => navigateToReferenceString(cr.ref, false)}
+                                            className="text-xs font-bold text-blue-700 dark:text-blue-400 hover:underline text-left"
+                                          >
+                                            {cr.ref}
+                                          </button>
+                                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-stone-100 dark:bg-zinc-800 text-stone-600 dark:text-zinc-400">
+                                            {cr.category}
+                                          </span>
+                                        </div>
+                                        <p className="text-xs text-stone-700 dark:text-zinc-300 leading-relaxed">
+                                          {cr.relevanceExplanation}
+                                        </p>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* 6. Literary & Cultural */}
+                              {(selectedInterpCategory === 'all' || selectedInterpCategory === 'literary') && interp.literaryAndCulturalContext && (
+                                <div className="space-y-2 rounded-xl p-3.5 bg-rose-500/5 dark:bg-rose-500/10 border border-rose-200/70 dark:border-rose-800/40">
+                                  <h4 className="text-xs font-bold uppercase tracking-wider text-rose-800 dark:text-rose-300">
+                                    Literary & Cultural Context
+                                  </h4>
+                                  <div className="text-xs sm:text-[13px] leading-relaxed space-y-1.5 text-stone-800 dark:text-zinc-200">
+                                    <p><strong>Genre:</strong> {interp.literaryAndCulturalContext.genre}</p>
+                                    <p><strong>Figures of Speech:</strong> {interp.literaryAndCulturalContext.figuresOfSpeechAndIdioms}</p>
+                                    <p><strong>Jewish Customs:</strong> {interp.literaryAndCulturalContext.jewishCustomsAndTraditions}</p>
+                                    <p><strong>Social Structures:</strong> {interp.literaryAndCulturalContext.socialStructures}</p>
+                                  </div>
+                                  {interp.literaryAndCulturalContext.sourceAttribution && (
+                                    <div className="pt-1 border-t border-rose-200/50 dark:border-rose-800/30 text-[11px] text-stone-500 dark:text-zinc-400 italic">
+                                      Sources: {interp.literaryAndCulturalContext.sourceAttribution}
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+
+                              {/* 7. Typology & Symbolism */}
+                              {(selectedInterpCategory === 'all' || selectedInterpCategory === 'typology') && interp.typologyAndSymbolism && (
+                                <div className="space-y-2 rounded-xl p-3.5 bg-teal-500/5 dark:bg-teal-500/10 border border-teal-200/70 dark:border-teal-800/40">
+                                  <h4 className="text-xs font-bold uppercase tracking-wider text-teal-800 dark:text-teal-300">
+                                    Typology & Biblical Symbolism
+                                  </h4>
+                                  <div className="text-xs sm:text-[13px] leading-relaxed space-y-1.5 text-stone-800 dark:text-zinc-200">
+                                    <p><strong>Types & Shadows:</strong> {interp.typologyAndSymbolism.typesAndShadowsIdentified}</p>
+                                    <p><strong>Prophetic Connections:</strong> {interp.typologyAndSymbolism.propheticConnections}</p>
+                                    {interp.typologyAndSymbolism.supportingReferences && interp.typologyAndSymbolism.supportingReferences.length > 0 && (
+                                      <p><strong>Supporting References:</strong> {interp.typologyAndSymbolism.supportingReferences.join(', ')}</p>
+                                    )}
+                                  </div>
+                                  {interp.typologyAndSymbolism.sourceAttribution && (
+                                    <div className="pt-1 border-t border-teal-200/50 dark:border-teal-800/30 text-[11px] text-stone-500 dark:text-zinc-400 italic">
+                                      Sources: {interp.typologyAndSymbolism.sourceAttribution}
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* =========================================================
                         3. VERSE ACTION INTERFACE
                         - Available action buttons directly beneath selected verse
                         - Label renamed from Content to Context (Requirement 3)
@@ -1996,6 +2424,17 @@ export default function BibleReaderPage() {
                                 }`}
                               >
                                 Type and Shadow
+                              </button>
+
+                              <button
+                                onClick={() => openIndependentVersePanel(v, 'interpretation', 'all')}
+                                className={`rounded-lg px-2.5 py-1.5 text-xs font-medium border transition shrink-0 whitespace-nowrap ${
+                                  isLight
+                                    ? 'bg-blue-50 hover:bg-blue-100 border-blue-200 text-blue-900'
+                                    : 'bg-blue-950/40 hover:bg-blue-900/50 border-blue-800 text-blue-300'
+                                }`}
+                              >
+                                Interpretation
                               </button>
 
                               {/* Requirement 3: Renamed Content to Context */}
