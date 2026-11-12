@@ -279,35 +279,197 @@ export const BIBLICAL_NAMES: BiblicalNameEntry[] = [
     alternativeScholarlyInterpretations: 'Standard Greek onomastic formation without linguistic dispute. The Talmud references Naqdimon as a nickname derived from naqad ("the sun shone through for him"), but the Greek name pre-dates that rabbinic legend.',
     sourceAttribution: 'BDAG (p. 674); D.A. Carson, The Gospel According to John; Craig S. Keener, The Gospel of John.',
   },
+  {
+    id: 'name-james',
+    name: 'James / Jacob',
+    originalSpelling: 'Ἰάκωβος / יַעֲקֹב',
+    transliteration: 'Iakōbos (Greek) / Ya‘aqōv (Hebrew)',
+    pronunciation: 'ee-AH-koh-bos / yah-ah-KOHV',
+    language: 'Greek',
+    linguisticRoot: 'The Hellenized Greek form (Ἰάκωβος / Iakōbos) of the Hebrew patriarchal name יַעֲקֹב (Ya‘aqōv / Jacob), derived from עָקֵב (‘āqēv, "heel") or the verbal root עָקַב (‘āqav, "to take by the heel, supplant, overreach, protect").',
+    meaning: 'He Grasps the Heel / Supplanter / May God Protect',
+    biblicalPersonAssociated: 'James the son of Zebedee and brother of John (apostle and early martyr, Acts 12:2); James the brother of the Lord and leader of the Jerusalem Church (author of the Epistle of James, Acts 15:13, Galatians 1:19); and James the son of Alphaeus (apostle, Matthew 10:3).',
+    otReferences: ['Genesis 25:26', 'Genesis 27:36', 'Genesis 32:28', 'Psalm 105:10'],
+    ntReferences: ['Matthew 4:21', 'Matthew 10:2–3', 'Mark 3:17', 'Acts 1:13', 'Acts 12:2', 'Acts 15:13', '1 Corinthians 15:7', 'Galatians 2:9', 'James 1:1'],
+    historicalBackground: 'Because the patriarch Jacob was one of the three covenant fathers of Israel, his name was extremely common in the Second Temple era. In the New Testament, Latin and English translations evolved Iakōbos into "James" (via Old French James / Gemmes from Vulgar Latin Iacomus).',
+    theologicalSignificance: 'The transition from Jacob ("heel-catcher / supplanter") to Prince with God (Israel) prefigures redemption: transforming deceitful striving into humble reliance on God’s grace. In the New Testament, James the Lord’s brother exemplifies apostolic wisdom, uncompromising holiness, and practical faith evidenced through righteous deeds (James 2:14–26).',
+    alternativeScholarlyInterpretations: 'Semito-linguists note the root ‘-q-b in ancient Northwest Semitic onomastics is often an abbreviated theophoric name: Ya‘qob-’El ("May El/God protect / reward"), meaning the patriarchal name may originally have expressed a pious prayer for divine guardianship.',
+    sourceAttribution: 'BDAG (p. 465); BDB (p. 784); HALOT (p. 872); Richard Bauckham, James: Wisdom of James, Disciple of Jesus; Martin Dibelius, James (Hermeneia).',
+  },
+  {
+    id: 'name-john-yochanan',
+    name: 'John / Yochanan',
+    originalSpelling: 'יוֹחָנָן / Ἰωάννης',
+    transliteration: 'Yōḥānān (Hebrew) / Iōannēs (Greek)',
+    pronunciation: 'yoh-chah-NAHN / ee-oh-AHN-nays',
+    language: 'Hebrew',
+    linguisticRoot: 'Compound of the divine abbreviated name יוֹ (Yō, shortened from YHWH) and the Hebrew verb חָנַן (ḥānan, "to show favor, be gracious, pity").',
+    meaning: 'Yahweh is Gracious / The Lord Has Shown Favor',
+    biblicalPersonAssociated: 'John the Baptist, herald of the Messiah (Luke 1:13); and John the Apostle, son of Zebedee, author of the Fourth Gospel, three Epistles, and Revelation.',
+    otReferences: ['2 Kings 25:23', '1 Chronicles 3:15', 'Jeremiah 40:8', 'Ezra 8:12'],
+    ntReferences: ['Luke 1:13', 'Matthew 3:1–4', 'John 13:23', 'John 19:26', 'Revelation 1:1'],
+    historicalBackground: 'A frequent name during the post-exilic and Hasmonean periods (e.g., John Hyrcanus) expressing national gratitude for divine covenant mercy.',
+    theologicalSignificance: 'The Baptist’s miraculous birth heralded the arrival of the promised era of grace. John the Apostle became known as "the disciple whom Jesus loved," writing extensively on the incarnation of divine love and grace in Christ.',
+    alternativeScholarlyInterpretations: 'Universal consensus on the Hebrew etymological root Yō-ḥanan. Epigraphic bullae from the First and Second Temple periods verify wide usage.',
+    sourceAttribution: 'BDB (p. 337); BDAG (p. 492); HALOT (p. 399); Leon Morris, The Gospel According to John.',
+  },
+  {
+    id: 'name-matthew',
+    name: 'Matthew / Mattityahu',
+    originalSpelling: 'מַתִּתְיָהוּ / Μαθθαῖος',
+    transliteration: 'Mattityāhū (Hebrew) / Matthaios (Greek)',
+    pronunciation: 'mah-teet-YAH-hoo / maht-THAI-os',
+    language: 'Hebrew',
+    linguisticRoot: 'Derived from מַתָּת (mattāt, "gift") and יָהוּ (Yāhū, shortened YHWH), from the verb נָתַן (nātan, "to give").',
+    meaning: 'Gift of Yahweh / Gift of God',
+    biblicalPersonAssociated: 'Levi son of Alphaeus, Galilean tax collector called by Jesus to be one of the Twelve Apostles and author of the First Gospel.',
+    otReferences: ['1 Chronicles 9:31', '1 Chronicles 15:18', 'Nehemiah 8:4'],
+    ntReferences: ['Matthew 9:9', 'Matthew 10:3', 'Mark 2:14', 'Luke 5:27–29', 'Acts 1:13'],
+    historicalBackground: 'Stationed at Capernaum collecting customs taxes on goods traveling along the Via Maris between Damascus and Mediterranean ports.',
+    theologicalSignificance: 'A former outcast and collaborator with Rome, transformed by sovereign grace into the chronicler who showed Jews that Jesus is the fulfillment of all Old Testament prophecies and the true King of Israel.',
+    alternativeScholarlyInterpretations: 'Clear etymology matching Theodore and Jonathan. Levi was his tribal family name, while Matthew was his Hebrew personal name or apostolic surname conferred by Jesus.',
+    sourceAttribution: 'BDB (p. 682); BDAG (p. 614); Craig L. Blomberg, Matthew (NAC).',
+  },
+  {
+    id: 'name-luke',
+    name: 'Luke / Lucas',
+    originalSpelling: 'Λουκᾶς',
+    transliteration: 'Loukas (Greek)',
+    pronunciation: 'loo-KAHS',
+    language: 'Greek',
+    linguisticRoot: 'Contracted hypocoristic of the Latin name Lucius or Lucanus, from lux / lucis ("light, daybreak, bringer of light").',
+    meaning: 'Luminous / Light-Giving / From Lucania',
+    biblicalPersonAssociated: 'The beloved physician, companion of Paul, and author of the Gospel of Luke and the Acts of the Apostles.',
+    otReferences: [],
+    ntReferences: ['Colossians 4:14', '2 Timothy 4:11', 'Philemon 1:24'],
+    historicalBackground: 'An educated Gentile physician (likely of Antioch or Philippi) writing historically rigorous accounts for Theophilus using advanced Hellenistic historiography.',
+    theologicalSignificance: 'Luke emphasized Jesus as the compassionate Savior of the poor, marginalized, women, Samaritans, and Gentiles, bringing light to those living in darkness (Luke 1:79).',
+    alternativeScholarlyInterpretations: 'Scholars confirm Loukas is a Hellenistic abbreviation of Lucanus. Church tradition (Eusebius, Jerome) consistently attests his Antiochene origin and medical profession.',
+    sourceAttribution: 'BDAG (p. 602); Martin Hengel, The Four Gospels and the One Gospel of Jesus Christ; Joseph A. Fitzmyer, Luke (Anchor).',
+  },
+  {
+    id: 'name-joshua',
+    name: 'Joshua / Yehoshua',
+    originalSpelling: 'יְהוֹשֻׁעַ',
+    transliteration: 'Yəhōshūa‘ (Hebrew)',
+    pronunciation: 'yeh-ho-SHOO-ah',
+    language: 'Hebrew',
+    linguisticRoot: 'Compound of יהוה (YHWH) and יָשַׁע (yāsha‘, "to save, deliver"). Originally named Hoshea ("salvation"), renamed by Moses in Numbers 13:16.',
+    meaning: 'Yahweh is Salvation / The Lord Delivers',
+    biblicalPersonAssociated: 'Son of Nun of the tribe of Ephraim, successor to Moses, conqueror of Canaan, and leader of Israel into the Promised Land.',
+    otReferences: ['Exodus 17:9', 'Numbers 13:16', 'Numbers 27:18', 'Joshua 1:1–9', 'Joshua 24:15'],
+    ntReferences: ['Acts 7:45', 'Hebrews 4:8'],
+    historicalBackground: 'Military commander in the battle against Amalek, Moses’ faithful attendant on Mount Sinai, and one of two faithful spies alongside Caleb.',
+    theologicalSignificance: 'The ultimate Old Testament type of Jesus (whose Hebrew name Yeshua is a shortened form of Joshua). Where Moses (the Law) could not bring the people into rest, Joshua (grace and faith) brought them in.',
+    alternativeScholarlyInterpretations: 'Consistently vocalized across the Masoretic Text and Dead Sea Scrolls. LXX renders both Old Testament Joshua and New Testament Jesus as Iēsous (Ἰησοῦς).',
+    sourceAttribution: 'BDB (p. 221); HALOT (p. 220); Richard S. Hess, Joshua (TOTC).',
+  },
+  {
+    id: 'name-daniel',
+    name: 'Daniel',
+    originalSpelling: 'דָּנִיֵּאל',
+    transliteration: 'Dāniyyēl (Hebrew)',
+    pronunciation: 'dah-nee-AYL',
+    language: 'Hebrew',
+    linguisticRoot: 'From the Hebrew verb דִּין (dīn, "to judge, vindicate") and אֵל (‘Ēl, "God"), with the first-person pronominal suffix.',
+    meaning: 'God is My Judge / Divine Vindicator',
+    biblicalPersonAssociated: 'Nobleman of Judah exiled to Babylon under Nebuchadnezzar (605 BC), statesman under Babylonian and Persian empires, and apocalyptic prophet.',
+    otReferences: ['Daniel 1:6', 'Daniel 6:10', 'Daniel 7:13', 'Ezekiel 14:14', 'Ezekiel 28:3'],
+    ntReferences: ['Matthew 24:15'],
+    historicalBackground: 'Given the Babylonian pagan name Belteshazzar ("protect his life"), yet resolved not to defile himself with royal food or idolatry.',
+    theologicalSignificance: 'Daniel lived out his name: earthly emperors and satraps judged him worthy of the lions’ den, but the Sovereign God of heaven vindicated him, revealing the eternal Son of Man whose kingdom will never be destroyed (Daniel 7:13–14).',
+    alternativeScholarlyInterpretations: 'Ugaritic literature mentions a legendary righteous king Danel, but biblical Daniel was a historical 6th-century BC Judean prince cited by Ezekiel.',
+    sourceAttribution: 'BDB (p. 193); HALOT (p. 226); Joyce G. Baldwin, Daniel (TOTC).',
+  },
+  {
+    id: 'name-adam',
+    name: 'Adam',
+    originalSpelling: 'אָדָם',
+    transliteration: '’Ādām (Hebrew)',
+    pronunciation: 'ah-DAHM',
+    language: 'Hebrew',
+    linguisticRoot: 'Linguistically paired with אֲדָמָה (’ădāmāh, "ground, earth, red soil") and related to the root א-ד-ם (’adam, "ruddy, red").',
+    meaning: 'Man / Human Being / Formed of the Earth',
+    biblicalPersonAssociated: 'The first created man, father of the human race, placed in the Garden of Eden to cultivate and keep it.',
+    otReferences: ['Genesis 1:26–27', 'Genesis 2:7', 'Genesis 3:19', 'Hosea 6:7'],
+    ntReferences: ['Romans 5:12–19', '1 Corinthians 15:21–22', '1 Corinthians 15:45–47', '1 Timothy 2:13–14'],
+    historicalBackground: 'Created on the sixth day in the image and likeness of God; fell into rebellion by eating the forbidden fruit, bringing sin and physical death into creation.',
+    theologicalSignificance: 'Adam is the covenant federal head of the first creation whose fall plunged humanity into death; Christ is the "Last Adam" and federal head of the new creation whose obedience brings righteousness and resurrection life (Romans 5:12–21; 1 Corinthians 15:45).',
+    alternativeScholarlyInterpretations: 'Linguists point out that in Genesis 1–3 ’ādām functions both generically as "humankind" and as the proper name of the first individual historical progenitor.',
+    sourceAttribution: 'BDB (p. 9); HALOT (p. 14); Kenneth Mathews, Genesis 1–11:26 (NAC).',
+  },
+  {
+    id: 'name-sarah',
+    name: 'Sarah / Sarai',
+    originalSpelling: 'שָׂרָה / שָׂרַי',
+    transliteration: 'Sārāh / Sāray (Hebrew)',
+    pronunciation: 'sah-RAH / sah-RAHY',
+    language: 'Hebrew',
+    linguisticRoot: 'Derived from שַׂר (sar, "prince, chieftain, ruler"), feminine שָׂרָה. Renamed by God in Genesis 17:15 from Sarai ("contentious / my princess") to Sarah.',
+    meaning: 'Princess / Noblewoman / Mother of Nations',
+    biblicalPersonAssociated: 'Wife of Abraham, mother of Isaac, and covenant matriarch of the nation of Israel.',
+    otReferences: ['Genesis 11:29', 'Genesis 17:15–19', 'Genesis 18:9–15', 'Genesis 21:1–7', 'Isaiah 51:2'],
+    ntReferences: ['Romans 4:19', 'Romans 9:9', 'Hebrews 11:11', '1 Peter 3:6'],
+    historicalBackground: 'Accompanied Abraham from Ur to Canaan; was barren until age 90, when God miraculously fulfilled His covenant promise by enabling her to conceive Isaac.',
+    theologicalSignificance: 'Sarah embodies the miracle of supernatural covenant promise versus human striving (Galatians 4:21–31, where Sarah represents the Jerusalem above and freedom in the Spirit).',
+    alternativeScholarlyInterpretations: 'Scholars interpret Sarai either as an archaic dialectal form or with the possessive suffix ("my princess"), whereas Sarah confers cosmic royalty: "she will be the mother of nations" (Genesis 17:16).',
+    sourceAttribution: 'BDB (p. 979); HALOT (p. 1354); Gordon Wenham, Genesis (WBC).',
+  },
 ];
 
 export function searchBiblicalNames(query: string): BiblicalNameEntry[] {
   if (!query || !query.trim()) return BIBLICAL_NAMES;
-  const q = query.trim().toLowerCase();
 
-  // Exact match on English name or transliteration
-  const exact = BIBLICAL_NAMES.filter(
-    (n) =>
-      n.name.toLowerCase() === q ||
-      n.transliteration.toLowerCase() === q ||
-      n.originalSpelling.toLowerCase() === q
-  );
+  // Clean query: normalize and strip common search prefixes like "meaning of", "definition of", "who is", "the name"
+  let cleanQ = query.trim().toLowerCase();
+  cleanQ = cleanQ
+    .replace(
+      /^(meaning\s+of\s+|definition\s+of\s+|what\s+is\s+|who\s+is\s+|name\s+of\s+|the\s+name\s+)/i,
+      ''
+    )
+    .trim();
 
-  const partial = BIBLICAL_NAMES.filter((n) => {
-    if (exact.some((e) => e.id === n.id)) return false;
+  if (!cleanQ) cleanQ = query.trim().toLowerCase();
+
+  // 1. Exact match on English name, name tokens (e.g. "James" in "James / Jacob"), transliteration, or original spelling
+  const exact = BIBLICAL_NAMES.filter((n) => {
+    const nameLower = n.name.toLowerCase();
+    const tokens = nameLower.split(/[\s/—–-]+/).map((t) => t.trim());
     return (
-      n.name.toLowerCase().includes(q) ||
-      n.meaning.toLowerCase().includes(q) ||
-      n.transliteration.toLowerCase().includes(q) ||
-      n.originalSpelling.toLowerCase().includes(q) ||
-      n.linguisticRoot.toLowerCase().includes(q) ||
-      n.biblicalPersonAssociated.toLowerCase().includes(q)
+      nameLower === cleanQ ||
+      tokens.includes(cleanQ) ||
+      n.transliteration.toLowerCase() === cleanQ ||
+      n.originalSpelling.toLowerCase() === cleanQ
     );
   });
 
-  return [...exact, ...partial];
+  // 2. Strong partial match on name or transliteration
+  const strongPartial = BIBLICAL_NAMES.filter((n) => {
+    if (exact.some((e) => e.id === n.id)) return false;
+    return (
+      n.name.toLowerCase().includes(cleanQ) ||
+      n.transliteration.toLowerCase().includes(cleanQ) ||
+      n.originalSpelling.toLowerCase().includes(cleanQ)
+    );
+  });
+
+  // 3. Contextual match on literal meaning, root, or associated biblical person
+  const contextual = BIBLICAL_NAMES.filter((n) => {
+    if (exact.some((e) => e.id === n.id) || strongPartial.some((s) => s.id === n.id)) return false;
+    return (
+      n.meaning.toLowerCase().includes(cleanQ) ||
+      n.linguisticRoot.toLowerCase().includes(cleanQ) ||
+      n.biblicalPersonAssociated.toLowerCase().includes(cleanQ)
+    );
+  });
+
+  return [...exact, ...strongPartial, ...contextual];
 }
 
 export function getNameById(id: string): BiblicalNameEntry | undefined {
-  return BIBLICAL_NAMES.find((n) => n.id === id);
+  const norm = id.trim().toLowerCase();
+  return BIBLICAL_NAMES.find(
+    (n) => n.id.toLowerCase() === norm || n.name.toLowerCase().includes(norm)
+  );
 }
+

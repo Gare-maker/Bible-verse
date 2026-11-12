@@ -923,7 +923,14 @@ export const BIBLICAL_LEXICON: LexiconEntry[] = [
  */
 export function searchBiblicalLexicon(query: string): LexiconEntry[] {
   if (!query || !query.trim()) return BIBLICAL_LEXICON;
-  const q = query.trim().toLowerCase();
+  let q = query.trim().toLowerCase();
+  q = q
+    .replace(
+      /^(meaning\s+of\s+|definition\s+of\s+|what\s+is\s+|word\s+study\s+of\s+|the\s+word\s+)/i,
+      ''
+    )
+    .trim();
+  if (!q) q = query.trim().toLowerCase();
 
   // 1. Exact matches on English word, Strong's number, or Transliteration
   const exactMatches = BIBLICAL_LEXICON.filter(

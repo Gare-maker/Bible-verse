@@ -152,52 +152,15 @@ export default function StudyPage({
     return { words, names, typesAndShadows, methods, etymologies, totalCount };
   }, [unifiedSearchQuery]);
 
-  // Click handler to open scripture in Bible reader
-  const handleScriptureClick = (refStr: string) => {
-    navigateToReferenceString(refStr, true);
-    setActivePage('bible');
-  };
-
-  // Navigation from search to specific item
-  const handleSelectWord = (entry: LexiconEntry) => {
-    setSelectedWordEntry(entry);
-    setActiveCategory('word-study');
-    setUnifiedSearchQuery('');
-    setIsSearchFocused(false);
-    scrollToTop();
-  };
-
-  const handleSelectName = (nameEntry: BiblicalNameEntry) => {
-    setSelectedNameEntry(nameEntry);
-    setActiveCategory('names');
-    setUnifiedSearchQuery('');
-    setIsSearchFocused(false);
-    scrollToTop();
-  };
-
-  const handleSelectMethod = (method: InterpretationMethod) => {
-    setSelectedMethod(method);
-    setActiveCategory('methods');
-    setUnifiedSearchQuery('');
-    setIsSearchFocused(false);
-    scrollToTop();
-  };
-
-  const handleSelectTypeShadow = (ts: BiblicalTypeAndShadowEntry) => {
-    setSelectedTypeShadow(ts);
-    setActiveCategory('types-shadows');
-    setUnifiedSearchQuery('');
-    setIsSearchFocused(false);
-    scrollToTop();
-  };
-
-  const handleSelectEtymology = (etym: EtymologyExample) => {
-    setSelectedEtymology(etym);
-    setActiveCategory('etymology');
-    setUnifiedSearchQuery('');
-    setIsSearchFocused(false);
-    scrollToTop();
-  };
+  // Dedicated Separate Details Page state (Requirement 5)
+  const [activeSearchDetail, setActiveSearchDetail] = useState<
+    | { type: 'word'; entry: LexiconEntry }
+    | { type: 'name'; entry: BiblicalNameEntry }
+    | { type: 'types-shadows'; entry: BiblicalTypeAndShadowEntry }
+    | { type: 'method'; entry: InterpretationMethod }
+    | { type: 'etymology'; entry: EtymologyExample }
+    | null
+  >(null);
 
   // Filtered lists for the active tab view
   const currentCategoryWords = useMemo(() => {
@@ -213,6 +176,50 @@ export default function StudyPage({
     return TYPES_AND_SHADOWS_LIBRARY.filter((item) => item.category === selectedTypologyCategory);
   }, [selectedTypologyCategory]);
 
+  // Click handler to open scripture in Bible reader
+  const handleScriptureClick = (refStr: string) => {
+    navigateToReferenceString(refStr, true);
+    setActivePage('bible');
+  };
+
+  // Navigation from search to dedicated details page (Requirement 5)
+  const handleSelectWord = (entry: LexiconEntry) => {
+    setActiveSearchDetail({ type: 'word', entry });
+    setIsSearchFocused(false);
+    scrollToTop();
+  };
+
+  const handleSelectName = (nameEntry: BiblicalNameEntry) => {
+    setActiveSearchDetail({ type: 'name', entry: nameEntry });
+    setIsSearchFocused(false);
+    scrollToTop();
+  };
+
+  const handleSelectMethod = (method: InterpretationMethod) => {
+    setActiveSearchDetail({ type: 'method', entry: method });
+    setIsSearchFocused(false);
+    scrollToTop();
+  };
+
+  const handleSelectTypeShadow = (ts: BiblicalTypeAndShadowEntry) => {
+    setActiveSearchDetail({ type: 'types-shadows', entry: ts });
+    setIsSearchFocused(false);
+    scrollToTop();
+  };
+
+  const handleSelectEtymology = (etym: EtymologyExample) => {
+    setActiveSearchDetail({ type: 'etymology', entry: etym });
+    setIsSearchFocused(false);
+    scrollToTop();
+  };
+
+  // Clear dedicated detail and return to search results (Requirement 5)
+  const handleBackToSearch = () => {
+    setActiveSearchDetail(null);
+    setIsSearchFocused(true);
+    scrollToTop();
+  };
+
   return (
     <div
       className={`flex-1 flex flex-col min-h-screen pb-28 lg:pb-16 ${
@@ -226,252 +233,887 @@ export default function StudyPage({
       }`}
     >
       {/* =====================================================================
-          HEADER (Section 2 Requirement)
-          - Title: "Study"
-          - NO icon before the title
-          - Search field directly below the title
-          - Clean, uncluttered, consistent with application design
+          DEDICATED SEPARATE DETAILS PAGE (Requirement 5)
+          When user selects any result from search, open a dedicated details page:
+          - Selected word or subject as page title
+          - Complete study information
+          - Clean readable layout without crowded search interface
+          - Clear Back to Search button preserving query and results
+          - Scroll position zero
           ===================================================================== */}
-      <header
-        className={`sticky top-0 z-30 px-4 sm:px-8 pt-5 pb-4 border-b transition-colors shadow-xs ${
-          isChildren
-            ? isLight
-              ? 'bg-[#FFFDF4]/95 border-amber-200/90 text-slate-900 backdrop-blur-md'
-              : 'bg-[#13192E]/95 border-indigo-900/80 text-slate-100 backdrop-blur-md'
-            : isLight
-            ? 'bg-[#FBF9F5]/95 border-stone-200/90 text-stone-900 backdrop-blur-md'
-            : 'bg-[#0F0F0F]/95 border-zinc-800/90 text-zinc-100 backdrop-blur-md'
-        }`}
-      >
-        <div className="max-w-5xl mx-auto w-full space-y-3">
-          {/* Top Title Bar: STRICTLY "Study" without any icon before it */}
-          <div className="flex items-center justify-between gap-3">
-            <h1 className="text-2xl sm:text-3xl font-serif font-bold tracking-tight">
-              Study
-            </h1>
-            <button
-              onClick={() => setActivePage('bible')}
-              className={`rounded-xl px-3 py-1.5 text-xs font-semibold border flex items-center gap-1.5 transition ${
-                isLight
-                  ? 'bg-white hover:bg-stone-50 border-stone-200/90 text-stone-700 shadow-2xs'
-                  : 'bg-zinc-900 hover:bg-zinc-800 border-zinc-800 text-zinc-200'
-              }`}
-              title="Return to Bible Reader"
-            >
-              <BookOpen className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">Bible Reader</span>
-            </button>
-          </div>
-
-          {/* Single Unified Primary Search Field directly below the title */}
-          <div ref={searchContainerRef} className="relative w-full">
-            <div
-              className={`relative rounded-2xl border transition-all ${
-                isSearchFocused
-                  ? isLight
-                    ? 'border-amber-600 ring-2 ring-amber-500/20 shadow-md bg-white'
-                    : 'border-amber-400 ring-2 ring-amber-400/20 shadow-md bg-[#181818]'
-                  : isLight
-                  ? 'border-stone-200/90 bg-white hover:border-stone-300 shadow-xs'
-                  : 'border-zinc-800 bg-[#161616] hover:border-zinc-700'
-              }`}
-            >
-              <Search className="h-4 w-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400 dark:text-zinc-500" />
-              <input
-                type="text"
-                value={unifiedSearchQuery}
-                onFocus={() => setIsSearchFocused(true)}
-                onChange={(e) => {
-                  setUnifiedSearchQuery(e.target.value);
-                  setIsSearchFocused(true);
-                }}
-                placeholder="Search biblical words, Greek/Hebrew terms, Strong's numbers, names, or types..."
-                className={`w-full bg-transparent pl-10 pr-20 py-2.5 sm:py-3 text-xs sm:text-sm focus:outline-none ${
+      {activeSearchDetail ? (
+        <div className="flex-1 flex flex-col">
+          {/* Top Sticky Navigation Bar with Back Button */}
+          <header
+            className={`sticky top-0 z-30 px-4 sm:px-8 py-3.5 border-b transition-colors shadow-xs ${
+              isChildren
+                ? isLight
+                  ? 'bg-[#FFFDF4]/95 border-amber-200/90 text-slate-900 backdrop-blur-md'
+                  : 'bg-[#13192E]/95 border-indigo-900/80 text-slate-100 backdrop-blur-md'
+                : isLight
+                ? 'bg-[#FBF9F5]/95 border-stone-200/90 text-stone-900 backdrop-blur-md'
+                : 'bg-[#0F0F0F]/95 border-zinc-800/90 text-zinc-100 backdrop-blur-md'
+            }`}
+          >
+            <div className="max-w-4xl mx-auto w-full flex items-center justify-between gap-3">
+              <button
+                type="button"
+                onClick={handleBackToSearch}
+                className={`inline-flex items-center gap-2 text-xs sm:text-sm font-bold transition px-3.5 py-2 rounded-xl border ${
                   isLight
-                    ? 'text-stone-900 placeholder-stone-400'
-                    : 'text-zinc-100 placeholder-zinc-500'
-                }`}
-              />
-              {unifiedSearchQuery && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setUnifiedSearchQuery('');
-                  }}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-stone-400 hover:text-stone-600 dark:hover:text-zinc-200 px-1 py-0.5"
-                >
-                  Clear
-                </button>
-              )}
-            </div>
-
-            {/* Live Search Results Dropdown Overlay */}
-            {isSearchFocused && unifiedSearchResults && unifiedSearchResults.totalCount > 0 && (
-              <div
-                className={`absolute top-full left-0 right-0 mt-2 rounded-2xl border shadow-2xl p-4 z-50 max-h-[460px] overflow-y-auto space-y-4 animate-in fade-in duration-150 ${
-                  isLight
-                    ? 'bg-white border-stone-200 text-stone-900'
-                    : 'bg-[#181818] border-zinc-800 text-zinc-100'
+                    ? 'bg-white hover:bg-stone-100 border-stone-200 text-stone-700 shadow-2xs'
+                    : 'bg-zinc-900 hover:bg-zinc-800 border-zinc-800 text-zinc-200'
                 }`}
               >
-                {/* 1. Word Study Results */}
-                {unifiedSearchResults.words.length > 0 && (
-                  <div className="space-y-1.5">
-                    <span className="text-[10.5px] uppercase font-bold tracking-wider text-amber-700 dark:text-amber-400">
-                      Word Study & Lexicon ({unifiedSearchResults.words.length})
+                <ArrowLeft className="h-4 w-4" />
+                <span>Back to Search</span>
+              </button>
+
+              <span className="text-[11px] font-bold uppercase tracking-wider text-stone-400">
+                {activeSearchDetail.type === 'word'
+                  ? 'Word Study'
+                  : activeSearchDetail.type === 'name'
+                  ? 'Name Meaning'
+                  : activeSearchDetail.type === 'types-shadows'
+                  ? 'Types & Shadows'
+                  : activeSearchDetail.type === 'method'
+                  ? 'Interpretation Method'
+                  : 'Etymology'}
+              </span>
+            </div>
+          </header>
+
+          {/* Details Content Container */}
+          <main className="max-w-4xl mx-auto w-full px-4 sm:px-8 pt-6 sm:pt-8 space-y-6 animate-in fade-in duration-150">
+            {activeSearchDetail.type === 'word' && (
+              <article className="space-y-6">
+                <div
+                  className={`rounded-3xl border p-5 sm:p-7 shadow-sm space-y-5 ${
+                    isLight
+                      ? 'bg-white border-stone-200/90 text-stone-900'
+                      : 'bg-[#151515] border-zinc-800 text-zinc-100'
+                  }`}
+                >
+                  {/* Top Word Card Banner */}
+                  <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-3 border-b border-stone-200/80 dark:border-zinc-800 pb-4">
+                    <div>
+                      <div className="flex items-baseline gap-3 flex-wrap">
+                        <h1 className="text-3xl sm:text-4xl font-serif font-bold tracking-tight">
+                          {activeSearchDetail.entry.englishWord}
+                        </h1>
+                        <span className="font-serif text-3xl sm:text-4xl font-bold text-amber-700 dark:text-amber-400">
+                          {activeSearchDetail.entry.originalSpelling}
+                        </span>
+                        <span className="text-base sm:text-lg italic text-stone-600 dark:text-zinc-300">
+                          ({activeSearchDetail.entry.transliteration})
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 mt-2 flex-wrap text-xs">
+                        <span className="px-2.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/70 text-amber-900 dark:text-amber-300 font-semibold">
+                          {activeSearchDetail.entry.language}
+                        </span>
+                        {activeSearchDetail.entry.strongsNumber && (
+                          <span className="font-mono px-2 py-0.5 rounded-full bg-stone-100 dark:bg-zinc-800 text-stone-700 dark:text-zinc-300 font-bold">
+                            Strong&apos;s {activeSearchDetail.entry.strongsNumber}
+                          </span>
+                        )}
+                        <span className="text-stone-500 dark:text-zinc-400">
+                          Pronunciation: <strong>{activeSearchDetail.entry.pronunciation || activeSearchDetail.entry.transliteration}</strong>
+                        </span>
+                        <span className="text-stone-500 dark:text-zinc-400">
+                          • {activeSearchDetail.entry.partOfSpeech}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="text-left sm:text-right shrink-0">
+                      <span className="text-xs font-bold text-stone-400 block">Occurrences</span>
+                      <span className="text-xl font-bold font-mono text-amber-700 dark:text-amber-400">
+                        {activeSearchDetail.entry.biblicalOccurrences} times
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* 16-Field Content Breakdown */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pt-2">
+                    <div className="p-4 rounded-2xl bg-stone-50/70 dark:bg-zinc-900/60 border border-stone-200/80 dark:border-zinc-800 space-y-1">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-stone-400 block">
+                        Root Word & Derivation
+                      </span>
+                      <p className="text-xs sm:text-sm leading-relaxed">
+                        {activeSearchDetail.entry.rootWordAndRelatedForms}
+                      </p>
+                    </div>
+
+                    <div className="p-4 rounded-2xl bg-stone-50/70 dark:bg-zinc-900/60 border border-stone-200/80 dark:border-zinc-800 space-y-1">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-stone-400 block">
+                        Primary Lexical Meaning
+                      </span>
+                      <p className="text-xs sm:text-sm leading-relaxed font-medium">
+                        {activeSearchDetail.entry.primaryMeaning || activeSearchDetail.entry.lexicalDefinition}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="p-4 rounded-2xl bg-amber-500/5 dark:bg-amber-500/10 border border-amber-200/70 dark:border-amber-900/40 space-y-1.5">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-amber-800 dark:text-amber-300 block">
+                      Etymology (Historical & Linguistic Development)
                     </span>
-                    <div className="grid gap-1.5">
-                      {unifiedSearchResults.words.map((w) => (
+                    <p className="text-xs sm:text-sm leading-relaxed text-stone-800 dark:text-zinc-200">
+                      {activeSearchDetail.entry.etymologyAndOrigin}
+                    </p>
+                  </div>
+
+                  <div className="p-4 rounded-2xl bg-blue-500/5 dark:bg-blue-500/10 border border-blue-200/70 dark:border-blue-900/40 space-y-1.5">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-blue-800 dark:text-blue-300 block">
+                      Theological Significance
+                    </span>
+                    <p className="text-xs sm:text-sm leading-relaxed text-stone-800 dark:text-zinc-200">
+                      {activeSearchDetail.entry.theologicalSignificance || activeSearchDetail.entry.contextualMeaning}
+                    </p>
+                  </div>
+
+                  {activeSearchDetail.entry.contextualMeanings && activeSearchDetail.entry.contextualMeanings.length > 0 && (
+                    <div className="space-y-2">
+                      <span className="text-xs font-bold uppercase tracking-wider text-stone-500 dark:text-zinc-400 block">
+                        Contextual Meanings Across Scripture
+                      </span>
+                      <ul className="grid gap-2">
+                        {activeSearchDetail.entry.contextualMeanings.map((cm, idx) => (
+                          <li
+                            key={idx}
+                            className="p-3 rounded-xl border text-xs sm:text-[13px] bg-stone-50/50 dark:bg-zinc-900/40 border-stone-200/70 dark:border-zinc-800"
+                          >
+                            {cm}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {activeSearchDetail.entry.biblicalUsageOverview && (
+                    <div className="p-4 rounded-2xl bg-stone-50/70 dark:bg-zinc-900/60 border border-stone-200/80 dark:border-zinc-800 space-y-1.5">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-stone-400 block">
+                        Biblical Usage Overview
+                      </span>
+                      <p className="text-xs sm:text-sm leading-relaxed text-stone-700 dark:text-zinc-300">
+                        {activeSearchDetail.entry.biblicalUsageOverview}
+                      </p>
+                    </div>
+                  )}
+
+                  <div className="space-y-2.5">
+                    <span className="text-xs font-bold uppercase tracking-wider text-stone-500 dark:text-zinc-400 block">
+                      Key Scripture Passages & Translations
+                    </span>
+                    <div className="grid gap-2.5">
+                      {activeSearchDetail.entry.examplesOfUsage.map((ex, idx) => (
+                        <div
+                          key={idx}
+                          className="p-3.5 rounded-2xl border bg-stone-50/60 dark:bg-zinc-900/50 border-stone-200/80 dark:border-zinc-800 space-y-1.5"
+                        >
+                          <div className="flex items-center justify-between">
+                            <button
+                              type="button"
+                              onClick={() => handleScriptureClick(ex.ref)}
+                              className="text-xs font-bold text-amber-800 dark:text-amber-400 hover:underline"
+                            >
+                              {ex.ref}
+                            </button>
+                            <span className="text-[11px] text-stone-400">Context passage</span>
+                          </div>
+                          <p className="font-serif text-sm italic text-stone-800 dark:text-zinc-200">
+                            &ldquo;{ex.passageSnippet}&rdquo;
+                          </p>
+                          <p className="text-xs text-stone-600 dark:text-zinc-400">
+                            <strong>Note:</strong> {ex.translationNote}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {activeSearchDetail.entry.historicalExplanation && (
+                    <div className="p-4 rounded-2xl bg-stone-50/70 dark:bg-zinc-900/60 border border-stone-200/80 dark:border-zinc-800 space-y-1.5">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-stone-400 block">
+                        Historical & Cultural Context
+                      </span>
+                      <p className="text-xs sm:text-sm leading-relaxed text-stone-700 dark:text-zinc-300">
+                        {activeSearchDetail.entry.historicalExplanation}
+                      </p>
+                    </div>
+                  )}
+
+                  {activeSearchDetail.entry.scholarlyPerspectives && (
+                    <div className="p-4 rounded-2xl bg-stone-50/70 dark:bg-zinc-900/60 border border-stone-200/80 dark:border-zinc-800 space-y-1.5">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-stone-400 block">
+                        Scholarly & Lexicographical Perspectives
+                      </span>
+                      <p className="text-xs sm:text-sm leading-relaxed text-stone-700 dark:text-zinc-300">
+                        {activeSearchDetail.entry.scholarlyPerspectives}
+                      </p>
+                    </div>
+                  )}
+
+                  <div className="pt-3 border-t border-stone-200/70 dark:border-zinc-800 text-[11px] text-stone-500 dark:text-zinc-400 italic">
+                    Source: {activeSearchDetail.entry.sourceAttribution}
+                  </div>
+                </div>
+              </article>
+            )}
+
+            {activeSearchDetail.type === 'name' && (
+              <article className="space-y-6">
+                <div
+                  className={`rounded-3xl border p-5 sm:p-7 shadow-sm space-y-5 ${
+                    isLight
+                      ? 'bg-white border-stone-200/90 text-stone-900'
+                      : 'bg-[#151515] border-zinc-800 text-zinc-100'
+                  }`}
+                >
+                  <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-3 border-b border-stone-200/80 dark:border-zinc-800 pb-4">
+                    <div>
+                      <div className="flex items-baseline gap-3 flex-wrap">
+                        <h1 className="text-3xl sm:text-4xl font-serif font-bold tracking-tight">
+                          {activeSearchDetail.entry.name}
+                        </h1>
+                        <span className="font-serif text-3xl sm:text-4xl font-bold text-sky-700 dark:text-sky-400">
+                          {activeSearchDetail.entry.originalSpelling}
+                        </span>
+                        <span className="text-base sm:text-lg italic text-stone-600 dark:text-zinc-300">
+                          ({activeSearchDetail.entry.transliteration})
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 mt-2 flex-wrap text-xs">
+                        <span className="px-2.5 py-0.5 rounded-full bg-sky-100 dark:bg-sky-950/70 text-sky-900 dark:text-sky-300 font-semibold">
+                          {activeSearchDetail.entry.language}
+                        </span>
+                        <span className="text-stone-500 dark:text-zinc-400">
+                          Pronunciation: <strong>{activeSearchDetail.entry.pronunciation}</strong>
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="p-3 rounded-2xl bg-sky-50 dark:bg-sky-950/40 border border-sky-200/70 dark:border-sky-800/40 text-left sm:text-right">
+                      <span className="text-[10px] uppercase font-bold tracking-wider text-sky-800 dark:text-sky-300 block">
+                        Meaning of the Name
+                      </span>
+                      <span className="text-sm sm:text-base font-bold text-sky-950 dark:text-sky-200">
+                        &ldquo;{activeSearchDetail.entry.meaning}&rdquo;
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="p-4 rounded-2xl bg-stone-50/70 dark:bg-zinc-900/60 border border-stone-200/80 dark:border-zinc-800 space-y-1">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-stone-400 block">
+                      Linguistic Root & Derivation
+                    </span>
+                    <p className="text-xs sm:text-sm leading-relaxed">
+                      {activeSearchDetail.entry.linguisticRoot}
+                    </p>
+                  </div>
+
+                  <div className="p-4 rounded-2xl bg-stone-50/70 dark:bg-zinc-900/60 border border-stone-200/80 dark:border-zinc-800 space-y-1">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-stone-400 block">
+                      Biblical Person Associated
+                    </span>
+                    <p className="text-xs sm:text-sm leading-relaxed font-medium">
+                      {activeSearchDetail.entry.biblicalPersonAssociated}
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="p-4 rounded-2xl bg-stone-50/70 dark:bg-zinc-900/60 border border-stone-200/80 dark:border-zinc-800 space-y-1">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-stone-400 block">
+                        Historical Background
+                      </span>
+                      <p className="text-xs sm:text-sm leading-relaxed text-stone-700 dark:text-zinc-300">
+                        {activeSearchDetail.entry.historicalBackground}
+                      </p>
+                    </div>
+
+                    <div className="p-4 rounded-2xl bg-stone-50/70 dark:bg-zinc-900/60 border border-stone-200/80 dark:border-zinc-800 space-y-1">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-stone-400 block">
+                        Theological Significance
+                      </span>
+                      <p className="text-xs sm:text-sm leading-relaxed text-stone-700 dark:text-zinc-300">
+                        {activeSearchDetail.entry.theologicalSignificance}
+                      </p>
+                    </div>
+                  </div>
+
+                  {activeSearchDetail.entry.alternativeScholarlyInterpretations && (
+                    <div className="p-4 rounded-2xl bg-amber-500/5 dark:bg-amber-500/10 border border-amber-200/70 dark:border-amber-900/40 space-y-1.5">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-amber-800 dark:text-amber-300 block">
+                        Scholarly Interpretations, Evidence & Uncertainties
+                      </span>
+                      <p className="text-xs sm:text-sm leading-relaxed text-stone-800 dark:text-zinc-200">
+                        {activeSearchDetail.entry.alternativeScholarlyInterpretations}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Scripture References */}
+                  <div className="space-y-2 pt-2">
+                    <span className="text-xs font-bold uppercase tracking-wider text-stone-500 dark:text-zinc-400 block">
+                      Scripture References
+                    </span>
+                    <div className="flex flex-wrap gap-2">
+                      {[...activeSearchDetail.entry.otReferences, ...activeSearchDetail.entry.ntReferences].map((ref) => (
                         <button
-                          key={w.id}
-                          onClick={() => handleSelectWord(w)}
-                          className={`w-full rounded-xl p-2.5 text-left text-xs transition border flex items-center justify-between ${
+                          key={ref}
+                          type="button"
+                          onClick={() => handleScriptureClick(ref)}
+                          className={`rounded-xl px-3 py-1.5 text-xs font-bold border transition flex items-center gap-1.5 ${
                             isLight
-                              ? 'bg-stone-50/70 hover:bg-amber-50 border-stone-200/80 hover:border-amber-300'
-                              : 'bg-zinc-900/80 hover:bg-zinc-800 border-zinc-800 hover:border-amber-500/40'
+                              ? 'bg-stone-50 hover:bg-stone-100 border-stone-200 text-stone-800'
+                              : 'bg-zinc-900 hover:bg-zinc-800 border-zinc-800 text-zinc-200'
                           }`}
                         >
-                          <div className="min-w-0 pr-2">
-                            <div className="flex items-baseline gap-2">
-                              <span className="font-bold text-stone-900 dark:text-white">
-                                {w.englishWord}
-                              </span>
-                              <span className="font-serif text-sm font-semibold text-amber-700 dark:text-amber-400">
-                                {w.originalSpelling}
-                              </span>
-                              <span className="text-[11px] italic text-stone-500 dark:text-zinc-400">
-                                ({w.transliteration})
-                              </span>
-                              {w.strongsNumber && (
-                                <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-stone-200/70 dark:bg-zinc-800 text-stone-600 dark:text-zinc-300">
-                                  {w.strongsNumber}
+                          <BookOpen className="h-3 w-3 text-sky-600 dark:text-sky-400" />
+                          <span>{ref}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="pt-3 border-t border-stone-200/70 dark:border-zinc-800 text-[11px] text-stone-500 dark:text-zinc-400 italic">
+                    Onomastic Sources: {activeSearchDetail.entry.sourceAttribution}
+                  </div>
+                </div>
+              </article>
+            )}
+
+            {activeSearchDetail.type === 'types-shadows' && (
+              <article className="space-y-6">
+                <div
+                  className={`rounded-3xl border p-5 sm:p-7 shadow-sm space-y-5 ${
+                    isLight
+                      ? 'bg-white border-stone-200/90 text-stone-900'
+                      : 'bg-[#151515] border-zinc-800 text-zinc-100'
+                  }`}
+                >
+                  <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-3 border-b border-stone-200/80 dark:border-zinc-800 pb-4">
+                    <div>
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-100 text-emerald-900 dark:bg-emerald-950 dark:text-emerald-300">
+                          {activeSearchDetail.entry.category}
+                        </span>
+                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-stone-100 dark:bg-zinc-800 text-stone-600 dark:text-zinc-400">
+                          {activeSearchDetail.entry.interpretiveClassification}
+                        </span>
+                      </div>
+                      <h1 className="text-3xl sm:text-4xl font-serif font-bold tracking-tight">
+                        {activeSearchDetail.entry.name}
+                      </h1>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="p-4 rounded-2xl bg-amber-500/5 dark:bg-amber-500/10 border border-amber-200/70 dark:border-amber-900/40 space-y-1.5">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-amber-800 dark:text-amber-300 block">
+                        Old Testament Shadow & Account
+                      </span>
+                      <p className="text-xs sm:text-sm leading-relaxed text-stone-800 dark:text-zinc-200">
+                        {activeSearchDetail.entry.biblicalAccount}
+                      </p>
+                    </div>
+
+                    <div className="p-4 rounded-2xl bg-emerald-500/5 dark:bg-emerald-500/10 border border-emerald-200/70 dark:border-emerald-900/40 space-y-1.5">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-300 block">
+                        Person / Reality Foreshadowed
+                      </span>
+                      <p className="text-xs sm:text-sm leading-relaxed text-stone-800 dark:text-zinc-200 font-medium">
+                        {activeSearchDetail.entry.personOrRealityForeshadowed}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="p-4 rounded-2xl bg-stone-50/70 dark:bg-zinc-900/60 border border-stone-200/80 dark:border-zinc-800 space-y-1.5">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-stone-400 block">
+                      Substantial Theological Explanation
+                    </span>
+                    <p className="text-xs sm:text-sm leading-relaxed text-stone-800 dark:text-zinc-200">
+                      {activeSearchDetail.entry.theologicalExplanation}
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <span className="text-xs font-bold uppercase tracking-wider text-stone-500 dark:text-zinc-400 block">
+                        Old Testament References (Type / Shadow)
+                      </span>
+                      <div className="flex flex-wrap gap-1.5">
+                        {activeSearchDetail.entry.otReferences.map((ref) => (
+                          <button
+                            key={ref}
+                            type="button"
+                            onClick={() => handleScriptureClick(ref)}
+                            className={`rounded-xl px-2.5 py-1 text-xs font-semibold border transition ${
+                              isLight
+                                ? 'bg-stone-50 hover:bg-stone-100 border-stone-200 text-stone-800'
+                                : 'bg-zinc-800 hover:bg-zinc-700 border-zinc-700 text-zinc-200'
+                            }`}
+                          >
+                            {ref}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <span className="text-xs font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-400 block">
+                        New Testament Fulfilment (Antitype)
+                      </span>
+                      <div className="flex flex-wrap gap-1.5">
+                        {activeSearchDetail.entry.ntFulfilmentOrConnection.map((ref) => (
+                          <button
+                            key={ref}
+                            type="button"
+                            onClick={() => handleScriptureClick(ref)}
+                            className={`rounded-xl px-2.5 py-1 text-xs font-bold border transition ${
+                              isLight
+                                ? 'bg-emerald-50 hover:bg-emerald-100 border-emerald-200 text-emerald-900'
+                                : 'bg-emerald-950/60 hover:bg-emerald-900/80 border-emerald-800 text-emerald-300'
+                            }`}
+                          >
+                            {ref}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="pt-3 border-t border-stone-200/70 dark:border-zinc-800 text-[11px] text-stone-500 dark:text-zinc-400 italic">
+                    Theological Sources: {activeSearchDetail.entry.sourceAttribution}
+                  </div>
+                </div>
+              </article>
+            )}
+
+            {activeSearchDetail.type === 'method' && (
+              <article className="space-y-6">
+                <div
+                  className={`rounded-3xl border p-5 sm:p-7 shadow-sm space-y-5 ${
+                    isLight
+                      ? 'bg-white border-stone-200/90 text-stone-900'
+                      : 'bg-[#151515] border-zinc-800 text-zinc-100'
+                  }`}
+                >
+                  <div className="border-b border-stone-200/80 dark:border-zinc-800 pb-4">
+                    <span className="text-[10.5px] uppercase font-bold tracking-wider text-purple-700 dark:text-purple-400 block mb-1">
+                      Hermeneutical Method
+                    </span>
+                    <h1 className="text-3xl sm:text-4xl font-serif font-bold tracking-tight">
+                      {activeSearchDetail.entry.name}
+                    </h1>
+                  </div>
+
+                  <div className="p-4 rounded-2xl bg-purple-500/5 dark:bg-purple-500/10 border border-purple-200/70 dark:border-purple-900/40 space-y-1.5">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-purple-800 dark:text-purple-300 block">
+                      Clear Summary
+                    </span>
+                    <p className="text-xs sm:text-sm leading-relaxed text-stone-800 dark:text-zinc-200 font-medium">
+                      {activeSearchDetail.entry.shortSummary}
+                    </p>
+                  </div>
+
+                  <div className="p-4 rounded-2xl bg-stone-50/70 dark:bg-zinc-900/60 border border-stone-200/80 dark:border-zinc-800 space-y-1.5">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-stone-400 block">
+                      Core Hermeneutical Principles
+                    </span>
+                    <p className="text-xs sm:text-sm leading-relaxed text-stone-700 dark:text-zinc-300">
+                      {activeSearchDetail.entry.detailedExplanation}
+                    </p>
+                  </div>
+
+                  {activeSearchDetail.entry.biblicalExamples && activeSearchDetail.entry.biblicalExamples.length > 0 && (
+                    <div className="p-4 rounded-2xl bg-amber-500/5 dark:bg-amber-500/10 border border-amber-200/70 dark:border-amber-900/40 space-y-1.5">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-amber-800 dark:text-amber-300 block">
+                        Biblical Example & Passage Application
+                      </span>
+                      <p className="text-xs sm:text-sm leading-relaxed text-stone-800 dark:text-zinc-200">
+                        <strong>{activeSearchDetail.entry.biblicalExamples[0].title} ({activeSearchDetail.entry.biblicalExamples[0].passage}):</strong>{' '}
+                        {activeSearchDetail.entry.biblicalExamples[0].explanation}
+                      </p>
+                    </div>
+                  )}
+
+                  {(activeSearchDetail.entry.whenInappropriate || (activeSearchDetail.entry.commonMistakes && activeSearchDetail.entry.commonMistakes.length > 0)) && (
+                    <div className="p-4 rounded-2xl bg-rose-500/5 dark:bg-rose-500/10 border border-rose-200/70 dark:border-rose-900/40 space-y-1.5">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-rose-800 dark:text-rose-300 block">
+                        Dangers of Misapplication
+                      </span>
+                      <p className="text-xs sm:text-sm leading-relaxed text-stone-800 dark:text-zinc-200">
+                        {activeSearchDetail.entry.whenInappropriate || activeSearchDetail.entry.commonMistakes?.join('; ')}
+                      </p>
+                    </div>
+                  )}
+
+                  <div className="pt-3 border-t border-stone-200/70 dark:border-zinc-800 text-[11px] text-stone-500 dark:text-zinc-400 italic">
+                    Hermeneutical Reference: {activeSearchDetail.entry.sourceAttribution}
+                  </div>
+                </div>
+              </article>
+            )}
+
+            {activeSearchDetail.type === 'etymology' && (
+              <article className="space-y-6">
+                <div
+                  className={`rounded-3xl border p-5 sm:p-7 shadow-sm space-y-5 ${
+                    isLight
+                      ? 'bg-white border-stone-200/90 text-stone-900'
+                      : 'bg-[#151515] border-zinc-800 text-zinc-100'
+                  }`}
+                >
+                  <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-3 border-b border-stone-200/80 dark:border-zinc-800 pb-4">
+                    <div>
+                      <div className="flex items-baseline gap-3 flex-wrap">
+                        <h1 className="text-3xl sm:text-4xl font-serif font-bold tracking-tight">
+                          {activeSearchDetail.entry.englishWord}
+                        </h1>
+                        <span className="font-serif text-3xl sm:text-4xl font-bold text-amber-700 dark:text-amber-400">
+                          {activeSearchDetail.entry.originalWord}
+                        </span>
+                        <span className="text-base sm:text-lg italic text-stone-600 dark:text-zinc-300">
+                          ({activeSearchDetail.entry.transliteration})
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 mt-2 flex-wrap text-xs">
+                        <span className="px-2.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/70 text-amber-900 dark:text-amber-300 font-semibold">
+                          {activeSearchDetail.entry.language}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-4 rounded-2xl bg-stone-50/70 dark:bg-zinc-900/60 border border-stone-200/80 dark:border-zinc-800 space-y-1">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-stone-400 block">
+                      Root Meaning & Etymology
+                    </span>
+                    <p className="text-xs sm:text-sm leading-relaxed font-medium">
+                      {activeSearchDetail.entry.meaning}
+                    </p>
+                  </div>
+
+                  <div className="p-4 rounded-2xl bg-stone-50/70 dark:bg-zinc-900/60 border border-stone-200/80 dark:border-zinc-800 space-y-1">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-stone-400 block">
+                      Historical Development
+                    </span>
+                    <p className="text-xs sm:text-sm leading-relaxed text-stone-700 dark:text-zinc-300">
+                      {activeSearchDetail.entry.historicalDevelopment}
+                    </p>
+                  </div>
+
+                  <div className="p-4 rounded-2xl bg-amber-500/5 dark:bg-amber-500/10 border border-amber-200/70 dark:border-amber-900/40 space-y-1.5">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-amber-800 dark:text-amber-300 block">
+                      Biblical Usage & The Root Fallacy Caution
+                    </span>
+                    <p className="text-xs sm:text-sm leading-relaxed text-stone-800 dark:text-zinc-200">
+                      {activeSearchDetail.entry.rootVsContextualMeaning}
+                    </p>
+                  </div>
+
+                  <div className="space-y-2 pt-2">
+                    <span className="text-xs font-bold uppercase tracking-wider text-stone-500 dark:text-zinc-400 block">
+                      Example Biblical Passages
+                    </span>
+                    <div className="flex flex-wrap gap-2">
+                      {activeSearchDetail.entry.scriptureReferences.map((ref: string) => (
+                        <button
+                          key={ref}
+                          type="button"
+                          onClick={() => handleScriptureClick(ref)}
+                          className={`rounded-xl px-3 py-1.5 text-xs font-bold border transition flex items-center gap-1.5 ${
+                            isLight
+                              ? 'bg-stone-50 hover:bg-stone-100 border-stone-200 text-stone-800'
+                              : 'bg-zinc-900 hover:bg-zinc-800 border-zinc-800 text-zinc-200'
+                          }`}
+                        >
+                          <BookOpen className="h-3 w-3 text-amber-600 dark:text-amber-400" />
+                          <span>{ref}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </article>
+            )}
+          </main>
+        </div>
+      ) : (
+        <>
+          {/* ===================================================================
+              NORMAL STUDY PAGE (Search + 6 Categories Router)
+              =================================================================== */}
+          <header
+            className={`sticky top-0 z-30 px-4 sm:px-8 pt-5 pb-4 border-b transition-colors shadow-xs ${
+              isChildren
+                ? isLight
+                  ? 'bg-[#FFFDF4]/95 border-amber-200/90 text-slate-900 backdrop-blur-md'
+                  : 'bg-[#13192E]/95 border-indigo-900/80 text-slate-100 backdrop-blur-md'
+                : isLight
+                ? 'bg-[#FBF9F5]/95 border-stone-200/90 text-stone-900 backdrop-blur-md'
+                : 'bg-[#0F0F0F]/95 border-zinc-800/90 text-zinc-100 backdrop-blur-md'
+            }`}
+          >
+            <div className="max-w-5xl mx-auto w-full space-y-3">
+              {/* Top Title Bar: STRICTLY "Study" without any icon beside it (Requirement 4) */}
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-serif font-bold tracking-tight">
+                  Study
+                </h1>
+              </div>
+
+              {/* Single Unified Primary Search Field directly below the title */}
+              <div ref={searchContainerRef} className="relative w-full">
+                <div
+                  className={`relative rounded-2xl border transition-all ${
+                    isSearchFocused
+                      ? isLight
+                        ? 'border-amber-600 ring-2 ring-amber-500/20 shadow-md bg-white'
+                        : 'border-amber-400 ring-2 ring-amber-400/20 shadow-md bg-[#181818]'
+                      : isLight
+                      ? 'border-stone-200/90 bg-white hover:border-stone-300 shadow-xs'
+                      : 'border-zinc-800 bg-[#161616] hover:border-zinc-700'
+                  }`}
+                >
+                  <Search className="h-4 w-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400 dark:text-zinc-500" />
+                  <input
+                    type="text"
+                    value={unifiedSearchQuery}
+                    onFocus={() => setIsSearchFocused(true)}
+                    onChange={(e) => {
+                      setUnifiedSearchQuery(e.target.value);
+                      setIsSearchFocused(true);
+                    }}
+                    placeholder="Search biblical words, Greek/Hebrew terms, Strong's numbers, names, or types..."
+                    className={`w-full bg-transparent pl-10 pr-20 py-2.5 sm:py-3 text-xs sm:text-sm focus:outline-none ${
+                      isLight
+                        ? 'text-stone-900 placeholder-stone-400'
+                        : 'text-zinc-100 placeholder-zinc-500'
+                    }`}
+                  />
+                  {unifiedSearchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setUnifiedSearchQuery('');
+                      }}
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-stone-400 hover:text-stone-600 dark:hover:text-zinc-200 px-1 py-0.5"
+                    >
+                      Clear
+                    </button>
+                  )}
+                </div>
+
+                {/* Live Search Results Dropdown Overlay — Fully Mobile Responsive (Requirement 3) */}
+                {isSearchFocused && unifiedSearchResults && unifiedSearchResults.totalCount > 0 && (
+                  <div
+                    className={`absolute top-full left-0 right-0 mt-2 rounded-2xl border shadow-2xl p-2.5 sm:p-4 z-50 max-h-[72vh] sm:max-h-[480px] overflow-y-auto overflow-x-hidden space-y-4 animate-in fade-in duration-150 w-full max-w-full ${
+                      isLight
+                        ? 'bg-white border-stone-200 text-stone-900'
+                        : 'bg-[#181818] border-zinc-800 text-zinc-100'
+                    }`}
+                  >
+                    {/* 1. Word Study Results */}
+                    {unifiedSearchResults.words.length > 0 && (
+                      <div className="space-y-1.5">
+                        <span className="text-[10.5px] uppercase font-bold tracking-wider text-amber-700 dark:text-amber-400">
+                          Word Study & Lexicon ({unifiedSearchResults.words.length})
+                        </span>
+                        <div className="grid gap-1.5">
+                          {unifiedSearchResults.words.map((w) => (
+                            <button
+                              key={w.id}
+                              onClick={() => handleSelectWord(w)}
+                              className={`w-full rounded-xl p-3 text-left text-xs transition border flex items-center justify-between gap-2 touch-manipulation active:scale-[0.99] ${
+                                isLight
+                                  ? 'bg-stone-50/70 hover:bg-amber-50 border-stone-200/80 hover:border-amber-300'
+                                  : 'bg-zinc-900/80 hover:bg-zinc-800 border-zinc-800 hover:border-amber-500/40'
+                              }`}
+                            >
+                              <div className="min-w-0 flex-1 pr-1">
+                                <div className="flex items-baseline gap-2 flex-wrap">
+                                  <span className="font-bold text-stone-900 dark:text-white text-sm">
+                                    {w.englishWord}
+                                  </span>
+                                  <span className="font-serif text-base font-semibold text-amber-700 dark:text-amber-400">
+                                    {w.originalSpelling}
+                                  </span>
+                                  <span className="text-[11px] italic text-stone-500 dark:text-zinc-400">
+                                    ({w.transliteration})
+                                  </span>
+                                  {w.strongsNumber && (
+                                    <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-stone-200/70 dark:bg-zinc-800 text-stone-600 dark:text-zinc-300">
+                                      {w.strongsNumber}
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-[11px] text-stone-500 dark:text-zinc-400 line-clamp-2 mt-1 break-words">
+                                  {w.primaryMeaning || w.lexicalDefinition}
+                                </p>
+                              </div>
+                              <ChevronRight className="h-4 w-4 shrink-0 text-stone-400" />
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* 2. Biblical Names Results (Requirement 2) */}
+                    {unifiedSearchResults.names.length > 0 && (
+                      <div className="space-y-1.5">
+                        <span className="text-[10.5px] uppercase font-bold tracking-wider text-sky-700 dark:text-sky-400">
+                          Biblical Name Meanings ({unifiedSearchResults.names.length})
+                        </span>
+                        <div className="grid gap-1.5">
+                          {unifiedSearchResults.names.map((n) => (
+                            <button
+                              key={n.id}
+                              onClick={() => handleSelectName(n)}
+                              className={`w-full rounded-xl p-3 text-left text-xs transition border flex items-center justify-between gap-2 touch-manipulation active:scale-[0.99] ${
+                                isLight
+                                  ? 'bg-stone-50/70 hover:bg-sky-50 border-stone-200/80 hover:border-sky-300'
+                                  : 'bg-zinc-900/80 hover:bg-zinc-800 border-zinc-800 hover:border-sky-500/40'
+                              }`}
+                            >
+                              <div className="min-w-0 flex-1 pr-1">
+                                <div className="flex items-baseline gap-2 flex-wrap">
+                                  <span className="font-bold text-stone-900 dark:text-white text-sm">
+                                    {n.name}
+                                  </span>
+                                  <span className="font-serif text-base font-semibold text-sky-700 dark:text-sky-400">
+                                    {n.originalSpelling}
+                                  </span>
+                                  <span className="text-[11px] font-semibold text-sky-800 dark:text-sky-300">
+                                    — &quot;{n.meaning}&quot;
+                                  </span>
+                                </div>
+                                <p className="text-[11px] text-stone-500 dark:text-zinc-400 line-clamp-2 mt-1 break-words">
+                                  {n.biblicalPersonAssociated}
+                                </p>
+                              </div>
+                              <ChevronRight className="h-4 w-4 shrink-0 text-stone-400" />
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* 3. Types and Shadows Results */}
+                    {unifiedSearchResults.typesAndShadows.length > 0 && (
+                      <div className="space-y-1.5">
+                        <span className="text-[10.5px] uppercase font-bold tracking-wider text-emerald-700 dark:text-emerald-400">
+                          Types & Shadows Library ({unifiedSearchResults.typesAndShadows.length})
+                        </span>
+                        <div className="grid gap-1.5">
+                          {unifiedSearchResults.typesAndShadows.map((ts) => (
+                            <button
+                              key={ts.id}
+                              onClick={() => handleSelectTypeShadow(ts)}
+                              className={`w-full rounded-xl p-3 text-left text-xs transition border flex items-center justify-between gap-2 touch-manipulation active:scale-[0.99] ${
+                                isLight
+                                  ? 'bg-stone-50/70 hover:bg-emerald-50 border-stone-200/80 hover:border-emerald-300'
+                                  : 'bg-zinc-900/80 hover:bg-zinc-800 border-zinc-800 hover:border-emerald-500/40'
+                              }`}
+                            >
+                              <div className="min-w-0 flex-1 pr-1">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <span className="font-bold text-stone-900 dark:text-white text-sm">
+                                    {ts.name}
+                                  </span>
+                                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-900 dark:bg-emerald-950 dark:text-emerald-300">
+                                    {ts.category}
+                                  </span>
+                                </div>
+                                <p className="text-[11px] text-stone-500 dark:text-zinc-400 line-clamp-2 mt-1 break-words">
+                                  Foreshadows: {ts.personOrRealityForeshadowed}
+                                </p>
+                              </div>
+                              <ChevronRight className="h-4 w-4 shrink-0 text-stone-400" />
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* 4. Interpretation Methods Results */}
+                    {unifiedSearchResults.methods.length > 0 && (
+                      <div className="space-y-1.5">
+                        <span className="text-[10.5px] uppercase font-bold tracking-wider text-purple-700 dark:text-purple-400">
+                          Interpretation Methods ({unifiedSearchResults.methods.length})
+                        </span>
+                        <div className="grid gap-1.5">
+                          {unifiedSearchResults.methods.map((m) => (
+                            <button
+                              key={m.id}
+                              onClick={() => handleSelectMethod(m)}
+                              className={`w-full rounded-xl p-3 text-left text-xs transition border flex items-center justify-between gap-2 touch-manipulation active:scale-[0.99] ${
+                                isLight
+                                  ? 'bg-stone-50/70 hover:bg-purple-50 border-stone-200/80 hover:border-purple-300'
+                                  : 'bg-zinc-900/80 hover:bg-zinc-800 border-zinc-800 hover:border-purple-500/40'
+                              }`}
+                            >
+                              <div className="min-w-0 flex-1 pr-1">
+                                <span className="font-bold text-stone-900 dark:text-white text-sm block">
+                                  {m.name}
                                 </span>
-                              )}
-                            </div>
-                            <p className="text-[11px] text-stone-500 dark:text-zinc-400 truncate mt-0.5">
-                              {w.lexicalDefinition}
-                            </p>
-                          </div>
-                          <ChevronRight className="h-4 w-4 shrink-0 text-stone-400" />
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                                <p className="text-[11px] text-stone-500 dark:text-zinc-400 line-clamp-2 mt-1 break-words">
+                                  {m.shortSummary}
+                                </p>
+                              </div>
+                              <ChevronRight className="h-4 w-4 shrink-0 text-stone-400" />
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
 
-                {/* 2. Biblical Names Results */}
-                {unifiedSearchResults.names.length > 0 && (
-                  <div className="space-y-1.5">
-                    <span className="text-[10.5px] uppercase font-bold tracking-wider text-sky-700 dark:text-sky-400">
-                      Biblical Name Meanings ({unifiedSearchResults.names.length})
-                    </span>
-                    <div className="grid gap-1.5">
-                      {unifiedSearchResults.names.map((n) => (
-                        <button
-                          key={n.id}
-                          onClick={() => handleSelectName(n)}
-                          className={`w-full rounded-xl p-2.5 text-left text-xs transition border flex items-center justify-between ${
-                            isLight
-                              ? 'bg-stone-50/70 hover:bg-sky-50 border-stone-200/80 hover:border-sky-300'
-                              : 'bg-zinc-900/80 hover:bg-zinc-800 border-zinc-800 hover:border-sky-500/40'
-                          }`}
-                        >
-                          <div>
-                            <div className="flex items-baseline gap-2">
-                              <span className="font-bold text-stone-900 dark:text-white">
-                                {n.name}
-                              </span>
-                              <span className="font-serif text-sm font-semibold text-sky-700 dark:text-sky-400">
-                                {n.originalSpelling}
-                              </span>
-                              <span className="text-[11px] text-stone-500 dark:text-zinc-400">
-                                — &quot;{n.meaning}&quot;
-                              </span>
-                            </div>
-                            <p className="text-[11px] text-stone-500 dark:text-zinc-400 truncate mt-0.5">
-                              {n.biblicalPersonAssociated}
-                            </p>
-                          </div>
-                          <ChevronRight className="h-4 w-4 shrink-0 text-stone-400" />
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* 3. Types and Shadows Results */}
-                {unifiedSearchResults.typesAndShadows.length > 0 && (
-                  <div className="space-y-1.5">
-                    <span className="text-[10.5px] uppercase font-bold tracking-wider text-emerald-700 dark:text-emerald-400">
-                      Types & Shadows Library ({unifiedSearchResults.typesAndShadows.length})
-                    </span>
-                    <div className="grid gap-1.5">
-                      {unifiedSearchResults.typesAndShadows.map((ts) => (
-                        <button
-                          key={ts.id}
-                          onClick={() => handleSelectTypeShadow(ts)}
-                          className={`w-full rounded-xl p-2.5 text-left text-xs transition border flex items-center justify-between ${
-                            isLight
-                              ? 'bg-stone-50/70 hover:bg-emerald-50 border-stone-200/80 hover:border-emerald-300'
-                              : 'bg-zinc-900/80 hover:bg-zinc-800 border-zinc-800 hover:border-emerald-500/40'
-                          }`}
-                        >
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <span className="font-bold text-stone-900 dark:text-white">
-                                {ts.name}
-                              </span>
-                              <span className="text-[10px] font-semibold px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-900 dark:bg-emerald-950 dark:text-emerald-300">
-                                {ts.category}
-                              </span>
-                            </div>
-                            <p className="text-[11px] text-stone-500 dark:text-zinc-400 truncate mt-0.5">
-                              Foreshadows: {ts.personOrRealityForeshadowed}
-                            </p>
-                          </div>
-                          <ChevronRight className="h-4 w-4 shrink-0 text-stone-400" />
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* 4. Interpretation Methods Results */}
-                {unifiedSearchResults.methods.length > 0 && (
-                  <div className="space-y-1.5">
-                    <span className="text-[10.5px] uppercase font-bold tracking-wider text-purple-700 dark:text-purple-400">
-                      Interpretation Methods ({unifiedSearchResults.methods.length})
-                    </span>
-                    <div className="grid gap-1.5">
-                      {unifiedSearchResults.methods.map((m) => (
-                        <button
-                          key={m.id}
-                          onClick={() => handleSelectMethod(m)}
-                          className={`w-full rounded-xl p-2.5 text-left text-xs transition border flex items-center justify-between ${
-                            isLight
-                              ? 'bg-stone-50/70 hover:bg-purple-50 border-stone-200/80 hover:border-purple-300'
-                              : 'bg-zinc-900/80 hover:bg-zinc-800 border-zinc-800 hover:border-purple-500/40'
-                          }`}
-                        >
-                          <div>
-                            <span className="font-bold text-stone-900 dark:text-white">
-                              {m.name}
-                            </span>
-                            <p className="text-[11px] text-stone-500 dark:text-zinc-400 truncate mt-0.5">
-                              {m.shortSummary}
-                            </p>
-                          </div>
-                          <ChevronRight className="h-4 w-4 shrink-0 text-stone-400" />
-                        </button>
-                      ))}
-                    </div>
+                    {/* 5. Etymology Results */}
+                    {unifiedSearchResults.etymologies.length > 0 && (
+                      <div className="space-y-1.5">
+                        <span className="text-[10.5px] uppercase font-bold tracking-wider text-amber-700 dark:text-amber-400">
+                          Etymology Terms ({unifiedSearchResults.etymologies.length})
+                        </span>
+                        <div className="grid gap-1.5">
+                          {unifiedSearchResults.etymologies.map((e) => (
+                            <button
+                              key={e.englishWord}
+                              onClick={() => handleSelectEtymology(e)}
+                              className={`w-full rounded-xl p-3 text-left text-xs transition border flex items-center justify-between gap-2 touch-manipulation active:scale-[0.99] ${
+                                isLight
+                                  ? 'bg-stone-50/70 hover:bg-amber-50 border-stone-200/80 hover:border-amber-300'
+                                  : 'bg-zinc-900/80 hover:bg-zinc-800 border-zinc-800 hover:border-amber-500/40'
+                              }`}
+                            >
+                              <div className="min-w-0 flex-1 pr-1">
+                                <div className="flex items-baseline gap-2 flex-wrap">
+                                  <span className="font-bold text-stone-900 dark:text-white text-sm">
+                                    {e.englishWord}
+                                  </span>
+                                  <span className="font-serif text-base font-semibold text-amber-700 dark:text-amber-400">
+                                    {e.originalWord}
+                                  </span>
+                                  <span className="text-[11px] italic text-stone-500 dark:text-zinc-400">
+                                    ({e.transliteration})
+                                  </span>
+                                </div>
+                                <p className="text-[11px] text-stone-500 dark:text-zinc-400 line-clamp-2 mt-1 break-words">
+                                  Meaning: {e.meaning}
+                                </p>
+                              </div>
+                              <ChevronRight className="h-4 w-4 shrink-0 text-stone-400" />
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
-            )}
-          </div>
-        </div>
-      </header>
+            </div>
+          </header>
 
       {/* =====================================================================
           MAIN STUDY CATEGORIES (6 Clear Categories — Section 2)
@@ -1626,6 +2268,9 @@ export default function StudyPage({
           </div>
         )}
       </main>
+        </>
+      )}
     </div>
   );
 }
+

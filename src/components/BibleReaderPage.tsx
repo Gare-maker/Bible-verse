@@ -1317,136 +1317,6 @@ export default function BibleReaderPage() {
                         </sup>
                         <span>{v.translations[translation] || v.translations.NIV}</span>
 
-                        {/* Distinct Inline Indicators Alongside Verse Text: Reference & Type and Shadow */}
-                        {hasAnyIntel && preferences.showReferenceBadges && (
-                          <span className="inline-flex flex-wrap items-center gap-1.5 ml-2 align-middle">
-                            {refs.length > 0 && (
-                              <button
-                                type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  if (isReferenceOpen) {
-                                    setSelectedVerse(null);
-                                    setOpenPanelMode('none');
-                                  } else {
-                                    openIndependentVersePanel(v, 'reference');
-                                  }
-                                }}
-                                className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 font-sans text-[11px] font-semibold transition border ${
-                                  isReferenceOpen
-                                    ? isLight
-                                      ? 'bg-amber-700 text-white border-amber-700 shadow-xs'
-                                      : 'bg-amber-500 text-zinc-950 border-amber-500 shadow-xs font-bold'
-                                    : isLight
-                                    ? 'bg-amber-50 hover:bg-amber-100 text-amber-900 border-amber-200/90'
-                                    : 'bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border-amber-500/30'
-                                }`}
-                                title={`Open Reference for ${v.canonicalRef}`}
-                              >
-                                <Link2 className="h-3 w-3" />
-                                <span>Reference</span>
-                              </button>
-                            )}
-
-                            {typeShadows.length > 0 && (
-                              <button
-                                type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  if (isTypesOpen) {
-                                    setSelectedVerse(null);
-                                    setOpenPanelMode('none');
-                                  } else {
-                                    openIndependentVersePanel(v, 'types');
-                                  }
-                                }}
-                                className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 font-sans text-[11px] font-semibold transition border ${
-                                  isTypesOpen
-                                    ? isLight
-                                      ? 'bg-emerald-700 text-white border-emerald-700 shadow-xs'
-                                      : 'bg-emerald-500 text-zinc-950 border-emerald-500 shadow-xs font-bold'
-                                    : isLight
-                                    ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border-emerald-200/90'
-                                    : 'bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border-emerald-500/30'
-                                }`}
-                                title={`Open Type and Shadow for ${v.canonicalRef}`}
-                              >
-                                <BookOpen className="h-3 w-3" />
-                                <span>Type and Shadow</span>
-                              </button>
-                            )}
-
-                            {interp && (
-                              <button
-                                type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  if (isInterpretationOpen) {
-                                    setSelectedVerse(null);
-                                    setOpenPanelMode('none');
-                                  } else {
-                                    openIndependentVersePanel(v, 'interpretation', 'all');
-                                  }
-                                }}
-                                className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 font-sans text-[11px] font-semibold transition border ${
-                                  isInterpretationOpen
-                                    ? isLight
-                                      ? 'bg-blue-700 text-white border-blue-700 shadow-xs'
-                                      : 'bg-blue-500 text-zinc-950 border-blue-500 shadow-xs font-bold'
-                                    : isLight
-                                    ? 'bg-blue-50 hover:bg-blue-100 text-blue-900 border-blue-200/90'
-                                    : 'bg-blue-500/15 hover:bg-blue-500/25 text-blue-300 border-blue-500/30'
-                                }`}
-                                title={`Open Interpretation for ${v.canonicalRef}`}
-                              >
-                                <Languages className="h-3 w-3" />
-                                <span>Interpretation</span>
-                              </button>
-                            )}
-
-                            {interp && interp.availableTags && interp.availableTags.map((tag) => {
-                              const catMap: Record<string, InterpretationCategory> = {
-                                'Historical Context': 'historical',
-                                'Contextual Explanation': 'contextual',
-                                'Theological Interpretation': 'theological',
-                                'Original Words': 'words',
-                                'Cross References': 'cross-references',
-                                'Literary and Cultural': 'literary',
-                                'Typology and Symbolism': 'typology',
-                              };
-                              const targetCat = catMap[tag] || 'all';
-                              const isTagActive = isInterpretationOpen && selectedInterpCategory === targetCat;
-                              return (
-                                <button
-                                  key={tag}
-                                  type="button"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    if (isTagActive) {
-                                      setSelectedVerse(null);
-                                      setOpenPanelMode('none');
-                                    } else {
-                                      openIndependentVersePanel(v, 'interpretation', targetCat);
-                                    }
-                                  }}
-                                  className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-sans text-[10.5px] transition border ${
-                                    isTagActive
-                                      ? isLight
-                                        ? 'bg-sky-700 text-white border-sky-700 font-bold'
-                                        : 'bg-sky-400 text-zinc-950 border-sky-400 font-bold'
-                                      : isLight
-                                      ? 'bg-stone-100 hover:bg-sky-50 text-stone-700 hover:text-sky-900 border-stone-200 hover:border-sky-300'
-                                      : 'bg-zinc-800/80 hover:bg-sky-950/60 text-zinc-300 hover:text-sky-300 border-zinc-700/80 hover:border-sky-600/50'
-                                  }`}
-                                  title={`Open ${tag} for ${v.canonicalRef}`}
-                                >
-                                  <span>[{tag}]</span>
-                                </button>
-                              );
-                            })}
-                          </span>
-                        )}
-
                         {isBookmarked && (
                           <Bookmark
                             className={`ml-2 inline h-3.5 w-3.5 ${
@@ -2412,7 +2282,7 @@ export default function BibleReaderPage() {
                                     : 'bg-zinc-800 hover:bg-zinc-700 border-zinc-700 text-zinc-200'
                                 }`}
                               >
-                                Reference
+                                References
                               </button>
 
                               <button
@@ -2423,7 +2293,7 @@ export default function BibleReaderPage() {
                                     : 'bg-zinc-800 hover:bg-zinc-700 border-zinc-700 text-zinc-200'
                                 }`}
                               >
-                                Type and Shadow
+                                Types and Shadows
                               </button>
 
                               <button
@@ -2435,21 +2305,6 @@ export default function BibleReaderPage() {
                                 }`}
                               >
                                 Interpretation
-                              </button>
-
-                              {/* Requirement 3: Renamed Content to Context */}
-                              <button
-                                onClick={() => {
-                                  setActiveActionView('context');
-                                  scrollVerseToTop(v.verse);
-                                }}
-                                className={`rounded-lg px-2.5 py-1.5 text-xs font-medium border transition shrink-0 whitespace-nowrap ${
-                                  isLight
-                                    ? 'bg-stone-100 hover:bg-stone-200/80 border-stone-200 text-stone-700'
-                                    : 'bg-zinc-800 hover:bg-zinc-700 border-zinc-700 text-zinc-200'
-                                }`}
-                              >
-                                Context
                               </button>
 
                               <button

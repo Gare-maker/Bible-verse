@@ -446,23 +446,40 @@ export function searchTypesAndShadows(
   }
 
   if (!query || !query.trim()) return list;
-  const q = query.trim().toLowerCase();
 
+  // Clean query: strip search intent prefixes like "meaning of", "type of"
+  let q = query.trim().toLowerCase();
+  q = q
+    .replace(
+      /^(meaning\s+of\s+|type\s+of\s+|types\s+and\s+shadows?\s+of\s+|what\s+is\s+|who\s+is\s+)/i,
+      ''
+    )
+    .trim();
+  if (!q) q = query.trim().toLowerCase();
+
+  // 1. Exact match on title/name
   const exact = list.filter((item) => item.name.toLowerCase() === q);
-  const partial = list.filter((item) => {
+
+  // 2. Strong match on name, foreshadowed reality, or category
+  const strong = list.filter((item) => {
     if (exact.some((e) => e.id === item.id)) return false;
     return (
       item.name.toLowerCase().includes(q) ||
       item.personOrRealityForeshadowed.toLowerCase().includes(q) ||
-      item.category.toLowerCase().includes(q) ||
-      item.theologicalExplanation.toLowerCase().includes(q) ||
-      item.biblicalAccount.toLowerCase().includes(q) ||
-      item.otReferences.some((r) => r.toLowerCase().includes(q)) ||
-      item.ntFulfilmentOrConnection.some((r) => r.toLowerCase().includes(q))
+      item.category.toLowerCase().includes(q)
     );
   });
 
-  return [...exact, ...partial];
+  // 3. Partial match on narrative description (never purely matching reference citations for unrelated name queries)
+  const partial = list.filter((item) => {
+    if (exact.some((e) => e.id === item.id) || strong.some((s) => s.id === item.id)) return false;
+    return (
+      item.theologicalExplanation.toLowerCase().includes(q) ||
+      item.biblicalAccount.toLowerCase().includes(q)
+    );
+  });
+
+  return [...exact, ...strong, ...partial];
 }
 
 export function getTypeAndShadowById(
@@ -470,3 +487,4 @@ export function getTypeAndShadowById(
 ): BiblicalTypeAndShadowEntry | undefined {
   return TYPES_AND_SHADOWS_LIBRARY.find((item) => item.id === id);
 }
+
