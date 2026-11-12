@@ -661,22 +661,60 @@ const RAW_CANONICAL_CROSS_REFERENCES: CrossReferenceRecord[] = [
     dataSource: 'Treasury of Scripture Knowledge (TSK)',
     verificationStatus: 'verified',
   },
-  // 35. John 1:29 <-> Exodus 12:13
+  // 35. John 1:29 <-> Isaiah 53:7
   {
-    id: 'xref-jhn-1-29-exo-12-13',
+    id: 'xref-jhn-1-29-isa-53-7',
     sourceRef: 'John 1:29',
-    targetRef: 'Exodus 12:13',
-    sourceToTargetCategory: 'Allusion',
+    targetRef: 'Isaiah 53:7',
+    sourceToTargetCategory: 'Prophecy fulfilment',
     targetToSourceCategory: 'Prophecy',
-    title: 'Behold the Lamb of God Who Takes Away the Sin of the World',
-    connectionSummary: 'Passover Lamb / Witness of John the Baptist',
+    title: 'The Lamb Led to the Slaughter',
+    connectionSummary: 'Suffering Servant Lamb of Isaiah 53 / The Lamb of God in John 1:29',
     explanation:
-      'John the Baptist’s declaration at Bethany beyond the Jordan—"Look, the Lamb of God, who takes away the sin of the world!" (John 1:29)—draws upon the Passover lamb of Exodus 12:13 and the Suffering Servant lamb of Isaiah 53:7.',
+      'Isaiah 53:7 foretold the Suffering Servant who would be led like a lamb to the slaughter and silent before His shearers. John the Baptist identifies Jesus as that very Lamb who takes away the sin of the world.',
     biblicalContext:
-      'Spoken by John the Baptist as he publicly identifies Jesus at the start of His ministry.',
+      'Spoken by the prophet Isaiah concerning the substitutionary sacrifice of the Messiah, fulfilled in Jesus Christ.',
     sourceSpeaker: 'Words spoken by prophets',
     targetSpeaker: 'Words spoken by prophets',
-    supportingRefs: ['Exodus 12:13', '1 Corinthians 5:7', 'Isaiah 53:5'],
+    supportingRefs: ['Isaiah 53:7', 'Exodus 12:5', '1 Peter 1:19'],
+    dataSource: 'Treasury of Scripture Knowledge (TSK)',
+    verificationStatus: 'verified',
+  },
+  // 35B. John 1:29 <-> Exodus 12:5–7
+  {
+    id: 'xref-jhn-1-29-exo-12-5-7',
+    sourceRef: 'John 1:29',
+    targetRef: 'Exodus 12:5–7',
+    sourceToTargetCategory: 'Allusion',
+    targetToSourceCategory: 'Prophecy',
+    title: 'The Passover Lamb Without Blemish',
+    connectionSummary: 'Exodus Passover Lamb / Lamb of God Taking Away Sin',
+    explanation:
+      'The Passover lamb of Exodus 12:5–7 had to be without blemish or defect, its blood delivering Israel from death. John the Baptist proclaims Jesus as the ultimate Lamb of God.',
+    biblicalContext:
+      'Exodus 12 records the institution of the Passover in Egypt; John 1:29 reveals its Messianic fulfilment.',
+    sourceSpeaker: 'Words spoken by prophets',
+    targetSpeaker: 'Words spoken by prophets',
+    supportingRefs: ['Exodus 12:5–7', '1 Corinthians 5:7', '1 Peter 1:19'],
+    dataSource: 'Treasury of Scripture Knowledge (TSK)',
+    verificationStatus: 'verified',
+  },
+  // 35C. John 1:29 <-> 1 Peter 1:19
+  {
+    id: 'xref-jhn-1-29-1pet-1-19',
+    sourceRef: 'John 1:29',
+    targetRef: '1 Peter 1:19',
+    sourceToTargetCategory: 'Theological connection',
+    targetToSourceCategory: 'Theological connection',
+    title: 'A Lamb Without Blemish or Defect',
+    connectionSummary: 'John the Baptist’s Declaration / Apostolic Doctrine of Christ’s Blood',
+    explanation:
+      'Peter confirms John the Baptist’s testimony by describing redemption through "the precious blood of Christ, a lamb without blemish or defect" (1 Peter 1:19).',
+    biblicalContext:
+      'Apostolic teaching on holiness and redemption through the sacrifice of Christ.',
+    sourceSpeaker: 'Words spoken by prophets',
+    targetSpeaker: 'Words spoken by apostles',
+    supportingRefs: ['1 Peter 1:19', 'Isaiah 53:7', 'Exodus 12:5–7'],
     dataSource: 'Treasury of Scripture Knowledge (TSK)',
     verificationStatus: 'verified',
   },
@@ -872,10 +910,10 @@ export const CANONICAL_TYPES_AND_SHADOWS: BiblicalTypeShadow[] = [
   },
   {
     id: 'type-passover-lamb-jhn',
-    title: 'The Passover Lamb & Behold the Lamb of God',
-    otTypeRef: 'Exodus 12:13',
+    title: 'The Passover Lamb',
+    otTypeRef: 'Exodus 12:5–7',
     ntAntitypeRef: 'John 1:29',
-    typeName: 'The Sacrificial Lamb of the Exodus (Exodus 12:13)',
+    typeName: 'The Passover Lamb (Exodus 12:5–7; 12:13)',
     fulfilmentName: 'The Lamb of God Who Takes Away the Sin of the World (John 1:29)',
     explanation:
       'The Old Testament Passover lamb delivered Israel from bondage and death in Egypt through substitutionary blood. In John 1:29, John the Baptist publicly identifies Jesus as "the Lamb of God, who takes away the sin of the world," fulfilling both the Exodus Passover lamb and Isaiah 53:7.',
@@ -884,8 +922,25 @@ export const CANONICAL_TYPES_AND_SHADOWS: BiblicalTypeShadow[] = [
     typologyBasis: 'Explicitly Established by Scripture',
     otSpeaker: 'Words spoken by prophets',
     ntSpeaker: 'Words spoken by prophets',
-    supportingRefs: ['Exodus 12:13', 'John 1:29', '1 Corinthians 5:7'],
+    supportingRefs: ['Exodus 12:5–7', 'John 1:29', '1 Corinthians 5:7'],
     historicalSource: 'Explicitly Established by Scripture (John 1:29; 1 Corinthians 5:7)',
+  },
+  {
+    id: 'type-sacrificial-lamb-jhn',
+    title: 'The Sacrificial Lamb',
+    otTypeRef: 'Isaiah 53:7',
+    ntAntitypeRef: 'John 1:29',
+    typeName: 'The Sacrificial Lamb Led to Slaughter (Isaiah 53:7)',
+    fulfilmentName: 'The Lamb Bearing Iniquity and Taking Away Sin (John 1:29)',
+    explanation:
+      'The sacrificial lambs offered daily in the sanctuary and the prophetic Lamb of Isaiah 53:7 pointed forward to the innocent substitute who takes away sin. John the Baptist identifies Jesus as this promised sacrificial Lamb.',
+    biblicalContext:
+      'Spoken by the prophet Isaiah and declared by John the Baptist at the Jordan river before the multitudes.',
+    typologyBasis: 'Explicitly Established by Scripture',
+    otSpeaker: 'Words spoken by prophets',
+    ntSpeaker: 'Words spoken by prophets',
+    supportingRefs: ['Isaiah 53:7', 'John 1:29', '1 Peter 1:19'],
+    historicalSource: 'Explicitly Established by Scripture (John 1:29; 1 Peter 1:19)',
   },
   {
     id: 'type-first-last-adam',

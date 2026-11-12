@@ -59,6 +59,8 @@ import {
 import BibleLineDrawing, { getIllustrationForChapter, getIllustrationForSection } from './BibleLineDrawing';
 import BookChapterSelectorModal from './BookChapterSelectorModal';
 import GlobalSearchModal from './GlobalSearchModal';
+import ScriptureDetailModal from './ScriptureDetailModal';
+import TypeShadowDetailModal from './TypeShadowDetailModal';
 
 type VerseActionView = 'none' | 'context' | 'compare' | 'save' | 'interpretation';
 type OpenPanelMode = 'none' | 'action' | 'reference' | 'types' | 'interpretation';
@@ -123,6 +125,12 @@ export default function BibleReaderPage() {
     collections[0]?.id || 'col-messianic'
   );
   const [, setCrossRefsCounter] = useState<number>(0);
+
+  // Dedicated Study Details Page & Modals state
+  const [scriptureDetailRef, setScriptureDetailRef] = useState<string | null>(null);
+  const [scriptureDetailContext, setScriptureDetailContext] = useState<string | undefined>(undefined);
+  const [typeShadowDetailItem, setTypeShadowDetailItem] = useState<any | null>(null);
+  const [activeInterpretationVerse, setActiveInterpretationVerse] = useState<VerseData | null>(null);
 
   // Audio speech state
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -603,6 +611,308 @@ export default function BibleReaderPage() {
       ? previousReadingPosition.book
       : previousReadingPosition.label
     : null;
+
+  // Dedicated Separate Interpretation Page (Requirement 1.2 & Requirement 2)
+  if (activeInterpretationVerse) {
+    const interp = getContextualInterpretation(activeInterpretationVerse.canonicalRef);
+    return (
+      <div
+        className={`flex-1 flex flex-col min-h-screen pb-28 lg:pb-16 ${
+          isChildren
+            ? isLight
+              ? 'bg-[#FFFDF4] text-slate-900'
+              : 'bg-[#111629] text-slate-100'
+            : isLight
+            ? 'bg-[#FBF9F5] text-stone-900'
+            : 'bg-[#0F0F0F] text-zinc-100'
+        }`}
+      >
+        {/* Sticky Header with Back to Bible button */}
+        <header
+          className={`sticky top-0 z-30 px-4 sm:px-8 py-3.5 border-b backdrop-blur-md flex items-center justify-between gap-3 shadow-xs ${
+            isChildren
+              ? isLight
+                ? 'bg-[#FFFDF4]/95 border-amber-200'
+                : 'bg-[#13192E]/95 border-indigo-900'
+              : isLight
+              ? 'bg-[#FBF9F5]/95 border-stone-200'
+              : 'bg-[#0F0F0F]/95 border-zinc-800'
+          }`}
+        >
+          <div className="flex items-center gap-2 min-w-0">
+            <button
+              type="button"
+              onClick={() => setActiveInterpretationVerse(null)}
+              className={`rounded-xl px-3 py-1.5 text-xs font-bold border flex items-center gap-1.5 transition shrink-0 ${
+                isChildren
+                  ? isLight
+                    ? 'bg-amber-100 hover:bg-amber-200 border-amber-300 text-amber-950 font-extrabold'
+                    : 'bg-indigo-900/60 hover:bg-indigo-800 border-indigo-700 text-amber-300 font-extrabold'
+                  : isLight
+                  ? 'bg-white hover:bg-stone-100 border-stone-200 text-stone-700'
+                  : 'bg-zinc-900 hover:bg-zinc-800 border-zinc-800 text-zinc-200'
+              }`}
+              title="Return to Bible reading"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              <span>Back to Bible Reading ({currentBook} {currentChapter}:{activeInterpretationVerse.verse})</span>
+            </button>
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={() => {
+                setActiveInterpretationVerse(null);
+                setActivePage('study');
+              }}
+              className={`rounded-xl px-3 py-1.5 text-xs font-semibold border flex items-center gap-1.5 transition ${
+                isLight
+                  ? 'bg-blue-50 hover:bg-blue-100 border-blue-200 text-blue-900'
+                  : 'bg-blue-900/30 hover:bg-blue-800/40 border-blue-800 text-blue-200'
+              }`}
+              title="Open Study Centre"
+            >
+              <GraduationCap className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Study Centre</span>
+            </button>
+          </div>
+        </header>
+
+        {/* Content Body */}
+        <main className="max-w-4xl mx-auto w-full px-4 sm:px-8 py-6 space-y-6 flex-1">
+          <div>
+            <span className="text-[11px] font-bold uppercase tracking-wider text-blue-700 dark:text-blue-400 block mb-1">
+              Contextual Scripture Interpretation
+            </span>
+            <h1 className="text-2xl sm:text-3xl font-serif font-bold tracking-tight">
+              {activeInterpretationVerse.canonicalRef}
+            </h1>
+            {interp?.chapterScope && (
+              <p className="text-xs sm:text-sm text-stone-500 dark:text-zinc-400 mt-1">
+                Passage Scope: {interp.chapterScope}
+              </p>
+            )}
+          </div>
+
+          {/* Verse Text Card */}
+          <div
+            className={`p-5 sm:p-6 rounded-3xl border space-y-2 ${
+              isLight
+                ? 'bg-white border-blue-200/80 shadow-2xs'
+                : 'bg-[#141822] border-blue-900/50 shadow-md'
+            }`}
+          >
+            <span className="text-[10px] uppercase font-bold tracking-wider text-blue-600 dark:text-blue-400 block">
+              Scripture Passage ({translation})
+            </span>
+            <p className="font-serif text-base sm:text-lg leading-relaxed italic text-stone-900 dark:text-zinc-100">
+              &ldquo;{activeInterpretationVerse.translations[translation] || activeInterpretationVerse.translations.NIV}&rdquo;
+            </p>
+          </div>
+
+          {!interp ? (
+            <div className="p-6 rounded-2xl border text-center space-y-2">
+              <p className="text-sm font-medium">
+                Detailed contextual interpretation is being prepared for {activeInterpretationVerse.canonicalRef}.
+              </p>
+              <p className="text-xs text-stone-400">
+                You can explore related cross-references, word studies, and types in the Study tab.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {/* 1. Historical Background */}
+              {interp.historicalContext && (
+                <section className="p-5 sm:p-6 rounded-3xl border bg-white dark:bg-[#151515] border-stone-200 dark:border-zinc-800 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold uppercase tracking-wider text-amber-800 dark:text-amber-400 block">
+                      1. Historical Context & Background
+                    </span>
+                    {interp.historicalContext.dateWritten && (
+                      <span className="text-xs text-stone-500 dark:text-zinc-400">
+                        Date: {interp.historicalContext.dateWritten}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs sm:text-sm leading-relaxed text-stone-800 dark:text-zinc-200">
+                    {interp.historicalContext.historicalCircumstances}
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 text-xs text-stone-600 dark:text-zinc-400">
+                    <div><strong>Author:</strong> {interp.historicalContext.author}</div>
+                    <div><strong>Original Audience:</strong> {interp.historicalContext.originalAudience}</div>
+                    <div className="sm:col-span-2"><strong>Conditions & Setting:</strong> {interp.historicalContext.politicalReligiousSocialConditions}</div>
+                  </div>
+                  {interp.historicalContext.sourceAttribution && (
+                    <div className="pt-2 text-[11px] text-stone-400 italic">
+                      Source: {interp.historicalContext.sourceAttribution}
+                    </div>
+                  )}
+                </section>
+              )}
+
+              {/* 2. Contextual & Passage Explanation */}
+              {interp.contextualExplanation && (
+                <section className="p-5 sm:p-6 rounded-3xl border bg-white dark:bg-[#151515] border-stone-200 dark:border-zinc-800 space-y-3">
+                  <span className="text-xs font-bold uppercase tracking-wider text-sky-800 dark:text-sky-400 block">
+                    2. Contextual & Passage Explanation
+                  </span>
+                  <div className="space-y-2 text-xs sm:text-sm leading-relaxed text-stone-800 dark:text-zinc-200">
+                    <p><strong>Main Subject:</strong> {interp.contextualExplanation.mainSubject}</p>
+                    <p><strong>Preceding Context:</strong> {interp.contextualExplanation.beforePassage}</p>
+                    <p><strong>Succeeding Context:</strong> {interp.contextualExplanation.afterPassage}</p>
+                    <div className="p-4 rounded-2xl bg-sky-500/5 dark:bg-sky-500/10 border border-sky-200/70 dark:border-sky-900/40 text-xs sm:text-sm space-y-1">
+                      <span className="font-bold text-sky-900 dark:text-sky-300 block">Author&apos;s Intended Message:</span>
+                      <p className="leading-relaxed text-stone-700 dark:text-zinc-300">
+                        {interp.contextualExplanation.authorsIntendedMessage}
+                      </p>
+                    </div>
+                  </div>
+                </section>
+              )}
+
+              {/* 3. Theological Significance */}
+              {interp.theologicalInterpretation && (
+                <section className="p-5 sm:p-6 rounded-3xl border bg-white dark:bg-[#151515] border-stone-200 dark:border-zinc-800 space-y-3">
+                  <span className="text-xs font-bold uppercase tracking-wider text-purple-800 dark:text-purple-400 block">
+                    3. Theological Significance & Doctrinal Truths
+                  </span>
+                  <div className="space-y-2 text-xs sm:text-sm leading-relaxed text-stone-800 dark:text-zinc-200">
+                    {interp.theologicalInterpretation.coreTheologicalThemes && (
+                      <p><strong>Core Themes:</strong> {interp.theologicalInterpretation.coreTheologicalThemes.join(', ')}</p>
+                    )}
+                    <p className="leading-relaxed text-stone-700 dark:text-zinc-300">
+                      {interp.theologicalInterpretation.explanation}
+                    </p>
+                  </div>
+                </section>
+              )}
+
+              {/* 4. Original Words */}
+              {interp.originalLanguageWords && interp.originalLanguageWords.length > 0 && (
+                <section className="p-5 sm:p-6 rounded-3xl border bg-white dark:bg-[#151515] border-stone-200 dark:border-zinc-800 space-y-3">
+                  <span className="text-xs font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-400 block">
+                    4. Original Language Meanings (Hebrew / Greek)
+                  </span>
+                  <div className="grid gap-3">
+                    {interp.originalLanguageWords.map((w, idx) => (
+                      <div key={idx} className="p-4 rounded-2xl bg-stone-50/70 dark:bg-zinc-900/60 border border-stone-200 dark:border-zinc-800 space-y-2">
+                        <div className="flex items-baseline gap-2 flex-wrap">
+                          <span className="font-bold text-sm sm:text-base text-stone-900 dark:text-white">{w.englishWord}</span>
+                          <span className="font-serif text-lg font-bold text-emerald-700 dark:text-emerald-400">{w.originalSpelling}</span>
+                          <span className="text-xs italic text-stone-500">({w.transliteration})</span>
+                          {w.strongsNumber && (
+                            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-stone-200 dark:bg-zinc-800 font-bold">
+                              {w.strongsNumber}
+                            </span>
+                          )}
+                          <span className="text-xs text-stone-500">• {w.partOfSpeech}</span>
+                        </div>
+                        <p className="text-xs sm:text-sm text-stone-800 dark:text-zinc-200">
+                          <strong>Meaning:</strong> {w.meaning}
+                        </p>
+                        <p className="text-xs text-stone-600 dark:text-zinc-400">
+                          <strong>Contextual Usage:</strong> {w.contextualUsage}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {/* 5. Cross-References (Clickable!) */}
+              {interp.crossReferences && interp.crossReferences.length > 0 && (
+                <section className="p-5 sm:p-6 rounded-3xl border bg-white dark:bg-[#151515] border-stone-200 dark:border-zinc-800 space-y-3">
+                  <span className="text-xs font-bold uppercase tracking-wider text-amber-800 dark:text-amber-400 block">
+                    5. Biblical Cross-References (Click to inspect)
+                  </span>
+                  <div className="grid gap-2.5">
+                    {interp.crossReferences.map((cr, idx) => (
+                      <div key={idx} className="p-3.5 rounded-2xl bg-stone-50/70 dark:bg-zinc-900/60 border border-stone-200 dark:border-zinc-800 space-y-1">
+                        <div className="flex items-center justify-between">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setScriptureDetailRef(cr.ref);
+                              setScriptureDetailContext(cr.relevanceExplanation);
+                            }}
+                            className="text-xs sm:text-sm font-bold text-blue-700 dark:text-blue-400 hover:underline flex items-center gap-1.5"
+                          >
+                            <BookOpen className="h-3.5 w-3.5" />
+                            <span>{cr.ref}</span>
+                          </button>
+                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-stone-200 dark:bg-zinc-800 text-stone-600 dark:text-zinc-400">
+                            {cr.category}
+                          </span>
+                        </div>
+                        <p className="text-xs text-stone-700 dark:text-zinc-300 leading-relaxed">
+                          {cr.relevanceExplanation}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {/* 6. Literary & Cultural Context */}
+              {interp.literaryAndCulturalContext && (
+                <section className="p-5 sm:p-6 rounded-3xl border bg-white dark:bg-[#151515] border-stone-200 dark:border-zinc-800 space-y-3">
+                  <span className="text-xs font-bold uppercase tracking-wider text-rose-800 dark:text-rose-400 block">
+                    6. Literary & Cultural Context
+                  </span>
+                  <div className="space-y-1.5 text-xs sm:text-sm leading-relaxed text-stone-800 dark:text-zinc-200">
+                    <p><strong>Genre:</strong> {interp.literaryAndCulturalContext.genre}</p>
+                    <p><strong>Figures of Speech:</strong> {interp.literaryAndCulturalContext.figuresOfSpeechAndIdioms}</p>
+                    <p><strong>Jewish Customs & Traditions:</strong> {interp.literaryAndCulturalContext.jewishCustomsAndTraditions}</p>
+                    <p><strong>Social Structures:</strong> {interp.literaryAndCulturalContext.socialStructures}</p>
+                  </div>
+                </section>
+              )}
+
+              {/* 7. Typology & Biblical Symbolism */}
+              {interp.typologyAndSymbolism && (
+                <section className="p-5 sm:p-6 rounded-3xl border bg-white dark:bg-[#151515] border-stone-200 dark:border-zinc-800 space-y-3">
+                  <span className="text-xs font-bold uppercase tracking-wider text-teal-800 dark:text-teal-400 block">
+                    7. Typology & Biblical Symbolism
+                  </span>
+                  <div className="space-y-1.5 text-xs sm:text-sm leading-relaxed text-stone-800 dark:text-zinc-200">
+                    <p><strong>Types & Shadows:</strong> {interp.typologyAndSymbolism.typesAndShadowsIdentified}</p>
+                    <p><strong>Prophetic Connections:</strong> {interp.typologyAndSymbolism.propheticConnections}</p>
+                  </div>
+                </section>
+              )}
+            </div>
+          )}
+
+          <div className="pt-4 flex justify-center">
+            <button
+              type="button"
+              onClick={() => setActiveInterpretationVerse(null)}
+              className={`rounded-2xl px-6 py-2.5 text-sm font-bold border transition flex items-center gap-2 ${
+                isLight
+                  ? 'bg-white hover:bg-stone-100 border-stone-200 text-stone-800 shadow-sm'
+                  : 'bg-zinc-900 hover:bg-zinc-800 border-zinc-800 text-zinc-100 shadow-md'
+              }`}
+            >
+              <ArrowLeft className="h-4 w-4" />
+              <span>Back to Bible Reading ({currentBook} {currentChapter}:{activeInterpretationVerse.verse})</span>
+            </button>
+          </div>
+        </main>
+
+        {/* Scripture Detail Modal */}
+        <ScriptureDetailModal
+          isOpen={Boolean(scriptureDetailRef)}
+          reference={scriptureDetailRef}
+          contextNote={scriptureDetailContext}
+          onClose={() => {
+            setScriptureDetailRef(null);
+            setScriptureDetailContext(undefined);
+          }}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="flex-1 flex flex-col min-h-0">
@@ -1328,6 +1638,91 @@ export default function BibleReaderPage() {
                         )}
                       </div>
                     </div>
+
+                    {/* Supporting Information: References & Types & Shadows directly beneath the verse (Requirement 1.1) */}
+                    {(refs.length > 0 || typeShadows.length > 0) && (
+                      <div
+                        onClick={(e) => e.stopPropagation()}
+                        className={`mt-2 mb-1 pl-3 border-l-2 space-y-1 text-xs ${
+                          isChildren
+                            ? isLight
+                              ? 'border-amber-400 bg-amber-50/50 py-1 px-2.5 rounded-r-xl'
+                              : 'border-indigo-500 bg-[#151C33]/60 py-1 px-2.5 rounded-r-xl'
+                            : isLight
+                            ? 'border-amber-500/60 bg-stone-50/60 py-1 px-2.5 rounded-r-xl'
+                            : 'border-amber-500/40 bg-zinc-900/40 py-1 px-2.5 rounded-r-xl'
+                        }`}
+                      >
+                        {refs.length > 0 && (
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span
+                              className={`font-bold shrink-0 ${
+                                isLight ? 'text-amber-900' : 'text-amber-400'
+                              }`}
+                            >
+                              References:
+                            </span>
+                            {refs.map((r, idx) => (
+                              <React.Fragment key={r.connectedRef || r.id}>
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setScriptureDetailRef(r.connectedRef);
+                                    setScriptureDetailContext(r.biblicalContext || r.explanation);
+                                  }}
+                                  className={`font-semibold underline decoration-dotted hover:decoration-solid transition ${
+                                    isLight
+                                      ? 'text-amber-800 hover:text-amber-950'
+                                      : 'text-amber-300 hover:text-white'
+                                  }`}
+                                  title={`Read scripture text for ${r.connectedRef}`}
+                                >
+                                  {r.connectedRef}
+                                </button>
+                                {idx < refs.length - 1 && (
+                                  <span className="text-stone-400 dark:text-zinc-600">,</span>
+                                )}
+                              </React.Fragment>
+                            ))}
+                          </div>
+                        )}
+
+                        {typeShadows.length > 0 && (
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span
+                              className={`font-bold shrink-0 ${
+                                isLight ? 'text-emerald-900' : 'text-emerald-400'
+                              }`}
+                            >
+                              Types & Shadows:
+                            </span>
+                            {typeShadows.map((ts, idx) => (
+                              <React.Fragment key={ts.id}>
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setTypeShadowDetailItem(ts);
+                                  }}
+                                  className={`font-semibold underline decoration-dotted hover:decoration-solid transition ${
+                                    isLight
+                                      ? 'text-emerald-800 hover:text-emerald-950'
+                                      : 'text-emerald-300 hover:text-white'
+                                  }`}
+                                  title={`View Type & Shadow: ${ts.title}`}
+                                >
+                                  {ts.title.replace(/^The\s+/i, '') || ts.typeName}
+                                </button>
+                                {idx < typeShadows.length - 1 && (
+                                  <span className="text-stone-400 dark:text-zinc-600">,</span>
+                                )}
+                              </React.Fragment>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
 
                     {/* =========================================================
                         1. REFERENCE VIEW (Requirement 2A & Requirement 4)
@@ -2272,36 +2667,18 @@ export default function BibleReaderPage() {
                               }`}
                             />
 
-                            {/* SECOND SECTION: Available actions directly beneath the selected verse */}
+                            {/* SECOND SECTION: Action card options (Requirement 1.2) */}
                             <div className="px-4 sm:px-5 py-3 flex flex-wrap items-center gap-1.5 sm:gap-2">
                               <button
-                                onClick={() => openIndependentVersePanel(v, 'reference')}
-                                className={`rounded-lg px-2.5 py-1.5 text-xs font-medium border transition shrink-0 whitespace-nowrap ${
+                                onClick={() => {
+                                  setSelectedVerse(null);
+                                  setOpenPanelMode('none');
+                                  setActiveInterpretationVerse(v);
+                                }}
+                                className={`rounded-lg px-2.5 py-1.5 text-xs font-semibold border transition shrink-0 whitespace-nowrap ${
                                   isLight
-                                    ? 'bg-stone-100 hover:bg-stone-200/80 border-stone-200 text-stone-700'
-                                    : 'bg-zinc-800 hover:bg-zinc-700 border-zinc-700 text-zinc-200'
-                                }`}
-                              >
-                                References
-                              </button>
-
-                              <button
-                                onClick={() => openIndependentVersePanel(v, 'types')}
-                                className={`rounded-lg px-2.5 py-1.5 text-xs font-medium border transition shrink-0 whitespace-nowrap ${
-                                  isLight
-                                    ? 'bg-stone-100 hover:bg-stone-200/80 border-stone-200 text-stone-700'
-                                    : 'bg-zinc-800 hover:bg-zinc-700 border-zinc-700 text-zinc-200'
-                                }`}
-                              >
-                                Types and Shadows
-                              </button>
-
-                              <button
-                                onClick={() => openIndependentVersePanel(v, 'interpretation', 'all')}
-                                className={`rounded-lg px-2.5 py-1.5 text-xs font-medium border transition shrink-0 whitespace-nowrap ${
-                                  isLight
-                                    ? 'bg-stone-100 hover:bg-stone-200/80 border-stone-200 text-stone-700'
-                                    : 'bg-zinc-800 hover:bg-zinc-700 border-zinc-700 text-zinc-200'
+                                    ? 'bg-amber-50 hover:bg-amber-100/80 border-amber-300 text-amber-900'
+                                    : 'bg-amber-950/40 hover:bg-amber-900/50 border-amber-800 text-amber-300'
                                 }`}
                               >
                                 Interpretation
@@ -2316,6 +2693,17 @@ export default function BibleReaderPage() {
                                 }`}
                               >
                                 Compare Translation
+                              </button>
+
+                              <button
+                                onClick={() => setIsBookSelectorOpen(true)}
+                                className={`rounded-lg px-2.5 py-1.5 text-xs font-medium border transition shrink-0 whitespace-nowrap ${
+                                  isLight
+                                    ? 'bg-stone-100 hover:bg-stone-200/80 border-stone-200 text-stone-700'
+                                    : 'bg-zinc-800 hover:bg-zinc-700 border-zinc-700 text-zinc-200'
+                                }`}
+                              >
+                                Transition
                               </button>
 
                               <button
@@ -2682,6 +3070,25 @@ export default function BibleReaderPage() {
         isOpen={isSearchOpen}
         onClose={() => setIsSearchOpen(false)}
         onOpenReferencePanel={(ref) => navigateToReferenceString(ref, true)}
+      />
+
+      <ScriptureDetailModal
+        isOpen={Boolean(scriptureDetailRef)}
+        reference={scriptureDetailRef}
+        contextNote={scriptureDetailContext}
+        onClose={() => {
+          setScriptureDetailRef(null);
+          setScriptureDetailContext(undefined);
+        }}
+      />
+
+      <TypeShadowDetailModal
+        isOpen={Boolean(typeShadowDetailItem)}
+        typeShadow={typeShadowDetailItem}
+        onClose={() => setTypeShadowDetailItem(null)}
+        onOpenScripture={(ref) => {
+          setScriptureDetailRef(ref);
+        }}
       />
     </div>
   );

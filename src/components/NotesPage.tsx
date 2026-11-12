@@ -14,6 +14,7 @@ import {
   Link2,
   Search,
   Share2,
+  Copy,
   Trash2,
   X,
 } from 'lucide-react';
@@ -51,6 +52,7 @@ export default function NotesPage() {
     collections,
     createCollection,
     preferences,
+    showToast,
   } = usePlatform();
 
   const isLight = preferences.theme === 'light';
@@ -284,6 +286,56 @@ export default function NotesPage() {
     setIsNewCollectionOpen(false);
   };
 
+  const handleCopyConnection = (conn: SavedConnection) => {
+    const textToCopy = `*${conn.primaryRef} ↔ ${conn.connectedRef}*\n\n` +
+      `*${conn.primaryRef} (${conn.translation}):*\n"${conn.primaryText}"\n\n` +
+      `*${conn.connectedRef} (${conn.translation}):*\n"${conn.connectedText}"\n\n` +
+      (conn.connectionLabel ? `*Context:*\n${conn.connectionLabel}\n\n` : '') +
+      (conn.personalObservation ? `*Personal Notes:*\n${conn.personalObservation}\n\n` : '') +
+      `Shared from Bible Study App`;
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(textToCopy);
+      showToast('Copied to clipboard for sharing!');
+    }
+  };
+
+  const handleCopyContext = (ctx: SavedContextItem) => {
+    const textToCopy = `*Context Study: ${ctx.verseRef} (${ctx.translation})*\n\n` +
+      `"${ctx.verseText}"\n\n` +
+      `*Main Theme:* ${ctx.mainTheme}\n` +
+      (ctx.contextSummary ? `*Summary:* ${ctx.contextSummary}\n\n` : '') +
+      (ctx.personalNotes ? `*Personal Notes:*\n${ctx.personalNotes}\n\n` : '') +
+      `Shared from Bible Study App`;
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(textToCopy);
+      showToast('Copied to clipboard for sharing!');
+    }
+  };
+
+  const handleCopyVerse = (vItem: SavedVerseItem) => {
+    const textToCopy = `*${vItem.verseRef} (${vItem.translation})*\n\n` +
+      `"${vItem.verseText}"\n\n` +
+      (vItem.personalNotes ? `*Personal Notes:*\n${vItem.personalNotes}\n\n` : '') +
+      `Shared from Bible Study App`;
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(textToCopy);
+      showToast('Copied to clipboard for sharing!');
+    }
+  };
+
+  const handleCopyTypeShadow = (tsItem: SavedTypeShadowItem) => {
+    const textToCopy = `*Type & Shadow: ${tsItem.title}*\n\n` +
+      `*Old Testament Type (${tsItem.otTypeRef}):*\n"${tsItem.otTypeText}"\n\n` +
+      `*New Testament Fulfilment (${tsItem.ntAntitypeRef}):*\n"${tsItem.ntAntitypeText}"\n\n` +
+      `*Biblical Explanation:*\n${tsItem.explanation}\n\n` +
+      (tsItem.personalNotes ? `*Personal Notes:*\n${tsItem.personalNotes}\n\n` : '') +
+      `Shared from Bible Study App`;
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(textToCopy);
+      showToast('Copied to clipboard for sharing!');
+    }
+  };
+
   const renderConnectionCard = (conn: SavedConnection) => {
     const isEditing = editingItemId === conn.id;
     const fullRefLabel = `${conn.primaryRef} ↔ ${conn.connectedRef}`;
@@ -291,7 +343,11 @@ export default function NotesPage() {
       <div
         key={conn.id}
         className={`rounded-2xl border overflow-hidden transition ${
-          isLight
+          isChildren
+            ? isLight
+              ? 'bg-[#FFF9E6] border-amber-300 text-slate-900 shadow-2xs'
+              : 'bg-[#161D35] border-indigo-700/80 text-slate-100 shadow-md'
+            : isLight
             ? 'bg-white border-stone-200/90 text-stone-900 shadow-2xs'
             : 'bg-[#161616] border-zinc-800 text-zinc-100'
         }`}
@@ -329,28 +385,20 @@ export default function NotesPage() {
 
           <div className="flex items-center gap-1 shrink-0">
             <button
-              onClick={() =>
-                updateSavedConnection(conn.id, {
-                  sharedToCommunity: !conn.sharedToCommunity,
-                })
-              }
-              className={`rounded-lg p-1.5 bg-transparent border-0 transition ${
-                conn.sharedToCommunity
+              onClick={() => handleCopyConnection(conn)}
+              className={`rounded-lg p-1.5 transition ${
+                isChildren
                   ? isLight
-                    ? 'text-emerald-600 hover:text-emerald-700'
-                    : 'text-emerald-400 hover:text-emerald-300'
+                    ? 'text-amber-900 hover:bg-amber-200/60'
+                    : 'text-amber-300 hover:bg-indigo-900/60'
                   : isLight
-                  ? 'text-stone-500 hover:text-stone-900'
-                  : 'text-zinc-400 hover:text-zinc-100'
+                  ? 'text-stone-500 hover:text-stone-900 hover:bg-stone-100'
+                  : 'text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800'
               }`}
-              title={
-                conn.sharedToCommunity
-                  ? 'Shared to Community'
-                  : 'Share to Community'
-              }
-              aria-label="Toggle Share to Community"
+              title="Copy to clipboard for WhatsApp or sharing"
+              aria-label="Copy to clipboard"
             >
-              <Share2 className="h-4 w-4" />
+              <Copy className="h-4 w-4" />
             </button>
 
             <button
@@ -578,7 +626,11 @@ export default function NotesPage() {
       <div
         key={ctx.id}
         className={`rounded-2xl border overflow-hidden transition ${
-          isLight
+          isChildren
+            ? isLight
+              ? 'bg-[#FFF9E6] border-amber-300 text-slate-900 shadow-2xs'
+              : 'bg-[#161D35] border-indigo-700/80 text-slate-100 shadow-md'
+            : isLight
             ? 'bg-white border-stone-200/90 text-stone-900 shadow-2xs'
             : 'bg-[#161616] border-zinc-800 text-zinc-100'
         }`}
@@ -589,7 +641,13 @@ export default function NotesPage() {
             <span
               title={`${ctx.verseRef} (${ctx.translation})`}
               className={`text-xs sm:text-sm font-bold tracking-tight shrink-0 ${
-                isLight ? 'text-amber-900' : 'text-amber-400'
+                isChildren
+                  ? isLight
+                    ? 'text-amber-950 font-extrabold'
+                    : 'text-amber-300 font-extrabold'
+                  : isLight
+                  ? 'text-amber-900'
+                  : 'text-amber-400'
               }`}
             >
               {ctx.verseRef} ({ctx.translation})
@@ -616,28 +674,20 @@ export default function NotesPage() {
 
           <div className="flex items-center gap-1 shrink-0">
             <button
-              onClick={() =>
-                updateSavedContext(ctx.id, {
-                  sharedToCommunity: !ctx.sharedToCommunity,
-                })
-              }
-              className={`rounded-lg p-1.5 bg-transparent border-0 transition ${
-                ctx.sharedToCommunity
+              onClick={() => handleCopyContext(ctx)}
+              className={`rounded-lg p-1.5 transition ${
+                isChildren
                   ? isLight
-                    ? 'text-emerald-600 hover:text-emerald-700'
-                    : 'text-emerald-400 hover:text-emerald-300'
+                    ? 'text-amber-900 hover:bg-amber-200/60'
+                    : 'text-amber-300 hover:bg-indigo-900/60'
                   : isLight
-                  ? 'text-stone-500 hover:text-stone-900'
-                  : 'text-zinc-400 hover:text-zinc-100'
+                  ? 'text-stone-500 hover:text-stone-900 hover:bg-stone-100'
+                  : 'text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800'
               }`}
-              title={
-                ctx.sharedToCommunity
-                  ? 'Shared to Community'
-                  : 'Share to Community'
-              }
-              aria-label="Toggle Share to Community"
+              title="Copy to clipboard for WhatsApp or sharing"
+              aria-label="Copy to clipboard"
             >
-              <Share2 className="h-4 w-4" />
+              <Copy className="h-4 w-4" />
             </button>
 
             <button
@@ -838,7 +888,11 @@ export default function NotesPage() {
       <div
         key={vItem.id}
         className={`rounded-2xl border overflow-hidden transition ${
-          isLight
+          isChildren
+            ? isLight
+              ? 'bg-[#FFF9E6] border-amber-300 text-slate-900 shadow-2xs'
+              : 'bg-[#161D35] border-indigo-700/80 text-slate-100 shadow-md'
+            : isLight
             ? 'bg-white border-stone-200/90 text-stone-900 shadow-2xs'
             : 'bg-[#161616] border-zinc-800 text-zinc-100'
         }`}
@@ -848,7 +902,11 @@ export default function NotesPage() {
             <span
               title={`${vItem.verseRef} (${vItem.translation})`}
               className={`shrink-0 rounded-md px-2 py-0.5 text-xs font-semibold ${
-                isLight
+                isChildren
+                  ? isLight
+                    ? 'bg-amber-200 text-amber-950 font-bold'
+                    : 'bg-indigo-900 text-amber-300 font-bold'
+                  : isLight
                   ? 'bg-amber-100 text-amber-900'
                   : 'bg-amber-500/20 text-amber-300'
               }`}
@@ -877,28 +935,20 @@ export default function NotesPage() {
 
           <div className="flex items-center gap-1 shrink-0">
             <button
-              onClick={() =>
-                updateSavedVerse(vItem.id, {
-                  sharedToCommunity: !vItem.sharedToCommunity,
-                })
-              }
-              className={`rounded-lg p-1.5 bg-transparent border-0 transition ${
-                vItem.sharedToCommunity
+              onClick={() => handleCopyVerse(vItem)}
+              className={`rounded-lg p-1.5 transition ${
+                isChildren
                   ? isLight
-                    ? 'text-emerald-600 hover:text-emerald-700'
-                    : 'text-emerald-400 hover:text-emerald-300'
+                    ? 'text-amber-900 hover:bg-amber-200/60'
+                    : 'text-amber-300 hover:bg-indigo-900/60'
                   : isLight
-                  ? 'text-stone-500 hover:text-stone-900'
-                  : 'text-zinc-400 hover:text-zinc-100'
+                  ? 'text-stone-500 hover:text-stone-900 hover:bg-stone-100'
+                  : 'text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800'
               }`}
-              title={
-                vItem.sharedToCommunity
-                  ? 'Shared to Community'
-                  : 'Share to Community'
-              }
-              aria-label="Toggle Share to Community"
+              title="Copy to clipboard for WhatsApp or sharing"
+              aria-label="Copy to clipboard"
             >
-              <Share2 className="h-4 w-4" />
+              <Copy className="h-4 w-4" />
             </button>
 
             <button
@@ -1092,7 +1142,11 @@ export default function NotesPage() {
       <div
         key={tsItem.id}
         className={`rounded-2xl border overflow-hidden transition ${
-          isLight
+          isChildren
+            ? isLight
+              ? 'bg-[#FFF9E6] border-emerald-300 text-slate-900 shadow-2xs'
+              : 'bg-[#161D35] border-emerald-700/80 text-slate-100 shadow-md'
+            : isLight
             ? 'bg-white border-stone-200/90 text-stone-900 shadow-2xs'
             : 'bg-[#161616] border-zinc-800 text-zinc-100'
         }`}
@@ -1139,28 +1193,20 @@ export default function NotesPage() {
 
           <div className="flex items-center gap-1 shrink-0">
             <button
-              onClick={() =>
-                updateSavedTypeShadow(tsItem.id, {
-                  sharedToCommunity: !tsItem.sharedToCommunity,
-                })
-              }
-              className={`rounded-lg p-1.5 bg-transparent border-0 transition ${
-                tsItem.sharedToCommunity
+              onClick={() => handleCopyTypeShadow(tsItem)}
+              className={`rounded-lg p-1.5 transition ${
+                isChildren
                   ? isLight
-                    ? 'text-emerald-600 hover:text-emerald-700'
-                    : 'text-emerald-400 hover:text-emerald-300'
+                    ? 'text-amber-900 hover:bg-amber-200/60'
+                    : 'text-amber-300 hover:bg-indigo-900/60'
                   : isLight
-                  ? 'text-stone-500 hover:text-stone-900'
-                  : 'text-zinc-400 hover:text-zinc-100'
+                  ? 'text-stone-500 hover:text-stone-900 hover:bg-stone-100'
+                  : 'text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800'
               }`}
-              title={
-                tsItem.sharedToCommunity
-                  ? 'Shared to Community'
-                  : 'Share to Community'
-              }
-              aria-label="Toggle Share to Community"
+              title="Copy to clipboard for WhatsApp or sharing"
+              aria-label="Copy to clipboard"
             >
-              <Share2 className="h-4 w-4" />
+              <Copy className="h-4 w-4" />
             </button>
 
             <button
@@ -1535,8 +1581,12 @@ export default function NotesPage() {
 
           {/* Second Dropdown: Collection Filter + Create Collection Icon Inside the Field */}
           <div
-            className={`min-w-0 rounded-xl border px-2.5 sm:px-3 py-2 flex items-center justify-between gap-1.5 ${
-              isLight
+            className={`min-w-0 rounded-xl border px-2.5 sm:px-3 py-2 flex items-center justify-between gap-1.5 transition ${
+              isChildren
+                ? isLight
+                  ? 'bg-amber-100/90 border-amber-300 text-amber-950 font-bold shadow-2xs'
+                  : 'bg-indigo-900/80 border-indigo-700 text-amber-200 font-bold'
+                : isLight
                 ? 'bg-white border-stone-200/90 text-stone-800 shadow-2xs'
                 : 'bg-[#161616] border-zinc-800 text-zinc-100'
             }`}
@@ -1544,7 +1594,13 @@ export default function NotesPage() {
             <div className="flex items-center gap-1.5 min-w-0 flex-1">
               <Folder
                 className={`h-3.5 w-3.5 shrink-0 ${
-                  isLight ? 'text-amber-700' : 'text-amber-400'
+                  isChildren
+                    ? isLight
+                      ? 'text-amber-800'
+                      : 'text-amber-300'
+                    : isLight
+                    ? 'text-amber-700'
+                    : 'text-amber-400'
                 }`}
               />
               <select
@@ -1552,7 +1608,13 @@ export default function NotesPage() {
                 onChange={(e) => setSelectedCollectionId(e.target.value)}
                 aria-label="Filter by Collection"
                 className={`w-full min-w-0 bg-transparent text-xs font-semibold truncate focus:outline-none ${
-                  isLight ? 'text-stone-800' : 'text-zinc-100'
+                  isChildren
+                    ? isLight
+                      ? 'text-amber-950 font-extrabold'
+                      : 'text-amber-200 font-extrabold'
+                    : isLight
+                    ? 'text-stone-800'
+                    : 'text-zinc-100'
                 }`}
               >
                 <option
@@ -1606,7 +1668,11 @@ export default function NotesPage() {
             filteredTypeShadows.length === 0 && (
               <div
                 className={`rounded-2xl border p-8 text-center space-y-2 ${
-                  isLight
+                  isChildren
+                    ? isLight
+                      ? 'bg-[#FFF9E6] border-amber-300 text-slate-900 shadow-2xs'
+                      : 'bg-[#161D35] border-indigo-700/80 text-slate-100 shadow-md'
+                    : isLight
                     ? 'bg-white border-stone-200 text-stone-600'
                     : 'bg-[#161616] border-zinc-800 text-zinc-300'
                 }`}
@@ -1633,7 +1699,11 @@ export default function NotesPage() {
               {contentFilter === 'verses' && filteredVerses.length === 0 ? (
                 <div
                   className={`rounded-2xl border p-8 text-center space-y-2 ${
-                    isLight
+                    isChildren
+                      ? isLight
+                        ? 'bg-[#FFF9E6] border-amber-300 text-slate-900 shadow-2xs'
+                        : 'bg-[#161D35] border-indigo-700/80 text-slate-100 shadow-md'
+                      : isLight
                       ? 'bg-white border-stone-200 text-stone-600'
                       : 'bg-[#161616] border-zinc-800 text-zinc-300'
                   }`}
@@ -1658,7 +1728,11 @@ export default function NotesPage() {
               filteredContexts.length === 0 ? (
                 <div
                   className={`rounded-2xl border p-8 text-center space-y-2 ${
-                    isLight
+                    isChildren
+                      ? isLight
+                        ? 'bg-[#FFF9E6] border-amber-300 text-slate-900 shadow-2xs'
+                        : 'bg-[#161D35] border-indigo-700/80 text-slate-100 shadow-md'
+                      : isLight
                       ? 'bg-white border-stone-200 text-stone-600'
                       : 'bg-[#161616] border-zinc-800 text-zinc-300'
                   }`}
@@ -1683,7 +1757,11 @@ export default function NotesPage() {
               filteredTypeShadows.length === 0 ? (
                 <div
                   className={`rounded-2xl border p-8 text-center space-y-2 ${
-                    isLight
+                    isChildren
+                      ? isLight
+                        ? 'bg-[#FFF9E6] border-amber-300 text-slate-900 shadow-2xs'
+                        : 'bg-[#161D35] border-indigo-700/80 text-slate-100 shadow-md'
+                      : isLight
                       ? 'bg-white border-stone-200 text-stone-600'
                       : 'bg-[#161616] border-zinc-800 text-zinc-300'
                   }`}
@@ -1710,7 +1788,11 @@ export default function NotesPage() {
               filteredConnections.length === 0 ? (
                 <div
                   className={`rounded-2xl border p-8 text-center space-y-2 ${
-                    isLight
+                    isChildren
+                      ? isLight
+                        ? 'bg-[#FFF9E6] border-amber-300 text-slate-900 shadow-2xs'
+                        : 'bg-[#161D35] border-indigo-700/80 text-slate-100 shadow-md'
+                      : isLight
                       ? 'bg-white border-stone-200 text-stone-600'
                       : 'bg-[#161616] border-zinc-800 text-zinc-300'
                   }`}

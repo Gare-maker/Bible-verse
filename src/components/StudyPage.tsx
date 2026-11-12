@@ -38,6 +38,7 @@ import {
   searchTypesAndShadows,
   getTypeAndShadowById,
 } from '@/data/typesAndShadowsLibrary';
+import ScriptureDetailModal from './ScriptureDetailModal';
 import {
   LexiconEntry,
   InterpretationMethod,
@@ -152,15 +153,19 @@ export default function StudyPage({
     return { words, names, typesAndShadows, methods, etymologies, totalCount };
   }, [unifiedSearchQuery]);
 
-  // Dedicated Separate Details Page state (Requirement 5)
+  // Dedicated Separate Details Page state (Requirement 2 & Requirement 5)
   const [activeSearchDetail, setActiveSearchDetail] = useState<
-    | { type: 'word'; entry: LexiconEntry }
-    | { type: 'name'; entry: BiblicalNameEntry }
-    | { type: 'types-shadows'; entry: BiblicalTypeAndShadowEntry }
-    | { type: 'method'; entry: InterpretationMethod }
-    | { type: 'etymology'; entry: EtymologyExample }
+    | { type: 'word'; entry: LexiconEntry; source: 'search' | 'category' }
+    | { type: 'name'; entry: BiblicalNameEntry; source: 'search' | 'category' }
+    | { type: 'types-shadows'; entry: BiblicalTypeAndShadowEntry; source: 'search' | 'category' }
+    | { type: 'method'; entry: InterpretationMethod; source: 'search' | 'category' }
+    | { type: 'etymology'; entry: EtymologyExample; source: 'search' | 'category' }
     | null
   >(null);
+
+  // Scripture Detail Modal State (Requirement 3)
+  const [scriptureModalRef, setScriptureModalRef] = useState<string | null>(null);
+  const [scriptureModalContext, setScriptureModalContext] = useState<string | undefined>(undefined);
 
   // Filtered lists for the active tab view
   const currentCategoryWords = useMemo(() => {
@@ -176,47 +181,50 @@ export default function StudyPage({
     return TYPES_AND_SHADOWS_LIBRARY.filter((item) => item.category === selectedTypologyCategory);
   }, [selectedTypologyCategory]);
 
-  // Click handler to open scripture in Bible reader
-  const handleScriptureClick = (refStr: string) => {
-    navigateToReferenceString(refStr, true);
-    setActivePage('bible');
+  // Click handler to open scripture in Scripture Detail Modal (Requirement 3)
+  const handleScriptureClick = (refStr: string, context?: string) => {
+    setScriptureModalRef(refStr);
+    setScriptureModalContext(context);
   };
 
   // Navigation from search to dedicated details page (Requirement 5)
-  const handleSelectWord = (entry: LexiconEntry) => {
-    setActiveSearchDetail({ type: 'word', entry });
+  const handleSelectWord = (entry: LexiconEntry, source: 'search' | 'category' = 'search') => {
+    setActiveSearchDetail({ type: 'word', entry, source });
     setIsSearchFocused(false);
     scrollToTop();
   };
 
-  const handleSelectName = (nameEntry: BiblicalNameEntry) => {
-    setActiveSearchDetail({ type: 'name', entry: nameEntry });
+  const handleSelectName = (nameEntry: BiblicalNameEntry, source: 'search' | 'category' = 'search') => {
+    setActiveSearchDetail({ type: 'name', entry: nameEntry, source });
     setIsSearchFocused(false);
     scrollToTop();
   };
 
-  const handleSelectMethod = (method: InterpretationMethod) => {
-    setActiveSearchDetail({ type: 'method', entry: method });
+  const handleSelectMethod = (method: InterpretationMethod, source: 'search' | 'category' = 'search') => {
+    setActiveSearchDetail({ type: 'method', entry: method, source });
     setIsSearchFocused(false);
     scrollToTop();
   };
 
-  const handleSelectTypeShadow = (ts: BiblicalTypeAndShadowEntry) => {
-    setActiveSearchDetail({ type: 'types-shadows', entry: ts });
+  const handleSelectTypeShadow = (ts: BiblicalTypeAndShadowEntry, source: 'search' | 'category' = 'search') => {
+    setActiveSearchDetail({ type: 'types-shadows', entry: ts, source });
     setIsSearchFocused(false);
     scrollToTop();
   };
 
-  const handleSelectEtymology = (etym: EtymologyExample) => {
-    setActiveSearchDetail({ type: 'etymology', entry: etym });
+  const handleSelectEtymology = (etym: EtymologyExample, source: 'search' | 'category' = 'search') => {
+    setActiveSearchDetail({ type: 'etymology', entry: etym, source });
     setIsSearchFocused(false);
     scrollToTop();
   };
 
-  // Clear dedicated detail and return to search results (Requirement 5)
+  // Clear dedicated detail and return to previous list or search (Requirement 2 & Requirement 5)
   const handleBackToSearch = () => {
+    const wasSearch = activeSearchDetail?.source === 'search';
     setActiveSearchDetail(null);
-    setIsSearchFocused(true);
+    if (wasSearch) {
+      setIsSearchFocused(true);
+    }
     scrollToTop();
   };
 
@@ -266,7 +274,19 @@ export default function StudyPage({
                 }`}
               >
                 <ArrowLeft className="h-4 w-4" />
-                <span>Back to Search</span>
+                <span>
+                  {activeSearchDetail.source === 'search'
+                    ? 'Back to Search'
+                    : activeSearchDetail.type === 'word'
+                    ? 'Back to Word Study'
+                    : activeSearchDetail.type === 'name'
+                    ? 'Back to Name Meanings'
+                    : activeSearchDetail.type === 'types-shadows'
+                    ? 'Back to Types & Shadows'
+                    : activeSearchDetail.type === 'method'
+                    ? 'Back to Interpretation Methods'
+                    : 'Back to Etymology'}
+                </span>
               </button>
 
               <span className="text-[11px] font-bold uppercase tracking-wider text-stone-400">
@@ -1399,8 +1419,7 @@ export default function StudyPage({
                       key={word.id}
                       type="button"
                       onClick={() => {
-                        setSelectedWordEntry(word);
-                        scrollToTop();
+                        handleSelectWord(word, 'category');
                       }}
                       className={`p-4 rounded-2xl border text-left transition space-y-2 group ${
                         isLight
@@ -1592,8 +1611,7 @@ export default function StudyPage({
                       key={nameEntry.id}
                       type="button"
                       onClick={() => {
-                        setSelectedNameEntry(nameEntry);
-                        scrollToTop();
+                        handleSelectName(nameEntry, 'category');
                       }}
                       className={`p-4 rounded-2xl border text-left transition space-y-2 group ${
                         isLight
@@ -1656,10 +1674,11 @@ export default function StudyPage({
               {ETYMOLOGY_EXAMPLES.map((item) => (
                 <div
                   key={item.englishWord}
-                  className={`p-5 rounded-2xl border space-y-3 ${
+                  onClick={() => handleSelectEtymology(item, 'category')}
+                  className={`p-5 rounded-2xl border space-y-3 cursor-pointer transition hover:scale-[1.01] ${
                     isLight
-                      ? 'bg-white border-stone-200/90 shadow-2xs'
-                      : 'bg-[#151515] border-zinc-800 shadow-sm'
+                      ? 'bg-white hover:bg-amber-50/40 border-stone-200/90 shadow-2xs'
+                      : 'bg-[#151515] hover:bg-zinc-900 border-zinc-800 shadow-sm'
                   }`}
                 >
                   <div className="flex items-start justify-between gap-2 border-b border-stone-200/70 dark:border-zinc-800 pb-2">
@@ -1685,17 +1704,25 @@ export default function StudyPage({
                     </p>
                   </div>
 
-                  <div className="flex flex-wrap gap-1.5 pt-2 border-t border-stone-100 dark:border-zinc-800/80">
-                    {item.scriptureReferences.map((ref) => (
-                      <button
-                        key={ref}
-                        type="button"
-                        onClick={() => handleScriptureClick(ref)}
-                        className="text-[11px] font-semibold text-blue-700 dark:text-blue-400 hover:underline"
-                      >
-                        {ref}
-                      </button>
-                    ))}
+                  <div className="flex items-center justify-between pt-2 border-t border-stone-100 dark:border-zinc-800 text-[11px] flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-1.5">
+                      {item.scriptureReferences.map((ref) => (
+                        <button
+                          key={ref}
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleScriptureClick(ref);
+                          }}
+                          className="text-[11px] font-semibold text-blue-700 dark:text-blue-400 hover:underline"
+                        >
+                          {ref}
+                        </button>
+                      ))}
+                    </div>
+                    <span className="font-bold text-amber-700 dark:text-amber-400">
+                      Open Full Details &rarr;
+                    </span>
                   </div>
                 </div>
               ))}
@@ -1972,8 +1999,7 @@ export default function StudyPage({
                         key={method.id}
                         type="button"
                         onClick={() => {
-                          setSelectedMethod(method);
-                          scrollToTop();
+                          handleSelectMethod(method, 'category');
                         }}
                         className={`px-3 py-2 rounded-xl text-xs font-semibold border transition shrink-0 ${
                           isLight
@@ -1994,8 +2020,7 @@ export default function StudyPage({
                       key={method.id}
                       type="button"
                       onClick={() => {
-                        setSelectedMethod(method);
-                        scrollToTop();
+                        handleSelectMethod(method, 'category');
                       }}
                       className={`p-4 rounded-2xl border text-left transition space-y-2 group ${
                         isLight
@@ -2233,8 +2258,7 @@ export default function StudyPage({
                       key={ts.id}
                       type="button"
                       onClick={() => {
-                        setSelectedTypeShadow(ts);
-                        scrollToTop();
+                        handleSelectTypeShadow(ts, 'category');
                       }}
                       className={`p-4 rounded-2xl border text-left transition space-y-2 group ${
                         isLight
@@ -2270,6 +2294,17 @@ export default function StudyPage({
       </main>
         </>
       )}
+
+      {/* Reusable Scripture Detail Modal (Requirement 3) */}
+      <ScriptureDetailModal
+        isOpen={Boolean(scriptureModalRef)}
+        reference={scriptureModalRef}
+        contextNote={scriptureModalContext}
+        onClose={() => {
+          setScriptureModalRef(null);
+          setScriptureModalContext(undefined);
+        }}
+      />
     </div>
   );
 }
