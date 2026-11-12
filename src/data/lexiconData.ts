@@ -204,6 +204,21 @@ export const BIBLICAL_LEXICON: LexiconEntry[] = [
       'From χαίρω (chairō, G5463, to rejoice, be glad); related to χάρισμα (charisma, free gift) and χαρίζομαι (charizomai, to forgive freely).',
     lexicalDefinition:
       'Unmerited favor, gracious goodwill, lovingkindness, and divine enablement freely bestowed without human earning.',
+    primaryMeaning: 'Unmerited divine favor and goodwill that brings salvation and sanctification.',
+    contextualMeanings: [
+      'Saving grace: God sovereignly justifying the ungodly through Christ (Romans 3:24; Ephesians 2:8).',
+      'Sustaining grace: Divine strengthening to endure hardship, weakness, and persecution (2 Corinthians 12:9).',
+      'Empowering grace: Divine gifts and abilities given for holy living and kingdom service (Romans 12:6; 1 Peter 4:10).',
+      'Thanksgiving: The grateful response of the redeemed human heart back to God (Colossians 3:16).',
+    ],
+    biblicalUsageOverview:
+      'Appears 156 times in the New Testament, overwhelmingly concentrated in the Pauline letters where it forms the heartbeat of New Testament soteriology.',
+    theologicalSignificance:
+      'The cornerstone of Christian theology (sola gratia). Charis completely divorces human acceptance before God from legalistic merit, ritual performance, or moral achievement. God gives His infinite best (Christ) to those who deserve His holy wrath.',
+    historicalExplanation:
+      'In Greco-Roman antiquity, charis was the cornerstone of the patron-client system, governed by strict reciprocity ("do ut des" - I give so that you may give back). The New Testament authors radically revolutionized this concept: God’s charis is completely one-way, uncalculated, and bestowed upon bankrupt enemies (Romans 5:8–10).',
+    scholarlyPerspectives:
+      'John Barclay’s landmark study "Paul and the Gift" demonstrates that Paul perfected the concept of grace by making it unconditioned by human worth, while maintaining that it is powerfully transformative in establishing a new covenant community.',
     etymologyAndOrigin:
       'In classical Greek, charis denoted beauty, charm, pleasantness, or reciprocity between patrons and clients. The New Testament writers revolutionized the term to describe God’s sovereign, one-way, unearned generosity to helpless sinners.',
     contextualMeaning:
@@ -904,12 +919,37 @@ export const BIBLICAL_LEXICON: LexiconEntry[] = [
 
 /**
  * Helper to query the biblical lexicon by keyword, original spelling, transliteration, or Strong's number.
+ * Guarantees exact matches (e.g. searching "Grace") appear first and with stable ID resolution.
  */
 export function searchBiblicalLexicon(query: string): LexiconEntry[] {
   if (!query || !query.trim()) return BIBLICAL_LEXICON;
   const q = query.trim().toLowerCase();
-  return BIBLICAL_LEXICON.filter(
+
+  // 1. Exact matches on English word, Strong's number, or Transliteration
+  const exactMatches = BIBLICAL_LEXICON.filter(
     (item) =>
+      item.englishWord.toLowerCase() === q ||
+      (item.strongsNumber && item.strongsNumber.toLowerCase() === q) ||
+      item.transliteration.toLowerCase() === q ||
+      item.originalSpelling === q
+  );
+
+  // 2. Starts with / prefix matches
+  const prefixMatches = BIBLICAL_LEXICON.filter((item) => {
+    if (exactMatches.some((e) => e.id === item.id)) return false;
+    return (
+      item.englishWord.toLowerCase().startsWith(q) ||
+      item.transliteration.toLowerCase().startsWith(q) ||
+      (item.relatedEnglishWords && item.relatedEnglishWords.some((r) => r.toLowerCase() === q))
+    );
+  });
+
+  // 3. Partial substring matches in definition or related words
+  const partialMatches = BIBLICAL_LEXICON.filter((item) => {
+    if (exactMatches.some((e) => e.id === item.id) || prefixMatches.some((p) => p.id === item.id)) {
+      return false;
+    }
+    return (
       item.englishWord.toLowerCase().includes(q) ||
       item.originalSpelling.includes(q) ||
       item.transliteration.toLowerCase().includes(q) ||
@@ -917,7 +957,10 @@ export function searchBiblicalLexicon(query: string): LexiconEntry[] {
       item.language.toLowerCase().includes(q) ||
       (item.relatedEnglishWords && item.relatedEnglishWords.some((r) => r.toLowerCase().includes(q))) ||
       item.lexicalDefinition.toLowerCase().includes(q)
-  );
+    );
+  });
+
+  return [...exactMatches, ...prefixMatches, ...partialMatches];
 }
 
 /**

@@ -2430,8 +2430,8 @@ export default function BibleReaderPage() {
                                 onClick={() => openIndependentVersePanel(v, 'interpretation', 'all')}
                                 className={`rounded-lg px-2.5 py-1.5 text-xs font-medium border transition shrink-0 whitespace-nowrap ${
                                   isLight
-                                    ? 'bg-blue-50 hover:bg-blue-100 border-blue-200 text-blue-900'
-                                    : 'bg-blue-950/40 hover:bg-blue-900/50 border-blue-800 text-blue-300'
+                                    ? 'bg-stone-100 hover:bg-stone-200/80 border-stone-200 text-stone-700'
+                                    : 'bg-zinc-800 hover:bg-zinc-700 border-zinc-700 text-zinc-200'
                                 }`}
                               >
                                 Interpretation

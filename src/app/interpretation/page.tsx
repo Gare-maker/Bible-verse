@@ -2,19 +2,19 @@
 
 import React, { useEffect } from 'react';
 import NavigationShell from '@/components/NavigationShell';
-import InterpretationPage from '@/components/InterpretationPage';
+import StudyPage from '@/components/StudyPage';
 import { usePlatform } from '@/context/PlatformContext';
 
 export default function DirectInterpretationRoute() {
   const { setActivePage } = usePlatform();
 
   useEffect(() => {
-    setActivePage('interpretation');
+    setActivePage('study');
   }, [setActivePage]);
 
   return (
     <NavigationShell>
-      <InterpretationPage />
+      <StudyPage />
     </NavigationShell>
   );
 }

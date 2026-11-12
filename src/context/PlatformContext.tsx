@@ -21,7 +21,7 @@ import { getVerseText } from '@/data/scriptureDatabase';
 import { parseScriptureReference } from '@/data/bibleBooks';
 import { getSupabaseClient } from '@/lib/supabase';
 
-export type PrimaryPage = 'bible' | 'saved' | 'community' | 'notes' | 'interpretation';
+export type PrimaryPage = 'bible' | 'saved' | 'study' | 'community' | 'notes' | 'interpretation';
 
 export interface ReadingPosition {
   book: string;
@@ -578,7 +578,14 @@ const STORAGE_KEYS = {
 const PlatformContext = createContext<PlatformContextValue | undefined>(undefined);
 
 export function PlatformProvider({ children }: { children: React.ReactNode }) {
-  const [activePage, setActivePage] = useState<PrimaryPage>('bible');
+  const [activePage, setActivePageState] = useState<PrimaryPage>('bible');
+
+  const setActivePage = (page: PrimaryPage) => {
+    setActivePageState(page);
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' as ScrollBehavior });
+    }
+  };
   const [currentBook, setCurrentBook] = useState<string>('Matthew');
   const [currentChapter, setCurrentChapter] = useState<number>(1);
   const [translation, setTranslationState] = useState<TranslationId>('NIV');

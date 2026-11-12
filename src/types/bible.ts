@@ -337,12 +337,73 @@ export interface LexiconEntry {
   lexicalDefinition: string; // e.g. "A change of mind, disposition, and purposeful orientation..."
   etymologyAndOrigin: string; // e.g. "Derived from the preposition meta (after/with) + nous (mind)..."
   contextualMeaning: string; // e.g. "In the New Testament, not merely remorse, but a transformative turn toward God..."
+  primaryMeaning?: string; // Fundamental lexical definition
+  contextualMeanings?: string[]; // Nuanced meanings across passages
+  biblicalUsageOverview?: string; // Comprehensive biblical usage
+  theologicalSignificance?: string; // Significance in biblical theology
+  historicalExplanation?: string; // Linguistic & cultural history
+  scholarlyPerspectives?: string; // Academic insights & debates
   biblicalOccurrences: number; // e.g. 22
   relevantReferences: string[]; // e.g. ["Acts 2:38", "Matthew 3:2", "2 Corinthians 7:10"]
   examplesOfUsage: LexiconWordUsageExample[];
   sourceAttribution: string; // e.g. "Thayer's Greek-English Lexicon & Strong's Exhaustive Concordance"
   relatedEnglishWords?: string[]; // e.g. ["Conversion", "Turning", "Shuv"]
   distinctionNote?: string; // e.g. distinction between agape, phileo, philia, eros
+}
+
+// ============================================================================
+// BIBLICAL NAME MEANINGS TYPES (Section 4)
+// ============================================================================
+export interface BiblicalNameEntry {
+  id: string; // e.g. "name-yeshua"
+  name: string; // English Name (e.g. "Jesus")
+  originalSpelling: string; // Hebrew / Greek script (e.g. "יֵשׁוּעַ" / "Ἰησοῦς")
+  transliteration: string; // e.g. "Yeshua" / "Iēsous"
+  pronunciation: string; // e.g. "yeh-SHOO-ah"
+  language: OriginalLanguage; // 'Hebrew' | 'Greek' | 'Aramaic'
+  linguisticRoot: string; // Root derivation
+  meaning: string; // Meaning of the name
+  biblicalPersonAssociated: string; // Associated biblical figure
+  otReferences: string[]; // Relevant OT references
+  ntReferences: string[]; // Relevant NT references
+  historicalBackground: string; // Cultural & historical context
+  theologicalSignificance: string; // Redemptive theological significance
+  alternativeScholarlyInterpretations?: string; // Scholarly debates, evidence & uncertainties
+  sourceAttribution?: string;
+}
+
+// ============================================================================
+// TYPES AND SHADOWS LIBRARY TYPES (Section 6)
+// ============================================================================
+export type TypologyCategory =
+  | 'People'
+  | 'Objects'
+  | 'Sacrifices'
+  | 'Events'
+  | 'Institutions'
+  | 'Places'
+  | 'Ceremonies and Feasts';
+
+export type InterpretiveClassification =
+  | 'Explicit Biblical Typology'
+  | 'Strongly Supported Typological Connection'
+  | 'Proposed Theological Parallel';
+
+export interface BiblicalTypeAndShadowEntry {
+  id: string; // e.g. "ts-adam"
+  name: string;
+  category: TypologyCategory;
+  biblicalAccount: string;
+  historicalBackground: string;
+  otReferences: string[];
+  ntFulfilmentOrConnection: string[];
+  personOrRealityForeshadowed: string;
+  theologicalExplanation: string;
+  crossReferences: string[];
+  scholarlyInterpretations: string;
+  alternativePositions?: string;
+  interpretiveClassification: InterpretiveClassification;
+  sourceAttribution?: string;
 }
 
 // ============================================================================
@@ -366,6 +427,17 @@ export interface InterpretationMethod {
   practicalApplication: string;
   relatedMethods: string[];
   sourceAttribution: string;
+  // Expanded 13 educational fields
+  definitionAndPurpose?: string;
+  historicalOriginAndDevelopment?: string;
+  fundamentalPrinciples?: string[];
+  whenToUse?: string;
+  whenInappropriate?: string;
+  stepByStepApplication?: string[];
+  strengthsAndAdvantages?: string[];
+  limitations?: string[];
+  commonMistakes?: string[];
+  recommendedSources?: string[];
 }
 
 export interface EssentialConcept {

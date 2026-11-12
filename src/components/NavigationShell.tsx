@@ -6,6 +6,7 @@ import {
   BookOpen,
   CheckCircle2,
   Compass,
+  GraduationCap,
   Languages,
   Moon,
   Sparkles,
@@ -250,11 +251,11 @@ export default function NavigationShell({ children }: { children: React.ReactNod
                 </span>
               </button>
 
-              {/* Interpretation Learning Centre */}
+              {/* Study Tools & Research */}
               <button
-                onClick={() => setActivePage('interpretation')}
+                onClick={() => setActivePage('study')}
                 className={`w-full rounded-xl px-3 py-2.5 text-sm font-semibold flex items-center justify-between transition ${
-                  activePage === 'interpretation'
+                  activePage === 'study' || activePage === 'interpretation'
                     ? isChildren
                       ? isLight
                         ? 'bg-amber-400 text-slate-950 shadow-sm font-extrabold'
@@ -268,9 +269,9 @@ export default function NavigationShell({ children }: { children: React.ReactNod
                 }`}
               >
                 <span className="flex items-center gap-2.5">
-                  <Languages
+                  <GraduationCap
                     className={`h-4 w-4 ${
-                      activePage === 'interpretation'
+                      activePage === 'study' || activePage === 'interpretation'
                         ? isChildren
                           ? isLight
                             ? 'text-slate-950'
@@ -281,16 +282,16 @@ export default function NavigationShell({ children }: { children: React.ReactNod
                         : 'opacity-70'
                     }`}
                   />
-                  <span>Interpretation</span>
+                  <span>Study</span>
                 </span>
                 <span
                   className={`text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${
-                    activePage === 'interpretation'
+                    activePage === 'study' || activePage === 'interpretation'
                       ? 'bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-300'
                       : 'text-stone-400'
                   }`}
                 >
-                  Study
+                  Tools
                 </span>
               </button>
             </nav>
@@ -485,23 +486,6 @@ export default function NavigationShell({ children }: { children: React.ReactNod
 
         <div className="flex items-center gap-1.5">
           <button
-            onClick={() => setActivePage(activePage === 'interpretation' ? 'bible' : 'interpretation')}
-            className={`rounded-xl px-2.5 py-1 text-xs font-bold border transition flex items-center gap-1 ${
-              activePage === 'interpretation'
-                ? isLight
-                  ? 'bg-amber-700 text-white border-amber-700'
-                  : 'bg-amber-500 text-zinc-950 border-amber-500'
-                : isLight
-                ? 'bg-stone-100 hover:bg-stone-200 border-stone-200 text-stone-700'
-                : 'bg-zinc-800 hover:bg-zinc-700 border-zinc-700 text-zinc-200'
-            }`}
-            title="Interpretation Learning Centre"
-          >
-            <Languages className="h-3.5 w-3.5" />
-            <span>Study</span>
-          </button>
-
-          <button
             onClick={() =>
               updatePreferences({
                 theme: preferences.theme === 'light' ? 'dark' : 'light',
@@ -543,11 +527,11 @@ export default function NavigationShell({ children }: { children: React.ReactNod
       <div className="flex-1 min-w-0 flex flex-col">{children}</div>
 
       {/* =====================================================================
-          MOBILE BOTTOM NAVBAR (< lg) — 2 Sections: Bible & Saved
+          MOBILE BOTTOM NAVBAR (< lg) — 3 Sections: Bible | Saved | Study
           ===================================================================== */}
       <nav
         aria-label="Mobile Bottom Navigation"
-        className={`lg:hidden fixed bottom-0 inset-x-0 z-40 h-16 grid grid-cols-2 px-6 backdrop-blur-lg shadow-[0_-4px_24px_rgba(0,0,0,0.06)] ${
+        className={`lg:hidden fixed bottom-0 inset-x-0 z-40 h-16 grid grid-cols-3 px-3 backdrop-blur-lg shadow-[0_-4px_24px_rgba(0,0,0,0.06)] ${
           isChildren
             ? isLight
               ? 'bg-[#FFF9E6]/95 border-t border-amber-200 text-slate-900'
@@ -557,12 +541,13 @@ export default function NavigationShell({ children }: { children: React.ReactNod
             : 'bg-[#141414]/95 text-zinc-100 border-t border-zinc-800/80'
         }`}
       >
+        {/* Bible */}
         <button
           onClick={() => setActivePage('bible')}
           className="flex flex-col items-center justify-center gap-1 group"
         >
           <div
-            className={`rounded-full px-5 py-1 flex items-center justify-center transition ${
+            className={`rounded-full px-4 py-1 flex items-center justify-center transition ${
               activePage === 'bible'
                 ? isLight
                   ? 'bg-amber-700/15 text-amber-800'
@@ -589,12 +574,13 @@ export default function NavigationShell({ children }: { children: React.ReactNod
           </span>
         </button>
 
+        {/* Saved */}
         <button
           onClick={() => setActivePage('saved')}
           className="flex flex-col items-center justify-center gap-1 group"
         >
           <div
-            className={`rounded-full px-5 py-1 flex items-center justify-center transition ${
+            className={`rounded-full px-4 py-1 flex items-center justify-center transition ${
               activePage === 'saved' || activePage === 'notes'
                 ? isLight
                   ? 'bg-amber-700/15 text-amber-800'
@@ -618,6 +604,39 @@ export default function NavigationShell({ children }: { children: React.ReactNod
             }`}
           >
             Saved
+          </span>
+        </button>
+
+        {/* Study */}
+        <button
+          onClick={() => setActivePage('study')}
+          className="flex flex-col items-center justify-center gap-1 group"
+        >
+          <div
+            className={`rounded-full px-4 py-1 flex items-center justify-center transition ${
+              activePage === 'study' || activePage === 'interpretation'
+                ? isLight
+                  ? 'bg-amber-700/15 text-amber-800'
+                  : 'bg-amber-500/20 text-amber-400'
+                : isLight
+                ? 'text-stone-500 group-hover:text-stone-800'
+                : 'text-zinc-400 group-hover:text-zinc-200'
+            }`}
+          >
+            <GraduationCap className="h-4 w-4" />
+          </div>
+          <span
+            className={`text-[11px] font-bold tracking-tight whitespace-nowrap ${
+              activePage === 'study' || activePage === 'interpretation'
+                ? isLight
+                  ? 'text-amber-800'
+                  : 'text-amber-400'
+                : isLight
+                ? 'text-stone-500'
+                : 'text-zinc-400'
+            }`}
+          >
+            Study
           </span>
         </button>
       </nav>
